@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<!-- template designed by Marco Von Ballmoos -->
+			<title>Docs for page _crypt.funcs.php</title>
+			<link rel="stylesheet" href="../../media/stylesheet.css" />
+			<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'/>
+		</head>
+		<body>
+			<div class="page-body">			
+<h2 class="file-name">/core/functions/_crypt.funcs.php</h2>
+
+<a name="sec-description"></a>
+<div class="info-box">
+	<div class="info-box-title">Description</div>
+	<div class="nav-bar">
+					<span class="disabled">Description</span> |
+									<a href="#sec-includes">Includes</a>
+			|							<a href="#sec-constants">Constants</a>
+			|									<a href="#sec-functions">Functions</a>
+			</div>
+	<div class="info-box-body">	
+		<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Balupton's Resource Library (balPHP)  Copyright (C) 2008 Benjamin Arthur Lupton  http://www.balupton.com/</p>
+<p class="description"><p>This file is part of Balupton's Resource Library (balPHP).</p><p>You should have received a copy of the GNU Affero General Public License  along with Balupton's Resource Library (balPHP).  If not, see &lt;http://www.gnu.org/licenses/&gt;.</p></p>
+	<ul class="tags">
+				<li><span class="field">author:</span> Benjamin &quot;balupton&quot; Lupton &lt;<a href="mailto:contact@balupton.com">contact@balupton.com</a>&gt; - <a href="http://www.balupton.com/">http://www.balupton.com/</a></li>
+				<li><span class="field">version:</span> 0.1.0-final, April 21, 2008</li>
+				<li><span class="field">copyright:</span> Copyright (c) 2008, Benjamin Arthur Lupton - <a href="http://www.balupton.com/">http://www.balupton.com/</a></li>
+				<li><span class="field">since:</span> 0.1.0-final, April 21, 2008</li>
+				<li><span class="field">license:</span> <a href="http://www.gnu.org/licenses/agpl.html">GNU Affero General Public License</a></li>
+			</ul>
+		
+			</div>
+</div>
+		
+
+	<a name="sec-includes"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Includes</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+						<span class="disabled">Includes</span>
+			|							<a href="#sec-constants">Constants</a>
+				|													<a href="#sec-functions">Functions</a>
+					</div>
+		<div class="info-box-body">	
+			<a name="_dirname(__FILE__)_/_general_funcs_php"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="include-title">
+			<span class="include-type">require_once</span>
+			(<span class="include-name">dirname(__FILE__).'/_general.funcs.php'</span>)
+			(line <span class="line-number">21</span>)
+		</span>
+	</div>
+
+	<!-- ========== Info from phpDoc block ========= -->
+	
+</div>
+		</div>
+	</div>
+	
+	<a name="sec-constants"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Constants</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+										<a href="#sec-includes">Includes</a>
+				|						<span class="disabled">Constants</span>
+			|										<a href="#sec-functions">Functions</a>
+					</div>
+		<div class="info-box-body">	
+			<a name="defineCRIPT_ENABLED"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRIPT_ENABLED</span> = function_exists('mcrypt_module_open')
+			(line <span class="line-number">27</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_CIPHER"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_CIPHER</span> = MCRYPT_RIJNDAEL_256
+			(line <span class="line-number">28</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_DECODER"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_DECODER</span> = 'base64_decode'
+			(line <span class="line-number">37</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_ENCODER"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_ENCODER</span> = 'base64_encode'
+			(line <span class="line-number">36</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_IV"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_IV</span> = 'QDFCMmMzRDRlNUY2ZzdIOAasd'
+			(line <span class="line-number">30</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_KEY"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_KEY</span> = 'F5Z3aDe4cQGeixEmS5XvhmG0cd'
+			(line <span class="line-number">29</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_LOADED"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_LOADED</span> = true
+			(line <span class="line-number">40</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_MODE"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_MODE</span> = MCRYPT_MODE_CBC
+			(line <span class="line-number">31</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_SIZE"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_SIZE</span> = '256'
+			(line <span class="line-number">33</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+<a name="defineCRYPT_SOURCE"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="const-title">
+			<span class="const-name">CRYPT_SOURCE</span> = MCRYPT_DEV_RANDOM
+			(line <span class="line-number">32</span>)
+		</span>
+	</div>
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	
+		
+</div>
+		</div>
+	</div>
+	
+	
+	<a name="sec-functions"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Functions</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+										<a href="#sec-includes">Includes</a>
+				|										<a href="#sec-constants">Constants</a>
+				|									<span class="disabled">Functions</span>
+		</div>
+		<div class="info-box-body">	
+			<a name="functiondecode" id="functiondecode"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">decode</span> (line <span class="line-number">76</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Decode a piece of data</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1.1, April 21, 2008</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			decode
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$data</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_DECODER</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$data</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_DECODER</span><span class="var-description">: the encoder function to use, defaults to CRYPT_ENCODER</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functiondecrypt" id="functiondecrypt"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">decrypt</span> (line <span class="line-number">140</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Decode a piece of data</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1.1, April 21, 2008</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			decrypt
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$data</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_DECODER</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_KEY</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_CIPHER</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_MODE</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_SOURCE</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$data</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_DECODER</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_KEY</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_CIPHER</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_MODE</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_SOURCE</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionencode" id="functionencode"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">encode</span> (line <span class="line-number">54</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Encode a piece of data</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1.1, April 21, 2008</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			encode
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$data</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_ENCODER</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$data</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_ENCODER</span><span class="var-description">: the encoder function to use, defaults to CRYPT_ENCODER</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionencrypt" id="functionencrypt"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">encrypt</span> (line <span class="line-number">103</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Encrypt a piece of data</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1.1, April 21, 2008</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			encrypt
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$data</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_ENCODER</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_DECODER</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_KEY</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_CIPHER</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_MODE</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$CRYPT_SOURCE</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$data</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_ENCODER</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_DECODER</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_KEY</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_CIPHER</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_MODE</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$CRYPT_SOURCE</span>			</li>
+				</ul>
+		
+	
+</div>
+		</div>
+	</div>
+	
+	<p class="notes" id="credit">
+		Documentation generated on Fri, 27 Jun 2008 16:10:19 +0000 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.2</a>
+	</p>
+	</div></body>
+</html>

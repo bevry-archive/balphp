@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<!-- template designed by Marco Von Ballmoos -->
+			<title>Docs for page _image.funcs.php</title>
+			<link rel="stylesheet" href="../../media/stylesheet.css" />
+			<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'/>
+		</head>
+		<body>
+			<div class="page-body">			
+<h2 class="file-name">/core/functions/_image.funcs.php</h2>
+
+<a name="sec-description"></a>
+<div class="info-box">
+	<div class="info-box-title">Description</div>
+	<div class="nav-bar">
+					<span class="disabled">Description</span> |
+									<a href="#sec-includes">Includes</a>
+			|											<a href="#sec-functions">Functions</a>
+			</div>
+	<div class="info-box-body">	
+		<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Balupton's Resource Library (balPHP)  Copyright (C) 2008 Benjamin Arthur Lupton  http://www.balupton.com/</p>
+<p class="description"><p>This file is part of Balupton's Resource Library (balPHP).</p><p>You should have received a copy of the GNU Affero General Public License  along with Balupton's Resource Library (balPHP).  If not, see &lt;http://www.gnu.org/licenses/&gt;.</p></p>
+	<ul class="tags">
+				<li><span class="field">author:</span> Benjamin &quot;balupton&quot; Lupton &lt;<a href="mailto:contact@balupton.com">contact@balupton.com</a>&gt; - <a href="http://www.balupton.com/">http://www.balupton.com/</a></li>
+				<li><span class="field">version:</span> 0.1.0-final, April 21, 2008</li>
+				<li><span class="field">copyright:</span> Copyright (c) 2008, Benjamin Arthur Lupton - <a href="http://www.balupton.com/">http://www.balupton.com/</a></li>
+				<li><span class="field">since:</span> 0.1.0-final, April 21, 2008</li>
+				<li><span class="field">license:</span> <a href="http://www.gnu.org/licenses/agpl.html">GNU Affero General Public License</a></li>
+			</ul>
+		
+			</div>
+</div>
+		
+
+	<a name="sec-includes"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Includes</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+						<span class="disabled">Includes</span>
+			|													<a href="#sec-functions">Functions</a>
+					</div>
+		<div class="info-box-body">	
+			<a name="_dirname(__FILE__)_/_general_funcs_php"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="include-title">
+			<span class="include-type">require_once</span>
+			(<span class="include-name">dirname(__FILE__).'/_general.funcs.php'</span>)
+			(line <span class="line-number">21</span>)
+		</span>
+	</div>
+
+	<!-- ========== Info from phpDoc block ========= -->
+	
+</div>
+		</div>
+	</div>
+	
+	
+	
+	<a name="sec-functions"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Functions</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+										<a href="#sec-includes">Includes</a>
+				|												<span class="disabled">Functions</span>
+		</div>
+		<div class="info-box-body">	
+			<a name="functioncompress_image" id="functioncompress_image"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">compress_image</span> (line <span class="line-number">776</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Compress our image resource to a specified quality or acceptable file size.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> binary output, or error</li>
+				<li><span class="field">version:</span> 4, July 20, 2007</li>
+				<li><span class="field">todo:</span> needs a clean</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string|false</span>
+		<span class="method-name">
+			compress_image
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$args</span>, <span class="var-type">resource|string</span>&nbsp;<span class="var-name">$args[$image]</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$args[$image_type]</span>, <span class="var-type">int|95</span>&nbsp;<span class="var-name">$args[$quality]</span>, <span class="var-type">int|0</span>&nbsp;<span class="var-name">$args[$max_filesize]</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">resource|string</span>
+				<span class="var-name">$args[$image]</span><span class="var-description">: image filename <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionread_image">read_image</a></span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$args[$image_type]</span><span class="var-description">: optional if $image is a resource, then the type must be specified</span>			</li>
+					<li>
+				<span class="var-type">int|95</span>
+				<span class="var-name">$args[$quality]</span><span class="var-description">: optional quality to start on</span>			</li>
+					<li>
+				<span class="var-type">int|0</span>
+				<span class="var-name">$args[$max_filesize]</span><span class="var-description">: optional the max filesize the result must be</span>			</li>
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$args</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functiondefine_image_vars" id="functiondefine_image_vars"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">define_image_vars</span> (line <span class="line-number">352</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Define the image vars: types, extensions, read/write types, and supported types.</p>
+<p class="description"><p>It is intended to be run once, any other runs are pointless.</p></p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			define_image_vars
+		</span>
+				()
+			</div>
+
+		
+	
+</div>
+<a name="functionexif_imagetype" id="functionexif_imagetype"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">exif_imagetype</span> (line <span class="line-number">292</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Create the exif_imagetype if it does not already exist</p>
+	<ul class="tags">
+				<li><span class="field">author:</span> none</li>
+				<li><span class="field">version:</span> 1, April 21, 2008</li>
+				<li><span class="field">copyright:</span> none</li>
+				<li><span class="field">license:</span> none</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			exif_imagetype
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$image_location</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$image_location</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionimage_read_function" id="functionimage_read_function"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">image_read_function</span> (line <span class="line-number">441</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Return the name of the function used to read the image based upon it's extension.</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string</span>
+		<span class="method-name">
+			image_read_function
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$image_extension</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$image_extension</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionimage_type_to_extension" id="functionimage_type_to_extension"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">image_type_to_extension</span> (line <span class="line-number">308</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Create the image_type_to_extension if it does not already exist</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			image_type_to_extension
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$image_type</span>, [<span class="var-type"></span>&nbsp;<span class="var-name">$include_dot</span> = <span class="var-default">true</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$image_type</span>			</li>
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$include_dot</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionimage_write_function" id="functionimage_write_function"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">image_write_function</span> (line <span class="line-number">459</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Return the name of the function used to write the image based upon it's extension.</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 1, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string</span>
+		<span class="method-name">
+			image_write_function
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$image_extension</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$image_extension</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionread_image" id="functionread_image"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">read_image</span> (line <span class="line-number">478</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Read a image location, string, or resource, and return the image resource, and optionally it's creation information as well.</p>
+	<ul class="tags">
+				<li><span class="field">version:</span> 4, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">resource|array</span>
+		<span class="method-name">
+			read_image
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$args</span>, [<span class="var-type">boolean</span>&nbsp;<span class="var-name">$return_info</span> = <span class="var-default">false</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$args</span>			</li>
+					<li>
+				<span class="var-type">boolean</span>
+				<span class="var-name">$return_info</span><span class="var-description">: if true, then an array is returned containing the image resource coupled with creation information.</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionremake_image" id="functionremake_image"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">remake_image</span> (line <span class="line-number">868</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Remake our image to the way we want, it is a combination of all the other image functions.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> binary output, or error</li>
+				<li><span class="field">version:</span> 9.1, December 02, 2007</li>
+				<li><span class="field">todo:</span> needs a clean</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string|false</span>
+		<span class="method-name">
+			remake_image
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$args</span>, <span class="var-type">resource|string</span>&nbsp;<span class="var-name">$args[$image]</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$args[$image_type]</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$width_new]</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$height_new]</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$args[$resize_mode]</span>, <span class="var-type">int|95</span>&nbsp;<span class="var-name">$args[$quality]</span>, <span class="var-type">int|0</span>&nbsp;<span class="var-name">$args[$max_filesize]</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">resource|string</span>
+				<span class="var-name">$args[$image]</span><span class="var-description">: image filename <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionread_image">read_image</a></span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$args[$image_type]</span><span class="var-description">: optional if $image is a resource, then the type must be specified</span>			</li>
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$width_new]</span><span class="var-description">: optional <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionresize">resize</a></span>			</li>
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$height_new]</span><span class="var-description">: optional <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionresize">resize</a></span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$args[$resize_mode]</span><span class="var-description">: optional <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionresize">resize</a></span>			</li>
+					<li>
+				<span class="var-type">int|95</span>
+				<span class="var-name">$args[$quality]</span><span class="var-description">: optional quality to start on</span>			</li>
+					<li>
+				<span class="var-type">int|0</span>
+				<span class="var-name">$args[$max_filesize]</span><span class="var-description">: optional the max filesize the result must be</span>			</li>
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$args</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionresize" id="functionresize"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">resize</span> (line <span class="line-number">37</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Scan the directory for files and folders, and return an array with the contents.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> the array of new dimensions (and image info), or error</li>
+				<li><span class="field">version:</span> 8, December 02, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">array|false</span>
+		<span class="method-name">
+			resize
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$args</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$width_original]</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$height_original]</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$width_desired]</span>, <span class="var-type">int</span>&nbsp;<span class="var-name">$args[$height_desired]</span>, <span class="var-type">string|'area'</span>&nbsp;<span class="var-name">$args[$resize_mode]</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$width_original]</span>			</li>
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$height_original]</span>			</li>
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$width_desired]</span>			</li>
+					<li>
+				<span class="var-type">int</span>
+				<span class="var-name">$args[$height_desired]</span>			</li>
+					<li>
+				<span class="var-type">string|'area'</span>
+				<span class="var-name">$args[$resize_mode]</span><span class="var-description">: optional</span>			</li>
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$args</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionresize_image" id="functionresize_image"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">resize_image</span> (line <span class="line-number">581</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Resize an image resource.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> resized image resource, or error</li>
+				<li><span class="field">version:</span> 3, July 20, 2007</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">resource|false</span>
+		<span class="method-name">
+			resize_image
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$args</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$args</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionwrite_image" id="functionwrite_image"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">write_image</span> (line <span class="line-number">685</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Return the binary output of a image resource</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> binary output, or error</li>
+				<li><span class="field">version:</span> 1, July 20, 2007</li>
+				<li><span class="field">todo:</span> needs a rewrite to it's flow is a logical stream</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string|false</span>
+		<span class="method-name">
+			write_image
+		</span>
+					(<span class="var-type"></span>&nbsp;<span class="var-name">$args</span>, <span class="var-type">mixed</span>&nbsp;<span class="var-name">$args[$image]</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$args[$image]</span><span class="var-description">: verified by <a href="../../balphp/core/_core---functions---_image.funcs.php.html#functionread_image">read_image</a></span>			</li>
+					<li>
+				<span class="var-type"></span>
+				<span class="var-name">$args</span>			</li>
+				</ul>
+		
+	
+</div>
+		</div>
+	</div>
+	
+	<p class="notes" id="credit">
+		Documentation generated on Fri, 27 Jun 2008 16:10:26 +0000 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.2</a>
+	</p>
+	</div></body>
+</html>
