@@ -146,6 +146,27 @@ if ( function_compare('get_param', 2, true, __FILE__, __LINE__) )
 	}
 }
 
+
+if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
+	function array_hydrate ( &$array ) {
+		foreach ( $array as $key => $value ) {
+			if ( is_array($value) ) {
+				array_hydrate($array[$key]);
+			} else {
+				$array[$key] = real_value($value);
+			}
+		}
+	}
+}
+
+if ( function_compare('hydrate_params', 1, true, __FILE__, __LINE__) ) {
+	function hydrate_params ( ) {
+		array_hydrate($_REQUEST);
+		array_hydrate($_POST);
+		array_hydrate($_GET);
+	}
+}
+
 /*
 if( function_comp('set_param', 1) )
 {

@@ -20,6 +20,58 @@
 
 require_once(dirname(__FILE__).'/_general.funcs.php');
 
+if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) )
+{	/**
+	 * Unset the keys from the array
+	 * 
+	 * @version 1, August 09, 2009
+	 * 
+	 * @param array $arr
+	 * @param array $unsets
+	 * 
+	 * @return mixed
+	 */
+	function array_unset ( &$arr, $unsets ) {
+		foreach ( $unsets as $unset )
+			unset($arr[$unset]);
+		return $arr;
+	}
+}
+
+
+if ( function_compare('in_array_multi', 1, true, __FILE__, __LINE__) )
+{	/**
+	 * Checks if multiple values are inside the array
+	 * 
+	 * @version 1, August 08, 2009
+	 * 
+	 * @param array $needles
+	 * @param array $haystack
+	 * @param boolean $all [optional]
+	 * 
+	 * @return mixed
+	 */
+	function in_array_multi ( $needles, $haystack, $all = false ) {
+		$result = false;
+		if ( !$all ) {
+			foreach ( $needles as $needle ) {
+				if ( in_array($needle, $haystack) ) {
+					$result = true;
+					break;
+				}
+			}
+		} else {
+			foreach ( $needles as $needle ) {
+				if ( in_array($needle, $haystack) ) {
+					++$count;
+				}
+			}
+			$result = sizeof($needles) === $count;
+		}
+		return $result;
+	}
+}
+
 if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) )
 {	/**
 	 * Clean empty values from an array
@@ -27,20 +79,26 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) )
 	 * @version 1, July 22, 2008
 	 * 
 	 * @param array &$array
-	 * @param array $default
+	 * @param mixed $to [optional]
 	 * 
 	 * @return mixed
 	 */
-	function array_clean ( &$array )
-	{
-		foreach ( $array as $key => $value )
-		{
-			if ( $value === '' || $value === NULL )
-			{	// Empty value, only key
-				unset($array[$key]);		// unset
+	function array_clean ( &$array, $to = 'remove' ) {
+		if ( !is_array($array) ) return $array;
+		foreach ( $array as $key => $value ) {
+			if ( $value === '' || $value === NULL ) {
+				// Empty value, only key
+				if ( $to === 'remove' ) {
+					unset($array[$key]);		// unset
+				} else {
+					$array[$key] = $to;
+				}
+			} elseif ( is_array($value) ) {
+				array_clean($array[$key]);
 			}
 		}
 		$array = array_merge($array);		// reset keys
+		return $array;
 	}
 }
 

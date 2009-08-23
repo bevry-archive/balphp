@@ -18,25 +18,37 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 
-	$GLOBALS['browsers'] = array(
-		'IE' => false,
-		'FF' => false,
-		'O' => false,
-		'Other' => false
+	$GLOBALS['BROWSER'] = array(
+		'ie' => false,
+		'firefox' => false,
+		'opera' => false,
+		'other' => false,
+		'version' => false
 	);
 	
-	global $browsers;
+	global $BROWSER;
 	
-	$browsers['browser'] = $h_u_a = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MSIE';
+	$BROWSER['browser'] = $h_u_a = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MSIE';
 	
-	if ( strstr($h_u_a,'Firefox') )
-		$browsers['FF']	= ( strstr($h_u_a,'Firefox/2') )	? 2 : 1;
-	elseif ( strstr($h_u_a,'Opera') )
-		$browsers['O']	= ( strstr($h_u_a,'Opera/9') )		? 9 : 8;
-	elseif( strstr($h_u_a,'MSIE') )
-		$browsers['IE']	= ( strstr($h_u_a,'MSIE 7') )	? 7 : 6;
-	else
-		$browsers['Other'] = true;
+	if ( strstr($h_u_a,'Firefox') ) {
+		$BROWSER['browser'] 	= 'firefox';
+		$BROWSER['firefox']		= true;
+		$BROWSER['version'] 	= (strstr($h_u_a,'Firefox/3') ? 3 : (strstr($h_u_a,'Firefox/2') ? 2 : 1));
+	}
+	elseif ( strstr($h_u_a,'Opera') ) {
+		$BROWSER['browser'] 	= 'opera';
+		$BROWSER['opera']		= true;
+		$BROWSER['version']		= (strstr($h_u_a,'Opera/9') ? 9 : 8);
+	}
+	elseif( strstr($h_u_a,'MSIE') ) {
+		$BROWSER['browser'] 	= 'ie';
+		$BROWSER['ie']			= true;
+		$BROWSER['version']		= (strstr($h_u_a,'MSIE 8') ? 8 : (strstr($h_u_a,'MSIE 7') ? 7 : 6));
+	}
+	else {
+		$BROWSER['browser'] 	= 'other';
+		$BROWSER['other'] 		= true;
+	}
 
 	unset($h_u_a);
 	

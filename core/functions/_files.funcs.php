@@ -59,125 +59,152 @@ if( function_compare( 'become_file_download', 1, true, __FILE__, __LINE__ ) )
 	 * 
 	 * http://tools.ietf.org/id/draft-ietf-http-range-retrieval-00.txt
 	 * 
-	 * @version 2, August 11, 2007
+	 * @version 3, July 18, 2009 (Added suport for data)
+	 * @since 2, August 11, 2007
 	 * 
 	 * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
 	 * 
-	 * @param string	$file_path	 
+	 * @param string	$file_path
 	 * @param string	$content_type
 	 * @param int		$buffer_size
+	 * @param string	$file_name
+	 * @param timestamp	$file_time
 	 * 
 	 * @return boolean	true on success, false on error
 	 */
-	function become_file_download ( $file_path, $content_type = NULL, $buffer_size = 4096 )
-	{	
-		// Check and open file
-		if ( file_exists($file_path) && $file_descriptor = fopen($file_path, 'rb') )
-		{	// We have a file that we can open
-			
-			// Define variables
-			$file_name 		= basename($file_path);
+	function become_file_download ( $file_path_or_data, $content_type = NULL, $buffer_size = null, $file_name = null, $file_time = null ) {	
+		
+		// Prepare
+		if ( empty($buffer_size) ) $buffer_size = 4096;
+		if ( empty($content_type) ) $content_type = 'application/force-download';
+		
+		// Check if we are data
+		$file_descriptor = null;
+		if ( file_exists($file_path_or_data) && $file_descriptor = fopen($file_path_or_data, 'rb') ) {
+			// We could be a file
+			// Set some variables
+			$file_data 		= null;
+			$file_path		= $file_path_or_data;
+			$file_name 		= $file_name ? $file_name : basename($file_path);
 			$file_size 		= filesize($file_path);
 			$file_time 		= filemtime($file_path);
-			
 			$etag  			= md5($file_time.$file_name);
-			$date			= gmdate('D, d M Y H:i:s').' GMT';
-			$expires		= gmdate('D, d M Y H:i:s', strtotime('+1 month')).' GMT';
-			$last_modified	= gmdate('D, d M Y H:i:s', $file_time).' GMT';
+		}
+		elseif ( $file_name !== null ) {
+			// We are just data
+			$file_data 		= $file_path_or_data;
+			$file_path 		= null;
+			$file_size 		= strlen($file_data);
+			$etag  			= md5($file_data);
+			if ( $file_time === null ) $file_time = time();
+		}
+		else {
+			// We couldn't find the file
+			header('HTTP/1.1 404 Not Found');
+			return false;
+		}
+	
+		// Set some variables
+		$date			= gmdate('D, d M Y H:i:s').' GMT';
+		$expires		= gmdate('D, d M Y H:i:s', strtotime('+1 month')).' GMT';
+		$last_modified	= gmdate('D, d M Y H:i:s', $file_time).' GMT';
+	
+		// Say we can go on forever
+		set_time_limit(0);
+	
+		// Check relevance
+		$etag_relevant = !empty($_SERVER['HTTP_IF_NONE_MATCH']) && trim(stripslashes($_SERVER['HTTP_IF_NONE_MATCH']), '\'"') === $etag;
+		$date_relevant = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $file_time;
+	
+		// Handle download
+		if ( $etag_relevant || $date_relevant ) {
+			// Not modified
+			header('HTTP/1.0 304 Not Modified');
+			header('Status: 304 Not Modified');
 			
-			if ( empty($content_type) )
-				$content_type = 'application/force-download';
+			header('Pragma: public');
+			header('Cache-Control: private');
+				
+			header('ETag: "'.				$etag.'"');
+			header('Date: '.				$date);
+			header('Expires: '.				$expires);
+			header('Last-modified: '.		$last_modified);
+			return true;
+		}
+		elseif ( !empty($_SERVER['HTTP_RANGE']) ) {
+			// Partial download
 			
-			// Say we can go on forever
-			set_time_limit(0);
+			/* 
+			 * bytes=0-99,500-1499,4000-
+			 */ 
 			
-			// Check relevance
-			$etag_relevant = !empty($_SERVER['HTTP_IF_NONE_MATCH']) && trim(stripslashes($_SERVER['HTTP_IF_NONE_MATCH']), '\'"') === $etag;
-			$date_relevant = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $file_time;
+			// Explode RANGE
+			list($size_unit, $ranges) = explode($_SERVER['HTTP_RANGE'], '=', 2);
 			
-			// Handle download
-			if ( $etag_relevant || $date_relevant )
-			{	// Not modified
-				header('HTTP/1.0 304 Not Modified');
-				header('Status: 304 Not Modified');
+			// Explode RANGES
+			$ranges = explode(',', $ranges);
+			
+			// Cycle through ranges
+			foreach ( $ranges as $range ) {
+				// We have a range
+				
+				/* 
+				 * All bytes until the end of document, except for the first 500 bytes:
+				 * Content-Range: bytes 500-1233/1234
+				 */
+				
+				// Set range start
+				$range_start;
+				if ( !empty($range[0]) && is_numeric($range[0]) ) {
+					// The range has a start
+					$range_start = intval($range[0]);
+				} else {
+					$range_start = 0;
+				}
+				
+				// Set range end
+				if ( !empty($range[1]) && is_numeric($range[1]) ) {
+					// The range has an end
+					$range_end = intval($range[1]);
+				} else {
+					$range_end = $file_size - 1;
+				}
+				
+				// Set the range size
+				$range_size = $range_end - $range_start + 1;
+				
+				// Set the headers
+				header('HTTP/1.1 206 Partial Content');
 				
 				header('Pragma: public');
 				header('Cache-Control: private');
-					
-				header('ETag: "'.				$etag.'"');
+				
+				header('ETag: "'.$etag.'"');
 				header('Date: '.				$date);
 				header('Expires: '.				$expires);
 				header('Last-modified: '.		$last_modified);
-				return true;
-			}
-			elseif ( !empty($_SERVER['HTTP_RANGE']) )
-			{	// Partial download
 				
-				/* 
-				 * bytes=0-99,500-1499,4000-
-				 */ 
+				header('Content-Transfer-Encoding: binary');
+				header('Accept-Ranges: bytes');
 				
-				// Explode RANGE
-				list($size_unit, $ranges) = explode($_SERVER['HTTP_RANGE'], '=', 2);
+				header('Content-Range: bytes '.	$range_start.'-'.$range_end.'/'.$file_size);
+				header('Content-Length: '.		$range_size);
 				
-				// Explode RANGES
-				$ranges = explode(',', $ranges);
+				header('Content-Type: '.		$content_type);
+				if ( $content_type === 'application/force-download' ) header('Content-Disposition: attachment; filename='.urlencode($file_name));
 				
-				// Cycle through ranges
-				foreach ( $ranges as $range )
-				{	// We have a range
-					
-					/* 
-					 * All bytes until the end of document, except for the first 500 bytes:
-					 * Content-Range: bytes 500-1233/1234
-					 */
-					
-					// Set range start
-					$range_start;
-					if ( !empty($range[0]) && is_numeric($range[0]) )
-					{	// The range has a start
-						$range_start = intval($range[0]);
-					} else
-						$range_start = 0;
-					
-					// Set range end
-					if ( !empty($range[1]) && is_numeric($range[1]) )
-					{	// The range has an end
-						$range_end = intval($range[1]);
-					} else
-						$range_end = $file_size - 1;
-					
-					// Set the range size
-					$range_size = $range_end - $range_start + 1;
-					
-					// Set the headers
-					header('HTTP/1.1 206 Partial Content');
-					
-					header('Pragma: public');
-					header('Cache-Control: private');
-					
-					header('ETag: "'.$etag.'"');
-					header('Date: '.				$date);
-					header('Expires: '.				$expires);
-					header('Last-modified: '.		$last_modified);
-					
-					header('Content-Transfer-Encoding: binary');
-					header('Accept-Ranges: bytes');
-					
-					header('Content-Range: bytes '.	$range_start.'-'.$range_end.'/'.$file_size);
-					header('Content-Length: '.		$range_size);
-					
-					header('Content-Type: '.		$content_type);
-					if ( $content_type === 'application/force-download' )
-						header('Content-Disposition: attachment; filename='.$file_name);
-					
+				// Handle our data transfer
+				if ( !$file_path ) {
+					// We are using file_data
+					echo substr($file_data, $range_start, $range_end-$range_start);
+				}
+				else {
 					// Seek to our location
 					fseek($file_descriptor, $range_start);
 					
 					// Read the file
 					$remaining = $range_size;
-					while ( $remaining > 0 )
-					{
+					while ( $remaining > 0 ) {
 						// 0-6   | buffer = 3 | remaining = 7
 						// 0,1,2 | buffer = 3 | remaining = 4
 						// 3,4,5 | buffer = 3 | remaining = 1
@@ -195,58 +222,151 @@ if( function_compare( 'become_file_download', 1, true, __FILE__, __LINE__ ) )
 						$remaining -= $buffer_size;
 					}
 				}
-
 			}
-			else 
-			{	// Usual download
+		}
+		else {
+			// Usual download
+		
+			// header('Pragma: public');
+			// header('Cache-control: must-revalidate, post-check=0, pre-check=0');
+			// header('Expires: '.		gmdate('D, d M Y H:i:s').' GMT');
 			
-				// header('Pragma: public');
-				// header('Cache-control: must-revalidate, post-check=0, pre-check=0');
-				// header('Expires: '.		gmdate('D, d M Y H:i:s').' GMT');
-				
-				// Set headers
-				header('HTTP/1.1 200 OK');
-				
-				header('Pragma: public');
-				header('Cache-Control: private');
-				
-				header('ETag: "'.$etag.'"');
-				header('Date: '.				$date);
-				header('Expires: '.				$expires);
-				header('Last-modified: '.		$last_modified);
-				
-				header('Content-Transfer-Encoding: binary');
-				header('Accept-Ranges: bytes');
-				
-				header('Content-Length: '.		$file_size);
-				
-				header('Content-Type: '.		$content_type);
-				if ( $content_type === 'application/force-download' )
-				  header('Content-Disposition: attachment; filename='.$file_name);
-				
+			// Set headers
+			header('HTTP/1.1 200 OK');
+			
+			header('Pragma: public');
+			header('Cache-Control: private');
+			
+			header('ETag: "'.$etag.'"');
+			header('Date: '.				$date);
+			header('Expires: '.				$expires);
+			header('Last-modified: '.		$last_modified);
+			
+			header('Content-Transfer-Encoding: binary');
+			header('Accept-Ranges: bytes');
+			
+			header('Content-Length: '.		$file_size);
+			
+			header('Content-Type: '.		$content_type);
+			if ( $content_type === 'application/force-download' ) header('Content-Disposition: attachment; filename='.urlencode($file_name));
+			
+			// Handle our data transfer
+			if ( !$file_path ) {
+				// We are using file_data
+				echo $file_data;
+			}
+			else {
+				// Seek to our location
 				// Read the file
 				$file_descriptor = fopen($file_path, 'r');
-				while ( !feof($file_descriptor) )
-				{	// Output file contents
+				while ( !feof($file_descriptor) ) {
+					// Output file contents
 					echo fread($file_descriptor, $buffer_size);
 					flush();
 					ob_flush();
 				}
 			}
-			
-			// Close the file
-			fclose($file_descriptor);
 		}
-		else
-		{	// We couldn't find the file
-			header('HTTP/1.1 404 Not Found');
-			return false;
-		}
+		
+		// Close the file
+		if ( $file_descriptor ) fclose($file_descriptor);
 		
 		// Done
 		return true;
 	}
 }
+
+if ( !isset($GLOBALS['MIME_TYPES']) )
+$GLOBALS['MIME_TYPES'] = array(
+    'txt' => 'text/plain',
+    'htm' => 'text/html',
+    'html' => 'text/html',
+    'php' => 'text/html',
+    'css' => 'text/css',
+    'js' => 'application/javascript',
+    'json' => 'application/json',
+    'xml' => 'application/xml',
+    'swf' => 'application/x-shockwave-flash',
+    'flv' => 'video/x-flv',
+
+    // images
+    'png' => 'image/png',
+    'jpe' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'jpg' => 'image/jpeg',
+    'gif' => 'image/gif',
+    'bmp' => 'image/bmp',
+    'ico' => 'image/vnd.microsoft.icon',
+    'tiff' => 'image/tiff',
+    'tif' => 'image/tiff',
+    'svg' => 'image/svg+xml',
+    'svgz' => 'image/svg+xml',
+
+    // archives
+    'zip' => 'application/zip',
+    'rar' => 'application/x-rar-compressed',
+    'exe' => 'application/x-msdownload',
+    'msi' => 'application/x-msdownload',
+    'cab' => 'application/vnd.ms-cab-compressed',
+
+    // audio/video
+    'mp3' => 'audio/mpeg',
+    'qt' => 'video/quicktime',
+    'mov' => 'video/quicktime',
+
+    // adobe
+    'pdf' => 'application/pdf',
+    'psd' => 'image/vnd.adobe.photoshop',
+    'ai' => 'application/postscript',
+    'eps' => 'application/postscript',
+    'ps' => 'application/postscript',
+
+    // ms office
+    'doc' => 'application/msword',
+    'rtf' => 'application/rtf',
+    'xls' => 'application/vnd.ms-excel',
+    'ppt' => 'application/vnd.ms-powerpoint',
+
+    // open office
+    'odt' => 'application/vnd.oasis.opendocument.text',
+    'ods' => 'application/vnd.oasis.opendocument.spreadsheet'
+);
+
+if ( !function_exists('get_mime_type') && function_compare('get_mime_type', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Gets a file mime type
+	 * @version 1, August 09, 2009
+	 * @param string $filename
+	 * @return string mimetype
+	 */
+	function get_mime_type($filename, $default = 'application/octet-stream') {
+		$mimetype = false;
+		if ( function_exists('mime_content_type') && empty($GLOBALS['mime_content_type__bal']) ) {
+			$mimetype = mime_content_type($filename);
+		}
+		if ( !$mimetype && function_exists('finfo_open') ) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $mimetype = finfo_file($finfo, $filename);
+            finfo_close($finfo);
+        }
+		if ( !$mimetype ) {
+			global $MIME_TYPES;
+			$extension = strtolower(get_extension($filename));
+			$mimetype = !empty($MIME_TYPES[$extension]) ? $MIME_TYPES[$extension] : false;
+		}
+		if ( !$mimetype ) {
+			$mimetype = $default;
+		}
+		return $mimetype;
+	}
+}
+if ( !function_exists('mime_content_type') && function_compare('mime_content_type', 1, true, __FILE__, __LINE__) ) {
+	$GLOBALS['mime_content_type__bal'] = true;
+	function mime_content_type($filename){
+		return get_mime_type($filename);
+	}
+}
+
 
 if ( !isset($GLOBALS['FILE_TYPES']) )
 $GLOBALS['FILE_TYPES'] = array(
@@ -260,9 +380,12 @@ $GLOBALS['FILE_TYPES'] = array(
 	'rar'	=> 'WinRAR Archive',
 	'pdf'	=> 'Adobe Reader Document',
 	'doc'	=> 'Word Document',
+	'docx'	=> 'Word Document',
 	'txt'	=> 'Document',
 	'rtf'	=> 'Rich Text File'
 );
+
+
 
 if( function_compare( 'filetype_human', 1.1, true, __FILE__, __LINE__ ) )
 {	/**

@@ -20,6 +20,39 @@
 
 require_once(dirname(__FILE__).'/_general.funcs.php');
 
+
+if( function_compare( 'strclean', 1.0, true, __FILE__, __LINE__ ) ) {
+	/**
+	 * Cleans unwanted characters
+	 * @version 1.0, August 22, 2009
+	 * @param	string		$str
+	 * @return	string
+	 */
+	function strclean ( $str ) {
+		$str_ = '';
+	    for ($i = 0, $n = strlen($str); $i < $n; ++$i) {
+	    	if ( ord($str[$i]) <= 127 ) $str_ .= $str[$i];
+		}
+		return $str_;
+	}
+}
+
+if( function_compare( 'strinitials', 1.0, true, __FILE__, __LINE__ ) ) {
+	/**
+	 * Get the initials of a string
+	 *
+	 * @version 1.0, August 08, 2009
+	 *
+	 * @param	string		$str
+	 * 
+	 * @return	string
+	 */
+	function strinitials ( $str ) {
+		$str = ucwords(strtolower($str));
+		return strtoupper(preg_replace('/[^A-Z]/', '', $str));
+	}
+}
+
 if( function_compare( 'to_string', 2.1, true, __FILE__, __LINE__ ) )
 {	/**
 	 * Alias for text_value
@@ -80,17 +113,18 @@ if( function_compare( 'real_value', 2.4, true, __FILE__, __LINE__ ) )
 	 * @param	boolean		$bool		convert from boolean?
 	 * @param	boolean		$null		convert from null?
 	 * @param	boolean		$numeric	convert from numeric?
+	 * @param	boolean		$question	convert question to boolean?
 	 * 
 	 * @return	mixed
 	 */
-	function real_value($value, $bool = true, $null = true, $numeric = true)
+	function real_value($value, $bool = true, $null = true, $numeric = true, $question = true)
 	{	// Turns a value into it's actual value, regardless of strings
 		// v2.4 - 02/10/2007
 		// v2.3 - 01/12/2006
 	
-		if ( $bool && ($value === true || $value === 'TRUE' || $value === 'true') )
+		if ( $bool && ($value === true || $value === 'TRUE' || $value === 'true' || ($question && ($value === 'on' || $value === 'yes'))) )
 				return true;
-		elseif( $bool && ($value === false || $value === 'FALSE' || $value === 'false') )
+		elseif( $bool && ($value === false || $value === 'FALSE' || $value === 'false' || ($question && ($value === 'off' || $value === 'no'))) )
 				return false;
 		elseif( $null && ($value === NULL || $value === 'NULL' || $value === 'null' || $value === 'UNDEFINED' || $value === 'undefined') )
 			return NULL;
