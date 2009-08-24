@@ -140,10 +140,10 @@ if( function_compare( 'scan_dir', 6, true, __FILE__, __LINE__ ) )
 			switch ( $action )
 			{	// Replace the pattern if it is predefined
 				case 'no_recurse':
-					$dir_action = 'if ( $dir !== \''.$dir.'\' ) { $skip = true; }';
+					$dir_action = 'scan_dir__dir_action__no_recurse';
 					break;
 				case 'inc_php':
-					$file_action = 'require_once($path);';
+					$file_action = 'scan_dir__file_action__inc_php';
 					break;
 				default:
 					if ( is_array($action) )
@@ -183,8 +183,11 @@ if( function_compare( 'scan_dir', 6, true, __FILE__, __LINE__ ) )
 					}
 					
 					// Perform custom action
-					extract(scan_dir__eval($both_action, compact('path', 'file', 'dir', 'skip'))); // Custom action
-					if ( $skip )	continue;
+					if ( $both_action ) {
+						$result = $both_action($path, $file, $dir, $skip);
+						extract($result); // Custom action
+					}
+					if ( $skip ) continue;
 					
 					// Continue with specifics
 					if ( is_file($path) )
@@ -199,8 +202,11 @@ if( function_compare( 'scan_dir', 6, true, __FILE__, __LINE__ ) )
 						}
 						
 						// Perform custom action
-						extract(scan_dir__eval($file_action, compact('path', 'file', 'dir', 'skip'))); // Custom action
-						if ( $skip )	continue;
+						if ( $file_action ) {
+							$result = $file_action($path, $file, $dir, $skip);
+							extract($result); // Custom action
+						}
+						if ( $skip ) continue;
 						
 						// Return
 						if ( $file_pattern !== NULL )
@@ -248,8 +254,11 @@ if( function_compare( 'scan_dir', 6, true, __FILE__, __LINE__ ) )
 						}
 						
 						// Perform custom action
-						extract(scan_dir__eval($dir_action, compact('path', 'file', 'dir', 'skip'))); // Custom action
-						if ( $skip )	continue;
+						if ( $dir_action ) {
+							$result = $dir_action($path, $file, $dir, $skip);
+							extract($result); // Custom action
+						}
+						if ( $skip ) continue;
 						
 						// Return
 						switch ( $return_format )
@@ -296,14 +305,18 @@ if( function_compare( 'scan_dir', 6, true, __FILE__, __LINE__ ) )
 		return $files;
 		
 	} // END: scan_dir
-	
-	function scan_dir__eval ( $eval, $args )
-	{	// Used to stop variable confilictions
-		extract($args);
-		eval($eval);
-		return compact('skip');
+
+	function scan_dir__dir_action__no_recurse ($path, $file, $dir, $skip) {
+		$return = array();
+		if ( dirname($path) !== $dir ) $return['skip'] = true;
+		return $return;
 	}
 	
+	function scan_dir__file_action__inc_php ($path, $file, $dir, $skip){
+		require_once($path);
+		return array();
+	}
+					
 } // END: function_exists
 
 ?>
