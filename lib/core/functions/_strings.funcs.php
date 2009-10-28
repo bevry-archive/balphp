@@ -37,14 +37,25 @@ if( function_compare( 'strclean', 1.0, true, __FILE__, __LINE__ ) ) {
 	}
 }
 
+
+if( function_compare( 'str_populate', 1.0, true, __FILE__, __LINE__ ) ) {
+	/**
+	 * Populates a string
+	 * @version 1.0, September 13, 2009
+	 * @param	string		$str
+	 * @param	array		$params
+	 * @return	string
+	 */
+	function str_populate ( $str, $params ) {
+		return preg_replace('/\{\$(\w+)\}/ie', '\$params["${1}"]', $str);
+	}
+}
+
 if( function_compare( 'strinitials', 1.0, true, __FILE__, __LINE__ ) ) {
 	/**
 	 * Get the initials of a string
-	 *
 	 * @version 1.0, August 08, 2009
-	 *
 	 * @param	string		$str
-	 * 
 	 * @return	string
 	 */
 	function strinitials ( $str ) {
