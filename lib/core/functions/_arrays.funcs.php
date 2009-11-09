@@ -20,7 +20,7 @@
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
-if ( function_compare('unset_multi', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Unset the keys from the array
@@ -29,14 +29,71 @@ if ( function_compare('unset_multi', 1, true, __FILE__, __LINE__) ) {
 	 * @param array $unsets
 	 * @return mixed
 	 */
-	function unset_multi ( &$array, $unsets ) {
-		if ( !is_array($unsets) )
-			$unsets = array($unsets);
+	function array_unset ( &$array, $unsets ) {
+		# Prepare
+		if ( !is_array($unsets) ) $unsets = array($unsets);
+		# Apply
 		foreach ( $unsets as $unset )
 			unset($array[$unset]);
+		# Done
 		return $array;
 	}
 }
+
+if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Unset the keys from the array
+	 * @version 1, November 9, 2009
+	 * @param array $array
+	 * @param array $keeps
+	 * @return mixed
+	 */
+	function array_keep ( &$array, $keeps ) {
+		# Prepare
+		if ( !is_array($keeps) ) $keeps = array($keeps);
+		# Apply
+		$keys = array_flip($keeps);
+		# Done
+		return array_intersect_key($array, $keys);
+	}
+}
+
+
+if ( function_compare('array_key_ensure', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Ensure the key exists in the array
+	 * @version 1, November 9, 2009
+	 * @param array $array
+	 * @param mixed $key
+	 * @param mixed $value [optional]
+	 * @return mixed
+	 */
+	function array_key_ensure ( &$array, $key, $value = null ) {
+		if ( !array_key_exists($key, $array) ) $array[$key] = $value;
+		return $array;
+	}
+}
+
+if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Ensure the keys exists in the array
+	 * @version 1, November 9, 2009
+	 * @param array $array
+	 * @param array $key
+	 * @param mixed $value [optional]
+	 * @return mixed
+	 */
+	function array_keys_ensure ( &$array, $keys, $value = null ) {
+		# Prepare
+		if ( !is_array($keys) ) $keys = array($keys);
+		# Apply
+		foreach ( $keys as $key ) array_key_ensure($array, $key, $value);
+		# Done
+		return $array;
+	}
+}
+
+
 
 if ( function_compare('in_array_multi', 1.1, true, __FILE__, __LINE__) ) {
 
@@ -83,7 +140,8 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	function array_clean ( &$array, $to = 'remove' ) {
 		if ( !is_array($array) )
 			return $array;
-		foreach ( $array as $key => $value ) {
+		foreach ( $array as $key => &$value ) {
+			$value = trim($value);
 			if ( $value === '' || $value === NULL ) {
 				// Empty value, only key
 				if ( $to === 'remove' ) {
@@ -100,16 +158,82 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('array_tree', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Turns an array into an flat array tree
+	 * @version 1, Novemer 9, 2009
+	 * @param array $map
+	 * @param string $idKey
+	 * @param string $parentKey
+	 * @param string $levelKey
+	 * @param string $positionKey
+	 */
+	function array_tree ( $array, $idKey = 'id', $parentKey = 'parent', $levelKey = 'level', $positionKey = 'position' ) {
+		$map = array();
+		foreach ( $array as $i => &$node ) {
+			// Ensure
+			array_keys_ensure($node, array($idKey, $parentKey, $levelKey, $positionKey));
+			// Fetch
+			$id = $node[$idKey];
+			$parent = $node[$parentKey];
+			$position = $node[$positionKey];
+			// Handle
+			if ( empty($parent) ) {
+				// Root
+				if ( !isset($map[0]) ) $map[0] = array();
+				$map[0][$position] = $node;
+			} else {
+				// Child
+				if ( !isset($map[$parent]) ) $map[$parent] = array();
+				$map[$parent][$position] = $node;
+			}
+		}
+		// Build again
+		$new = array();
+		array_tree_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,0,0);
+		return $new;
+	}
+}
+
+if ( function_compare('array_tree_helper', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Array tree helper
+	 * @version 1, Novemer 9, 2009
+	 * @param array $map
+	 * @param string $idKey
+	 * @param string $parentKey
+	 * @param string $levelKey
+	 * @param string $positionKey
+	 * @param array $new
+	 * @param integer $parent
+	 * @param integer $level
+	 */
+	function array_tree_helper ( &$map, $idKey, $parentKey, $levelKey, $positionKey, &$new, $parent, $level ) {
+		if ( empty($map[$parent]) ) return;
+		ksort($map[$parent]);
+		foreach ( $map[$parent] as $node ) {
+			// Fetch
+			$id = $node[$idKey];
+			$parent = $node[$parentKey];
+			$position = $node[$positionKey];
+			// Handle
+			$node[$levelKey] = $level;
+			$new[] = $node;
+			array_tree_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,$id,$level+1);
+		}
+	}
+}
+
 if ( function_compare('array_cycle', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Cycle through an array
-	 *
 	 * @version 1, July 22, 2008
-	 *
 	 * @param array &$array
 	 * @param array $default
-	 *
 	 * @return mixed
 	 */
 	function array_cycle ( &$array, $default ) {
