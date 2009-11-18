@@ -273,7 +273,8 @@ if ( function_compare('image_dimensions', 1, true, __FILE__, __LINE__) ) {
 	 * @version 1, November 11, 2009
 	 */
 	function image_dimensions ( $image_path ) {
-		$image = image_read($image); if ( !$image ) return $image;
+		$image = image_read($image_path);
+		if ( !$image ) return $image;
 		$width = imagesx($image);
 		$height = imagesy($image);
 		$dimensions = compact('width','height');
@@ -395,8 +396,8 @@ if ( function_compare('define_image_vars', 1.1, true, __FILE__, __LINE__) ) {
 					$IMAGE_SUPPORTED_TYPES[] = $image_type;
 					$IMAGE_SUPPORTED_EXTENSIONS += $image_extensions;
 					$IMAGE_SUPPORTED_TYPES_EXTENSIONS[$image_type] = $image_extensions;
-					$IMAGE_TYPE_WRITEFUNCTION = $image_read_function;
-					$IMAGE_TYPE_READFUNCTION = $image_write_function;
+					$IMAGE_TYPE_WRITEFUNCTION[$image_type] = $image_write_function;
+					$IMAGE_TYPE_READFUNCTION[$image_type] = $image_read_function;
 					// Done we work
 					break;
 				}

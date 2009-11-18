@@ -314,9 +314,9 @@ if ( !isset($GLOBALS['FILE_MIME_EXT']) ) {
 }
 
 if ( !isset($GLOBALS['FILE_TYPE_EXTS']) ) {
-	$GLOBALS['FILE_TYPE_EXTS'] = array('file' => 'file,bin,ai,eps,ps', 'application' => 'exe,msi', 'image' => 'gif,jpe,jpg,jpeg,png,tif,tiff,bmp,ico,svg,svgz', 'archive' => 'zip,rar,cab,tar,gz,gzip,gtar', 'document' => 'pdf,doc,doc,txt,rtf,odt,ods,ppt,xls', 'video' => 'avi,mpg,mpeg,mpe,mpa,mp2,wmv,flv,qt,mov', 'audio' => 'mp3,fla,flac,wma,ogg', 'web' => 'htm,html,php,css,rb,ruby,js,json,xml,swf');
+	$GLOBALS['FILE_TYPE_EXTS'] = array('file' => 'file,bin,ai,eps,ps', 'application' => 'exe,msi', 'image' => 'gif,jpe,jpg,jpeg,png,tif,tiff,bmp,ico,svg,svgz', 'archive' => 'zip,rar,cab,tar,gz,gzip,gtar', 'document' => 'pdf,doc,doc,txt,rtf,odt,ods,ppt,xls', 'video' => 'avi,mpg,mpeg,mpe,mpa,mp2,wmv,flv,qt,mov', 'audio' => 'mp3,fla,flac,wma,ogg', 'code' => 'htm,html,php,css,rb,ruby,js,json,xml,swf');
 	foreach ( $GLOBALS['FILE_TYPE_EXTS'] as $type => $ext ) {
-		$GLOBALS['FILE_TYPE_EXTS'][$type] = explode($ext, ',');
+		$GLOBALS['FILE_TYPE_EXTS'][$type] = explode(',', $ext);
 	}
 }
 
@@ -329,6 +329,21 @@ if ( !isset($GLOBALS['FILE_EXT_TYPE']) ) {
 	}
 }
 
+if ( function_compare('trim_mime_type', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Trims a file mime type
+	 * @version 1, August 09, 2009
+	 * @param string $filename
+	 * @return string mimetype
+	 */
+	function trim_mime_type ( $mime ) {
+		$mime = str_replace(';', ' ', $mime);
+		$mime = explode(' ', $mime);
+		$mime = $mime[0];
+		return $mime;
+	}
+}
+	
 if ( !function_exists('get_mime_type') && function_compare('get_mime_type', 1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -385,7 +400,7 @@ if ( function_compare('get_filetype', 1, true, __FILE__, __LINE__) ) {
 		// prepare
 		global $FILE_EXT_TYPE, $FILE_MIME_EXT;
 		// <- mime
-		$mime = get_mime_type($file_path);
+		$mime = trim_mime_type(get_mime_type($file_path));
 		// mime -> ext
 		if ( empty($FILE_MIME_EXT[$mime]) )
 			return $default_type;
@@ -661,7 +676,7 @@ if ( function_compare('get_extension', 1, true, __FILE__, __LINE__) ) {
 	function get_extension ( $file ) {
 		$end = strrpos($file, '.');
 		if ( $end !== false )
-			return substr($file, $end + 1);
+			return strtolower(substr($file, $end + 1));
 		else
 			return '';
 	}

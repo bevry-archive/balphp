@@ -140,6 +140,19 @@ if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('fix_magic_quotes', 1, true, __FILE__, __LINE__) ) {
+
+	function fix_magic_quotes ( ) {
+		if ( ini_get('magic_quotes_gpc') ) {
+			$_POST = array_map('stripslashes_deep', $_POST);
+			$_GET = array_map('stripslashes_deep', $_GET);
+			$_COOKIE = array_map('stripslashes_deep', $_COOKIE);
+			$_REQUEST = array_map('stripslashes_deep', $_REQUEST);
+			ini_set('magic_quotes_gpc', 0);
+		}
+	}
+}
+
 if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
 
 	function array_hydrate ( &$array ) {

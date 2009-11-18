@@ -38,6 +38,21 @@ if ( function_compare('strclean', 1.0, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('stripslashes_deep', 1.0, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Strips slashes
+	 * @version 1.0, August 22, 2009
+	 * @param	string		$str
+	 * @return	string
+	 */
+	function stripslashes_deep ( $value ) {
+		$value = is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);
+		return $value;
+	}
+}
+
 if ( function_compare('str_populate', 1.0, true, __FILE__, __LINE__) ) {
 
 	/**
