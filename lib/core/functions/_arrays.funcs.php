@@ -50,6 +50,7 @@ if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keep ( &$array, $keeps ) {
 		# Prepare
+		if ( !is_array($array) ) $array = array($array);
 		if ( !is_array($keeps) ) $keeps = array($keeps);
 		# Apply
 		$keys = array_flip($keeps);
@@ -59,17 +60,22 @@ if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
 }
 
 
-if ( function_compare('array_key_ensure', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_key_ensure', 1.1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Ensure the key exists in the array
-	 * @version 1, November 9, 2009
+	 * @version 1.1, November 9, 2009
 	 * @param array $array
 	 * @param mixed $key
 	 * @param mixed $value [optional]
 	 * @return mixed
 	 */
 	function array_key_ensure ( &$array, $key, $value = null ) {
+		# Prepare
+		if ( is_array($key) ) return array_keys_ensure($array, $key, $value);
+		if ( !is_array($array) ) $array = array($array);
+		# Apply
 		if ( !array_key_exists($key, $array) ) $array[$key] = $value;
+		# Done
 		return $array;
 	}
 }
@@ -85,9 +91,15 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_ensure ( &$array, $keys, $value = null ) {
 		# Prepare
-		if ( !is_array($keys) ) $keys = array($keys);
+		if ( !is_array($array) ) $array = array($array);
 		# Apply
-		foreach ( $keys as $key ) array_key_ensure($array, $key, $value);
+		foreach ( $keys as $key ) {
+			if ( is_array($key) ) {
+				array_keys_ensure($array, $key, $value);
+			} else {
+				array_key_ensure($array, $key, $value);
+			}
+		}
 		# Done
 		return $array;
 	}
