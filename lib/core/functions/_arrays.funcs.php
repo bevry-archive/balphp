@@ -171,7 +171,7 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 }
 
 
-if ( function_compare('array_tree', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_tree_flat', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Turns an array into an flat array tree
@@ -182,7 +182,7 @@ if ( function_compare('array_tree', 1, true, __FILE__, __LINE__) ) {
 	 * @param string $levelKey
 	 * @param string $positionKey
 	 */
-	function array_tree ( $array, $idKey = 'id', $parentKey = 'parent', $levelKey = 'level', $positionKey = 'position' ) {
+	function array_tree_flat ( $array, $idKey = 'id', $parentKey = 'parent', $levelKey = 'level', $positionKey = 'position' ) {
 		$map = array();
 		foreach ( $array as $i => &$node ) {
 			// Ensure
@@ -192,6 +192,7 @@ if ( function_compare('array_tree', 1, true, __FILE__, __LINE__) ) {
 			$parent = $node[$parentKey];
 			$position = $node[$positionKey];
 			// Handle
+			$node[$levelKey] = 0;
 			if ( empty($parent) ) {
 				// Root
 				if ( !isset($map[0]) ) $map[0] = array();
@@ -204,12 +205,61 @@ if ( function_compare('array_tree', 1, true, __FILE__, __LINE__) ) {
 		}
 		// Build again
 		$new = array();
-		array_tree_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,0,0);
+		array_tree_flat_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,0,0);
 		return $new;
 	}
 }
 
-if ( function_compare('array_tree_helper', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_tree_round', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Turns an array into an round array tree
+	 * @version 1, Novemer 9, 2009
+	 * @param array $map
+	 * @param string $idKey
+	 * @param string $parentKey
+	 * @param string $levelKey
+	 * @param string $positionKey
+	 * @param string $childrenKey
+	 */
+	function array_tree_round ( $array, $idKey = 'id', $parentKey = 'parent', $levelKey = 'level', $positionKey = 'position', $childrenKey = 'children', array $keep = array() ) {
+		# Generate Map
+		$map = array();
+		foreach ( $array as $i => $node ) {
+			# Ensure
+			array_keys_ensure($node, array($idKey, $parentKey, $levelKey, $positionKey, $childrenKey));
+			# Fetch
+			$id = $node[$idKey];
+			# Prepare
+			$node[$levelKey] = 0;
+			$node[$childrenKey] = array();
+			# Apply
+			$map[$id] = $node;
+		}
+		
+		# Build Chidren
+		$tree = array();
+		foreach ( $map as $id => &$node ) {
+			# Fetch
+			$id = $node[$idKey];
+			$parent = $node[$parentKey];
+			$position = $node[$positionKey];
+			# Trim
+			if ( $keep ) $node = array_keep($node, $keep);
+			# Apply
+			if ( $parent ) {
+				$map[$parent][$childrenKey][$position] = &$node;
+			} else {
+				$tree[$id] = &$node;
+			}
+		}
+		
+		# Done
+		return $tree;
+	}
+}
+
+if ( function_compare('array_tree_flat_helper', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Array tree helper
@@ -223,19 +273,19 @@ if ( function_compare('array_tree_helper', 1, true, __FILE__, __LINE__) ) {
 	 * @param integer $parent
 	 * @param integer $level
 	 */
-	function array_tree_helper ( &$map, $idKey, $parentKey, $levelKey, $positionKey, &$new, $parent, $level ) {
+	function array_tree_flat_helper ( &$map, $idKey, $parentKey, $levelKey, $positionKey, &$new, $parent, $level ) {
 		if ( empty($map[$parent]) ) return;
 		ksort($map[$parent]);
 		foreach ( $map[$parent] as $node ) {
 			// Fetch
 			$id = $node[$idKey];
-			$parent = $node[$parentKey];
 			$position = $node[$positionKey];
 			// Handle
 			$node[$levelKey] = $level;
 			$new[] = $node;
-			array_tree_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,$id,$level+1);
+			array_tree_flat_helper($map,$idKey,$parentKey,$levelKey,$positionKey,$new,$id,$level+1);
 		}
+		return true;
 	}
 }
 
