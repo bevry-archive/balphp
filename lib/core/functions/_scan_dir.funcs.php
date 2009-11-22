@@ -58,7 +58,8 @@ if ( function_compare('scan_dir', 6, true, __FILE__, __LINE__) ) {
 	 * @return array the contents of the directoy returned in the specified format
 	 *
 	 */
-	function scan_dir ( $dir, $pattern = NULL, $action = NULL, $prepend = '', $return_format = NULL ) { /* If we want to include the [ files || dirs ] in the output we make
+	function scan_dir ( $dir, $pattern = NULL, $action = NULL, $prepend = '', $return_format = NULL ) {
+		/* If we want to include the [ files || dirs ] in the output we make
 		 *		[ $file_pattern = true or $file_pattern = string || $dir_pattern = true or $dir_pattern = string ]
 		 * If we do not want to include a [ dir || file ] we do
 		 *		[ $file_pattern  = false || $dir_pattern = false ]

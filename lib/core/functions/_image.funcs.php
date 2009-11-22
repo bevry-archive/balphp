@@ -129,15 +129,15 @@ if ( function_compare('image_resize_dimensions', 8.1, true, __FILE__, __LINE__) 
 		}
 		
 		//
-		if ( empty($width_desired) || empty($height_desired) ) { // Don't do any resizing
+		if ( is_null($width_desired) || is_null($height_desired) ) { // Don't do any resizing
 			trigger_error('no desired dimensions specified', E_USER_NOTICE);
 			// return array( 'width' => $width_original, 'height' => $height_original );
 		}
 		
 		// ---------
-		if ( is_null($resize_mode) )
+		if ( is_null($resize_mode) ) {
 			$resize_mode = 'area';
-		elseif ( $resize_mode === 'none' ) { // Don't do any resizing
+		} elseif ( $resize_mode === 'none' ) { // Don't do any resizing
 			trigger_error('$resize_mode === \'none\'', E_USER_NOTICE);
 			// return array( 'width' => $width_original, 'height' => $height_original );
 		} elseif ( !in_array($resize_mode, array('area', 'crop', 'exact', true)) ) { //
@@ -190,17 +190,24 @@ if ( function_compare('image_resize_dimensions', 8.1, true, __FILE__, __LINE__) 
 		
 		// ---------
 		// Do resize
-		if ( $height_desired === 0 && $width_desired === 0 ) { // Nothing to do
-		} elseif ( $height_desired === 0 && $width_desired !== 0 ) { // We don't care about the height
+		if ( $height_desired === 0 && $width_desired === 0 ) {
+			// Nothing to do
+		} elseif ( $height_desired === 0 && $width_desired !== 0 ) {
+			// We don't care about the height
 			$width_new = $width_desired;
-			if ( $resize_mode !== 'exact' )
-				$height_new = $width_desired * $proportion_hw; // h = w*(h/w)
-		} elseif ( $height_desired !== 0 && $height_desired === 0 ) { // We don't care about the width
-			if ( $resize_mode !== 'exact' )
-				$width_new = $height_desired * $proportion_wh; // w = h*(w/h)
+			if ( $resize_mode !== 'exact' ) {
+				// h = w*(h/w)
+				$height_new = $width_desired * $proportion_hw;
+			}
+		} elseif ( $height_desired !== 0 && $width_desired === 0 ) {
+			// We don't care about the width
+			if ( $resize_mode !== 'exact' ) {
+				 // w = h*(w/h)
+				$width_new = $height_desired * $proportion_wh;
+			}
 			$height_new = $height_desired;
-		} else { // We care about both
-			
+		} else {
+			// We care about both
 
 			if ( $resize_mode === 'exact' || /* no upscaling */ ($width_original <= $width_desired && $height_original <= $height_desired) ) { // Nothing to do
 			} elseif ( $resize_mode === 'area' ) { // Proportion to fit inside
@@ -273,7 +280,7 @@ if ( function_compare('image_dimensions', 1, true, __FILE__, __LINE__) ) {
 	 * @version 1, November 11, 2009
 	 */
 	function image_dimensions ( $image_path ) {
-		$image = image_read($image_path);
+		$image = image_read($image_path,false);
 		if ( !$image ) return $image;
 		$width = imagesx($image);
 		$height = imagesy($image);
@@ -455,7 +462,7 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 	 * @param boolean $return_info if true, then an array is returned containing the image resource coupled with creation information.
 	 * @return resource|array
 	 */
-	function image_read ( $args, $return_info = false ) {
+	function image_read ( $args, $return_info = true ) {
 		/*
 		 * Changelog
 		 * Version 4.1, November 11, 2007
@@ -467,7 +474,7 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 		 */
 		
 		// Set defaults
-		$image = null;
+		$image_type = $image = null;
 		
 		// Extract
 		if ( gettype($args) === 'array' )
@@ -489,12 +496,12 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 			case 'string' :
 				// Try and create it
 				$result = @imagecreatefromstring($image);
-				if ( $result )
-					return $result; // The image was a binary string
-				
-
+				if ( $result ) {
+					 // The image is a binary string
+					$image = $result;
+				}
 				// Check if it is a file
-				if ( is_file($image) ) {
+				elseif ( is_file($image) ) {
 					// Get the image type
 					$image_type = exif_imagetype($image);
 					if ( !$image_type ) { // Error
@@ -517,7 +524,7 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 					}
 					break;
 				}
-			
+				
 			case 'resource' :
 				// Check if it is already a image
 				if ( @imagesx($image) ) { // We have a valid image
@@ -531,12 +538,16 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 				break;
 		}
 		
-		// return
+		# Return
 		if ( $return_info ) {
-			return compact('image', 'image_extension', 'image_type', 'image_read_function');
+			if ( empty($image_type) ) {
+				return compact('image');
+			} else {
+				return compact('image', 'image_type');
+			}
 		}
 		
-		// return
+		# Return
 		return $image;
 	}
 }
@@ -570,7 +581,7 @@ if ( function_compare('image_resize', 3, true, __FILE__, __LINE__) ) {
 		extract($args);
 		
 		// Read image
-		$image = image_read($image);
+		$image = image_read($image,false);
 		if ( empty($image) ) { // error
 			trigger_error('no image was specified', E_USER_WARNING);
 			return false;
@@ -641,7 +652,7 @@ if ( function_compare('image_write', 1.1, true, __FILE__, __LINE__) ) {
 	 * @return string|false binary output, or error
 	 * @todo needs a rewrite to it's flow is a logical stream
 	 */
-	function image_write ( $args ) { /*
+	function image_write ( $args, $return_info = true ) { /*
 		 * Changelog
 		 * Version 1.1, November 11, 2009
 		 * - Cleaned
@@ -665,7 +676,7 @@ if ( function_compare('image_write', 1.1, true, __FILE__, __LINE__) ) {
 				return false;
 			}
 			// Check Image
-			$image = image_read($image);
+			$image = image_read($image, false);
 		} else {
 			// Check image type
 			if ( empty($image_type) ) { // error
@@ -690,14 +701,23 @@ if ( function_compare('image_write', 1.1, true, __FILE__, __LINE__) ) {
 		// Read the image
 		ob_start();
 		$image = call_user_func($image_write_function, $image, $location, $quality);
-		$error = strstr(ob_get_contents(), '</b>:');
-		ob_end_flush();
+		$result = ob_get_contents();
+		$error = strstr($result, '</b>:');
+		ob_end_clean();
 		if ( !$image || $error ) { // Error
-			trigger_error('Failed to the write the image: ' . var_export(compact('image'), true), E_USER_WARNING);
+			trigger_error('Failed to the write the image: ' . var_export(compact('image','error'), true), E_USER_WARNING);
 			return false;
 		}
 		
-		// Return
+		# Swap
+		$image = $result;
+		
+		# Return
+		if ( $return_info ) {
+			return compact('image', 'image_type');
+		}
+		
+		# Return
 		return $image;
 	}
 }
@@ -715,7 +735,7 @@ if ( function_compare('image_compress', 4.1, true, __FILE__, __LINE__) ) {
 	 * @return string|false binary output, or error
 	 * @todo needs a clean
 	 */
-	function image_compress ( $args ) { /*
+	function image_compress ( $args, $return_info = false ) { /*
 		 * Changelog
 		 * Version 4.1, November 11, 2009
 		 * - Cleaned
@@ -734,8 +754,12 @@ if ( function_compare('image_compress', 4.1, true, __FILE__, __LINE__) ) {
 		
 		$max_size = null;
 		
-		// Exract user
-		extract($args);
+		// Exract args
+		if ( is_array($args) )
+			extract($args);
+		else {
+			$image = $args;
+		}
 		
 		// Read image + info
 		$result = image_read($image, true);
@@ -750,6 +774,12 @@ if ( function_compare('image_compress', 4.1, true, __FILE__, __LINE__) ) {
 			trigger_error('No image was specified', E_USER_WARNING);
 			return false;
 		}
+	
+		// Check Image
+		if ( empty($image_type) ) { // error
+			trigger_error('No image type was specified', E_USER_WARNING);
+			return false;
+		}
 		
 		// Max filesize
 		if ( !empty($max_size) )
@@ -758,26 +788,29 @@ if ( function_compare('image_compress', 4.1, true, __FILE__, __LINE__) ) {
 
 		// Do compression
 		$location = null;
-		ob_start();
-		if ( !image_write(compact('image', 'location', 'quality', 'image_type', 'image_extension')) ) { // Writing the image failed
-			ob_end_flush();
+		$result = image_write(compact('image', 'location', 'quality', 'image_type', 'image_extension'),false);
+		if ( !$result ) { // Writing the image failed
 			trigger_error('Writing the image failed', E_USER_WARNING);
 			return false;
 		}
-		$result = ob_get_contents();
-		ob_end_clean();
 		
 		if ( $max_filesize != 0 ) { // Max filesize is now bytes!
 			while ( $quality >= 5 && strlen($result) /* current filesize */ > $max_filesize ) {
-				ob_start();
-				image_write(compact('image', 'location', 'quality', 'image_type', 'image_extension'));
-				$result = ob_get_contents();
-				ob_end_clean();
+				$result = image_write(compact('image', 'location', 'quality', 'image_type', 'image_extension'),false);
 				$quality -= 5;
 			}
 		}
 		
-		return $result;
+		# Swap
+		$image = $result;
+		
+		# Return
+		if ( $return_info ) {
+			return compact('image', 'image_type');
+		}
+		
+		# Return
+		return $image;
 	}
 }
 
@@ -846,7 +879,7 @@ if ( function_compare('image_remake', 9.2, true, __FILE__, __LINE__) ) {
 		}
 		
 		// Check new dimensions
-		if ( !isset($args['width_new']) || !isset($args['height_new']) ) { // error
+		if ( !array_key_exists('width_new',$args) || !array_key_exists('height_new',$args) ) { // error
 			trigger_error('Desired/new dimensions were not found', E_USER_WARNING);
 			return false;
 		}
@@ -874,7 +907,7 @@ if ( function_compare('image_remake', 9.2, true, __FILE__, __LINE__) ) {
 		
 
 		// Get new resize stuff
-		$result = image_resize(compact('image', 'resize_mode', 'width_old', 'height_old', 'width_new', 'height_new'));
+		$result = image_resize_dimensions(compact('image', 'resize_mode', 'width_old', 'height_old', 'width_new', 'height_new'));
 		if ( !$result )
 			return $result;
 			
@@ -889,7 +922,7 @@ if ( function_compare('image_remake', 9.2, true, __FILE__, __LINE__) ) {
 			
 		// Compress the image
 		$image_compress = compact('image', 'max_filesize', 'quality', 'image_type', 'image_extension');
-		$image = image_compress($image_compress);
+		$image = image_compress($image_compress,false);
 		if ( !$image )
 			return $image;
 			
