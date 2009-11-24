@@ -517,7 +517,7 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 					}
 					
 					// Read the image
-					$image = @call_user_func($image_read_function, $image);
+					$image = call_user_func($image_read_function, $image);
 					if ( !$image ) { // Error
 						trigger_error('Failed to the read the image: ' . var_export(compact('image'), true), E_USER_WARNING);
 						return false;
