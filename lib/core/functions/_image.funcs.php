@@ -489,8 +489,8 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 	    	$memoryLimitNewMB = $memoryLimitMB + ceil($memoryDifference/$MB);
 	    	$memoryLimitNew = $memoryLimitNewMB * $MB;
 			ini_set('memory_limit', $memoryLimitNewMB . 'M');
-			var_dump(compact('memoryNeeded','memoryHave','memoryExtra','memoryDifference','memoryLimitNewMB', 'memoryLimitNew', 'memoryLimit', 'memoryLimitMB'));
-			var_dump(intval(ini_get('memory_limit')));
+			//var_dump(compact('memoryNeeded','memoryHave','memoryExtra','memoryDifference','memoryLimitNewMB', 'memoryLimitNew', 'memoryLimit', 'memoryLimitMB'));
+			//var_dump(intval(ini_get('memory_limit')));
 			if ( intval(ini_get('memory_limit')) === $memoryLimitNewMB ) {
 				return true; // Adjusted
 			} else {
