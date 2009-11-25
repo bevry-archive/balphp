@@ -452,6 +452,49 @@ if ( function_compare('image_write_function', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Adjusts the memory limits so that we can hopefully read the image
+	 * @version 1, November 26, 2009
+	 * @since 1, November 26, 2009
+	 * @param string $type
+	 * @return string
+	 */
+	function image_memory_adjust ( $filename ) {
+		// http://www.php.net/manual/en/function.imagecreatefromjpeg.php#64155
+		
+		# Prepare
+	    $imageInfo = getimagesize($filename);
+	    $MB = pow(1024,2);   // number of bytes in 1M
+	    $K64 = pow(2,16);    // number of bytes in 64K
+	    $TWEAKFACTOR = 1.8;  // Or whatever works for you
+	    
+	    # Calculate
+	    $pixels = $imageInfo[0]*$imageInfo[1];
+	    $memory = $pixels * $imageInfo['bits'] * ($imageInfo['channels'] / 8) + $K64;
+	    $memoryNeeded = round($memory * $TWEAKFACTOR);
+	    
+	    # Limits
+		$memoryHave = memory_get_usage();
+	    $memoryLimitMB = intval(ini_get('memory_limit'));
+	    if ( !$memoryLimitMB ) $memoryLimitMB = 8;
+	    $memoryLimit = $memoryLimitMB * $MB;
+	    
+	    # Check
+	    if ( function_exists('memory_get_usage') && $memoryHave + $memoryNeeded > $memoryLimit) {
+	    	$memoryExtra = $memoryHave + $memoryNeeded - $memoryLimit;
+	        $newLimit = $memoryLimitMB + ceil( $memoryExtra / $MB );
+	        ini_set( 'memory_limit', $newLimit . 'M' );
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
+	
+}
+
 if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -515,6 +558,9 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 						trigger_error('Unsupported image type: ' . var_export(compact('image_type'), true), E_USER_WARNING);
 						return false;
 					}
+					
+					// Adjust memory for the image
+					image_memory_adjust($image);
 					
 					// Read the image
 					$image = call_user_func($image_read_function, $image);
