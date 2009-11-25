@@ -488,12 +488,16 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 	    	$memoryDifference = $memoryNeeded-$memoryLimit;
 	    	$memoryLimitNewMB = $memoryLimitMB + ceil($memoryDifference/$MB);
 	    	$memoryLimitNew = $memoryLimitNewMB * $MB;
+			ini_set('memory_limit', $memoryLimitNewMB . 'M');
 			var_dump(compact('memoryNeeded','memoryHave','memoryExtra','memoryDifference','memoryLimitNewMB', 'memoryLimitNew', 'memoryLimit', 'memoryLimitMB'));
-			ini_set( 'memory_limit', $memoryLimitNewMB . 'M' );
-			var_dump(memory_get_usage());
-	        return true;
+			var_dump(intval(ini_get('memory_limit')));
+			if ( intval(ini_get('memory_limit')) === $memoryLimitNewMB ) {
+				return true; // Adjusted
+			} else {
+				return false; // Can't adjust
+			}
 	    } else {
-	        return false;
+	        return true; // No need to adjust
 	    }
 	}
 	
@@ -559,12 +563,15 @@ if ( function_compare('image_read', 4.1, true, __FILE__, __LINE__) ) {
 					// Check if image is supported
 					$image_read_function = image_read_function($image_type);
 					if ( !$image_read_function ) { // Error
-						trigger_error('Unsupported image type: ' . var_export(compact('image_type'), true), E_USER_WARNING);
+						trigger_error('Unsupported image type: ' . var_export(compact('image_type','image'), true), E_USER_WARNING);
 						return false;
 					}
 					
 					// Adjust memory for the image
-					image_memory_adjust($image);
+					if ( !image_memory_adjust($image) ) { // Error
+						trigger_error('Image requires more resources than those available: ' . var_export(compact('image'), true), E_USER_WARNING);
+						return false;
+					}
 					
 					// Read the image
 					$image = call_user_func($image_read_function, $image);
