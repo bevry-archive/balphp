@@ -467,14 +467,14 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 		
 		# Prepare
 	    $imageInfo = getimagesize($filename);
-	    $MB = pow(1024,2);   // number of bytes in 1M
-	    $K64 = pow(2,16);    // number of bytes in 64K
-	    $TWEAKFACTOR = 1.8;  // Or whatever works for you
+	    $MB = pow(1024,2);		// number of bytes in 1M
+	    $K64 = pow(2,16);		// number of bytes in 64K
+	    $TWEAKFACTOR = 1.8;		// Or whatever works for you
 	    
 	    # Calculate
 	    $pixels = $imageInfo[0]*$imageInfo[1];
 	    $memory = $pixels * $imageInfo['bits'] * ($imageInfo['channels'] / 8) + $K64;
-	    $memoryNeeded = round($memory * $TWEAKFACTOR);
+	    $memoryExtra = round($memory * $TWEAKFACTOR);
 	    
 	    # Limits
 		$memoryHave = memory_get_usage();
@@ -483,10 +483,12 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 	    $memoryLimit = $memoryLimitMB * $MB;
 	    
 	    # Check
-	    if ( function_exists('memory_get_usage') && $memoryHave + $memoryNeeded > $memoryLimit) {
-	    	$memoryExtra = $memoryHave + $memoryNeeded - $memoryLimit;
-	        $newLimit = $memoryLimitMB + ceil( $memoryExtra / $MB );
-	        ini_set( 'memory_limit', $newLimit . 'M' );
+	    $memoryNeeded = $memoryHave+$memoryExtra;
+	    if ( $memoryNeeded > $memoryLimit) {
+	    	$memoryDifference = $memoryNeeded-$memoryLimit;
+	    	$memoryLimitNew = $memoryLimitMB + ceil($memoryDifference/$MB);
+	    	var_dump(compact('memoryNeeded','memoryHave','memoryExtra','memoryDifference','memoryLimitNew','memoryLimit'));
+	        ini_set( 'memory_limit', $memoryLimitNew . 'M' );
 	        return true;
 	    } else {
 	        return false;
