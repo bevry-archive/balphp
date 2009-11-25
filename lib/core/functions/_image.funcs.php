@@ -490,6 +490,7 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 	    	$memoryLimitNew = $memoryLimitNewMB * $MB;
 			var_dump(compact('memoryNeeded','memoryHave','memoryExtra','memoryDifference','memoryLimitNewMB', 'memoryLimitNew', 'memoryLimit', 'memoryLimitMB'));
 			ini_set( 'memory_limit', $memoryLimitNewMB . 'M' );
+			var_dump(memory_get_usage());
 	        return true;
 	    } else {
 	        return false;
