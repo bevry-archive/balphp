@@ -1,5 +1,4 @@
 <?php
-require_once 'Doctrine/Record/Listener.php';
 class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 	
 	protected $_default = false;
