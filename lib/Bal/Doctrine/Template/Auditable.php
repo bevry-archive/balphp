@@ -171,7 +171,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 		$save = false;
 		
 		// Author
-		if ( $this->setAuthorstr() ) {
+    	if ( !$this->_options['authorstr']['disabled'] && $this->setAuthorstr() ) {
 			$save = true;
 		}
 		
