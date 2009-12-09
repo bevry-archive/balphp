@@ -75,24 +75,7 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		# Done
 		return true;
 	}
-
-	/**
-	 * Ensure Consistency
-	 * @return bool
-	 */
-	public function ensureConsistency ( ) {
-		// Prepare
-		$save = false;
-		
-		// Author
-		if ( $this->setAuthorstr() ) {
-			$save = true;
-		}
-		
-		// Done
-		return $save;
-	}
-
+	
 	/**
 	 * Backup old values
 	 * @param Doctrine_Event $Event

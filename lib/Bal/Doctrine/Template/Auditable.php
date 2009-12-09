@@ -161,4 +161,22 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 		return false;
 	}
 	
+
+	/**
+	 * Ensure Consistency
+	 * @return bool
+	 */
+	public function ensureConsistency ( ) {
+		// Prepare
+		$save = false;
+		
+		// Author
+		if ( $this->setAuthorstr() ) {
+			$save = true;
+		}
+		
+		// Done
+		return $save;
+	}
+	
 }
