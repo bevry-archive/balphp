@@ -10,14 +10,13 @@
  * along with Balupton's Resource Library (balPHP).  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package balphp
- * @subpackage core
- * @version 0.1.0-final, April 21, 2008
+ * @subpackage bal
+ * @version 0.2.0-final, December 9, 2009
  * @since 0.1.0-final, April 21, 2008
  * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
  * @copyright Copyright (c) 2008-2009, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
-
 class Bal_Locale {
 	
 	public $Zend_Locale;
