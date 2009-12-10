@@ -110,7 +110,11 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		$params['content'] = $content;
 		
 		# Attributes
-		$attrs = array(); // not supported yet
+		if ( !is_array($attrs) ) {
+			// Somehow turns these attributes into an array
+			$attrs = stripslashes($attrs);
+			$attrs = array_from_attributes($attrs);
+		}
 		
 		# Apply
 		$params += $attrs;

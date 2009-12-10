@@ -20,6 +20,36 @@
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
+
+if ( function_compare('array_from_attributes', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Return a NameValuePair from a bunch of text attributes
+	 * @version 1, December 10, 2009
+	 * @param string $attrs
+	 * @return array
+	 */
+	function array_from_attributes ( $attrs = '' ) {
+		# Prepare
+		if ( is_array($attrs) ) return $attrs;
+		$array = array();
+	
+		# Search
+		$search = '/(?<name>\w+)\="(?<value>.*?[^\\\\])"/';
+		$matches = array();
+		preg_match_all($search, $attrs, $matches);
+		
+		# Handle
+		foreach ( $matches['name'] as $match => $name ) {
+			$value = $matches['value'][$match];
+			$array[$name] = $value;
+		}
+		
+		# Done
+		return $array;
+	}
+}
+
 if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 
 	/**
