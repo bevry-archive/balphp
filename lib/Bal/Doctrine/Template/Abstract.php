@@ -65,7 +65,7 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 			$column['length'] = null;
 		}
 		if ( !array_key_exists('options', $column) ) {
-			$column['options'] = null;
+			$column['options'] = array();
 		}
 		
 		# Handle
@@ -80,8 +80,20 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 		if ( isset($column['disabled']) && $column['disabled'] )
 			return;
 			
-		# Handle
+		# Setup
 		$this->hasOne($column['class'] . ' as ' . $column['relation'], array('local' => $column['name'], 'foreign' => 'id'));
+		
+		# Foreign
+		if ( !empty($column['foreignAlias']) ) {
+			$tableName = $this->_table->getComponentName();
+			$relationName = $tableName.($column['foreignAlias'] !== true ? ' as '.$column['foreignAlias'] : '');
+	        $options = array(
+	            'local'    => $column['name'],
+	            'foreign'  => 'id',
+	            'refClass' => $tableName
+	        );
+	        Doctrine::getTable($this->_options['avatar']['class'])->bind(array($relationName, $options), Doctrine_Relation::MANY);
+		}
 		
 		# Chain
 		return $this;

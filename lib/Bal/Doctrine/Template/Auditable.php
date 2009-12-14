@@ -131,10 +131,12 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      * @return void
      */
     public function setUp(){
-    	# Handle
+    	# Getters/Setters
     	if ( !$this->_options['authorstr']['disabled'] )
 			$this->getInvoker()->hasMutator('authorstr', 'setAuthorstr');
-        $this->hasOneHelper($this->_options['author']);
+        
+		# Relations
+		$this->hasOneHelper($this->_options['author']);
         
         # Done
         return true;
@@ -146,18 +148,20 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 	 * @return bool
 	 */
 	public function setAuthorstr ( $author = null ) {
-		/// Default
+		# Default
 		if ( is_null($author) ) {
 			if ( isset($this->Author) && $this->Author->exists() ) {
 				$author = $this->Author->displayname;
 			}
 		}
-		// Is Change?
+		
+		# Has changed?
 		if ( $this->authorstr != $author ) {
 			$this->_set('authorstr', $author);
 			return true;
 		}
-		// No Change
+		
+		# No Change
 		return false;
 	}
 	
@@ -167,15 +171,15 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 	 * @return bool
 	 */
 	public function ensureConsistency ( ) {
-		// Prepare
+		# Prepare
 		$save = false;
 		
-		// Author
+		# Author
     	if ( !$this->_options['authorstr']['disabled'] && $this->setAuthorstr() ) {
 			$save = true;
 		}
 		
-		// Done
+		# Done
 		return $save;
 	}
 	

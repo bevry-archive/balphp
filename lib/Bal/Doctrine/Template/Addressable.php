@@ -32,7 +32,7 @@
  * @version     $Revision$
  * @author      Benjamin "balupton" Lupton <contact@balupton.com>
  */
-class Bal_Doctrine_Template_Adressable extends Bal_Doctrine_Template_Abstract {
+class Bal_Doctrine_Template_Addressable extends Bal_Doctrine_Template_Abstract {
 	
     /**
      * Array of options
