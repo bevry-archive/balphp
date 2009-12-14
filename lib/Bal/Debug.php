@@ -72,45 +72,185 @@ class Bal_Debug extends Zend_Debug
      * @param  bool   $echo  OPTIONAL Echo output if true.
      * @return string
      */
-    /* *
-    public static function dump($var, $label=null, $echo=true)
-    {
-        // format the label
-        $label = ($label===null) ? '' : rtrim($label) . ' ';
-
-        // var_dump the variable into a buffer and keep the output
-        ob_start();
-        var_dump($var);
-        $output = ob_get_clean();
-
-        // neaten the newlines and indents
-        $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
-        if (self::getSapi() == 'cli') {
-            $output = PHP_EOL . $label
-                    . PHP_EOL . $output
-                    . PHP_EOL;
-        } else {
-            if(!extension_loaded('xdebug')) {
-                $output = htmlspecialchars($output, ENT_QUOTES);
-            }
-
-            $output = '<pre>'
-                    . $label
-                    . $output
-                    . '</pre>';
-        }
-
-        if ($echo) {
-            echo($output);
-        }
-        return $output;
-    }
-    /* */
-    
     public static function dump($var, $label=null, $echo=true) {
-
-    	require_once 'Var_Dump.php';
-		//Var_Dump::displayInit(array('display_mode' => 'HTML4_Text'), array('mode' => 'normal','offset' => 4));
-		echo Var_Dump::display($var);
+    	require_once 'dBug.php';
+		new dBug($var);
     }
+    
+    public static $options = array(
+    	'debugStart'	=> '<div class="debug">',
+    	'debugEnd'		=> '</div>',
+    	
+    	'nameStart'		=> '<span class="name">',
+    	'nameEnd'		=> ':</span>',
+    	'valueStart'	=> '<span class="value">',
+    	'valueEnd'		=> '</span>',
+    	'typeStart'		=> '<span class="type">',
+    	'typeEnd'		=> '</span>',
+    
+    	'booleanStart'	=> '<span class="var boolean">',
+    	'booleanEnd'	=> '</span>',
+    	'integerStart'	=> '<span class="var integer">',
+    	'integerEnd'	=> '</span>',
+    	'doubleStart'	=> '<span class="var double">',
+    	'doubleEnd'		=> '</span>',
+    	'stringStart'	=> '<span class="var string">',
+    	'stringEnd'		=> '</span>',
+    	'nullStart'		=> '<span class="var null">',
+    	'nullEnd'		=> '</span>',
+    	'resourceStart'	=> '<span class="var resource">',
+    	'resourceEnd'	=> '</span>',
+    	'arrayStart'	=> '<span class="var array">',
+    	'arrayEnd'		=> '</span>',
+    	'objectStart'	=> '<span class="var object">',
+    	'objectEnd'		=> '</span>',
+    	'methodStart'	=> '<span class="var method">',
+    	'methodEnd'		=> '</span>',
+    
+    	'helpStart'		=> '<span class="help">',
+    	'helpEnd'		=> '</span>'
+    );
+    
+    public static function render($value, $name=null, $level=0) {
+    	$type = strtolower(gettype($value));
+    	switch ( $type ) {
+    		case 'string':
+    			if ( strpos($value,"\n") || strpos($value,"\t") ) {
+    				$value = self::escape($value,false,true);
+    				$value = '<pre>'.$value.'</pre>';
+    				$return = self::renderVariable($value,$name,$type,false);
+    			} else {
+    				$return = self::renderVariable($value,$name);
+    			}
+    			break;
+    			
+    		case 'boolean':
+			case 'integer':
+    		case 'double':
+    		case 'null':
+    			$return = self::renderVariable($value,$name);
+    			break;
+    			
+    		case 'resource':
+    			$return = self::renderVariable(substr($value,0,5).'...',$name);
+    			break;
+    		
+    		case 'array':
+    			$return = '';
+    			foreach ( $value as $key => $val ) {
+    				$return .= self::render($val,$key,$level+1);
+    			}
+    			$return = self::renderVariable($return,$name,$type,false);
+    			break;
+    			
+    		case 'object':
+    			$class = get_class($value);
+    			$parents = self::parents($class, true);
+    			$type .= ' < '.implode(' < ', $parents);
+    			//
+    			$return = '';
+    			$vars = get_object_vars($value);
+    			foreach ( $vars as $key => $val ) {
+    				$return .= self::render($val,$key,$level+1);
+    			}
+    			$methods = get_class_methods($value);
+    			foreach ( $methods as $key => $val ) {
+    				$return .= self::renderVariable($val,$key,'method',false);
+    			}
+    			//
+    			$return = self::renderVariable($return,$name,$type,false);
+    			break;
+    	}
+    	return !$level ? self::$options['debugStart'].$return.self::$options['debugEnd'] : $return;
+    }
+    
+    public static function renderVariable ( $value, $name=null, $type=null, $escape=true ) {
+    	if ( !$type ) {
+    		$type = strtolower(gettype($value));
+    	}
+    	$parts = explode(' < ', $type);
+    	$classtype = $rawtype = $parts[0];
+    	if ( !empty($parts[1]) ) {
+    		$classtype = $parts[1];
+    	}
+    	return
+    		self::$options[$rawtype.'Start'].
+		    	(	$name===null ? '' :
+		    		self::$options['nameStart'].
+		    			self::escape($name,false,true).
+		    		self::$options['nameEnd']
+		    	).
+		    	self::$options['typeStart'].
+		    		self::escape($type,false,true).
+		    	self::$options['typeEnd'].
+    			self::$options['helpStart'].
+    				self::getHelpLinks($value,$classtype).
+    			self::$options['helpEnd'].
+		    	self::$options['valueStart'].
+		    		($escape?self::escape($value,true,true):$value).
+		    	self::$options['valueEnd'].
+    		self::$options[$rawtype.'End']
+		;
+    }
+    
+    public static function escape($value, $type=true, $html=true){
+    	if ( $type ) {
+    		$value = var_export($value,true);
+    	}
+    	if ( $html ) {
+    		$value = htmlentities($value);
+    	}
+    	return $value;
+    }
+    
+    public static function parents($class, $self=true){
+    	$parents = array();
+    	if ( $self ) $parents[] = $class;
+    	$_class = $class; while ( $_class = get_parent_class($_class) ) {
+    		$parents[] = $_class;
+    	}
+    	return $parents;
+    }
+    
+    public static function help($value,$name=null) {
+    	self::$_help = true;
+    	$result = self::render($value,$name=null);
+    	self::$_help = false;
+    	return $result;
+    }
+    
+    public static function getHelpLinks ( $value, $type=null ) {
+    	$help = self::getHelpArray($value, $type);
+    	$result = '';
+    	foreach ( $help as $name => $url ) {
+    		$result .= '<a href="'.$url.'" title="Documentation for: '.$name.'" class="help-link">'.$name.'</a>';
+    	}
+    	return $result;
+    }
+    
+    public static function getHelpArray ( $value, $type=null ) {
+    	# Prepare
+    	$has = self::parents($type, true);
+    	$has[] = $type;
+    	$has[] = gettype($value);
+    	array_clean($has);
+    	
+    	# Search
+    	$has = array_flip($has);
+    	$help = array_intersect_key(self::$_helps, $has);
+    	
+    	# Done
+    	return $help;
+    }
+    
+    public static $_help = false;
+    public static $_helps = array(
+    	'Zend_View' => 'http://framework.zend.com/manual/en/zend.view.html',
+    	'Zend_View_Helper_Headlink' => 'http://framework.zend.com/manual/en/zend.view.helpers.html#zend.view.helpers.initial.headlink',
+    	'Zend_View_Helper_Abstract' => 'http://framework.zend.com/manual/en/zend.view.helpers.html',
+    	'Zend_Navigation' => 'http://framework.zend.com/manual/en/zend.navigation.html',
+    	'Doctrine_Record' => 'http://www.doctrine-project.org/documentation/manual/1_2/en/component-overview#record',
+    	'Doctrine_Record_Abstract' => 'http://www.doctrine-project.org/Doctrine_Record/1_2'
+    );
+    
 }
