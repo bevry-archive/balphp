@@ -418,6 +418,10 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 		return $prefix.$suffix;
 	}
 	
+	public function getPublicPath ( ) {
+		return PUBLIC_PATH;
+	}
+	
 	/**
 	 * Get the base url for an area
 	 * @see getThemeUrl
@@ -425,10 +429,11 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param bool $prefix
 	 * @return string
 	 */
-	public function getAreaUrl ( $area, $prefix = false ) {
+	public function getAreaUrl ( $area = null, $prefix = false ) {
 		$theme = $this->getAreaTheme($area);
 		return $this->getThemeUrl($theme, $prefix);
 	}
+	
 	
 	/**
 	 * Get the base url for a theme
@@ -455,10 +460,31 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 		return $theme;
 	}
 	
+	
 	public function getThemePath ( $theme ) {
 		$themes_path = THEMES_PATH;
 		return $themes_path . DIRECTORY_SEPARATOR . $theme;
 	}
+	
+	public function getAreaLayoutPath ( $area = null ) {
+		$theme = $this->getAreaTheme($area);
+		return $this->getThemeLayoutPath($theme);
+	}
+	
+	public function getThemeLayoutPath ( $theme ) {
+		return $this->getThemePath($theme) . DIRECTORY_SEPARATOR . 'layouts';
+	}
+	
+	public function setAreaLayout ( $area = null, $layout = 'layout' ) {
+		$theme = $this->getAreaTheme($area);
+		return $this->setThemeLayout($theme, $layout);
+	}
+	
+	public function setThemeLayout ( $theme, $layout = 'layout' ) {
+		$path = $this->getThemeLayoutPath($theme);
+		return $this->getLayout()->setLayout($layout)->setLayoutPath($path);
+	}
+	
 	
 	public function startLayout ( $layout = null ) {
 		Zend_Layout::startMvc();
@@ -472,26 +498,6 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	public function setLayout ( $layout ) {
 		return $this->getLayout()->setLayout('layout');
 	}
-	
-	public function getAreaLayoutPath ( $area ) {
-		$theme = $this->getAreaTheme($area);
-		return $this->getThemeLayoutPath($theme);
-	}
-	
-	public function getThemeLayoutPath ( $theme ) {
-		return $this->getThemePath($theme) . DIRECTORY_SEPARATOR . 'layouts';
-	}
-	
-	public function setAreaLayout ( $area = null, $layout = 'theme' ) {
-		$theme = $this->getAreaTheme($area);
-		return $this->setThemeLayout($theme, $layout);
-	}
-	
-	public function setThemeLayout ( $theme, $layout = 'theme' ) {
-		$path = $this->getThemeLayoutPath($theme);
-		return $this->getLayout()->setLayout($layout)->setLayoutPath($path);
-	}
-	
 	
 	# -----------
 	# Menu
