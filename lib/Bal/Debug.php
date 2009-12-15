@@ -212,13 +212,6 @@ class Bal_Debug extends Zend_Debug
     	return $parents;
     }
     
-    public static function help($value,$name=null) {
-    	self::$_help = true;
-    	$result = self::render($value,$name=null);
-    	self::$_help = false;
-    	return $result;
-    }
-    
     public static function getHelpLinks ( $value, $type=null ) {
     	$help = self::getHelpArray($value, $type);
     	$result = '';
@@ -243,7 +236,6 @@ class Bal_Debug extends Zend_Debug
     	return $help;
     }
     
-    public static $_help = false;
     public static $_helps = array(
     	'Zend_View' => 'http://framework.zend.com/manual/en/zend.view.html',
     	'Zend_View_Helper_Headlink' => 'http://framework.zend.com/manual/en/zend.view.helpers.html#zend.view.helpers.initial.headlink',
