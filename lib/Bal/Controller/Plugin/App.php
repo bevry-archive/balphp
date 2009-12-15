@@ -436,7 +436,8 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param bool $prefix
 	 * @return string
 	 */
-	public function getThemeUrl ( $theme, $prefix = false ) {
+	public function getThemeUrl ( $theme = null, $prefix = false ) {
+		if ( empty($theme) ) $theme = $this->getAreaTheme();
 		$prefix = $prefix ? $this->getRootUrl() : '';
 		$suffix = THEMES_URL.'/'.$theme;
 		return $prefix.$suffix;
@@ -448,18 +449,9 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param string $area
 	 * @return string|null
 	 */
-	public function getAreaTheme ( $area ) {
-		$theme = null;
-		switch ( $area ) {
-			case 'front':
-				$theme = $this->getConfig('bal.themes.front');
-				break;
-			case 'back':
-				$theme = $this->getConfig('bal.themes.back');
-				break;
-			default:
-				break;
-		}
+	public function getAreaTheme ( $area = null ) {
+		if ( empty($area) ) $area = 'default';
+		$theme = $this->getConfig('bal.themes.'.$area);
 		return $theme;
 	}
 	
@@ -490,7 +482,7 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 		return $this->getThemePath($theme) . DIRECTORY_SEPARATOR . 'layouts';
 	}
 	
-	public function setAreaLayout ( $area, $layout = 'theme' ) {
+	public function setAreaLayout ( $area = null, $layout = 'theme' ) {
 		$theme = $this->getAreaTheme($area);
 		return $this->setThemeLayout($theme, $layout);
 	}
