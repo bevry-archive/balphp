@@ -48,7 +48,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	 * Magic
 	 * @return mixed
 	 */
-	protected function __call ( $method, $args ) {
+	function __call ( $method, $args ) {
 		$App = $this->getApp();
 		if ( method_exists($App, $method) ) {
 			return call_user_func_array(array($App, $method), $args);
@@ -61,40 +61,26 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	# -----------
 	# View stuff
 	
-	public function getFileUrl ( $file ) {
-		# Prepare
-		$App = $this->getApp();
-		$publicPath = $App->getPublicPath();
-		$publicUrl = $App->getPublicUrl();
-		$themePath = $App->getThemePath();
-		$themeUrl = $App->getThemeUrl();
-		$result = false;
-		
-		# Handle
-		if ( file_exists($themePath . DIRECTORY_SEPERATOR . $file) ) {
-			$result = $themeUrl . '/' . $file;
-		} elseif ( file_exists($publicPath . DIRECTORY_SEPERATOR . $file) ) {
-			$result = $publicUrl . '/' . $file;
-		}
-		
-		# Done
-		return $result;
-	}
-	
 	public function getStylesheetUrl ( $file ) {
 		$file = 'styles/' . $file;
-		$url = $this->getFileUrl($file);
+		$url = $this->getApp()->getFileUrl($file);
+		return $url;
+	}
+	
+	public function getScriptUrl ( $file ) {
+		$file = 'scripts/' . $file;
+		$url = $this->getApp()->getFileUrl($file);
 		return $url;
 	}
 	
 	public function getLocaleStylesheetUrl ( ) {
 		# Attempt Locale
-		$file = 'locale/'.$this->locale()->getFullLocale().'.css';
+		$file = 'locale/'.$this->view->locale()->getFullLocale().'.css';
 		$url = $this->getStylesheetUrl($file);
 		
 		# Attempt Language
 		if ( !$url ) {
-			$file = 'locale/'.$this->locale()->getLanguage().'.css';
+			$file = 'locale/'.$this->view->locale()->getLanguage().'.css';
 			$url = $this->getStylesheetUrl($file);
 		}
 		
@@ -102,30 +88,38 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $url;
 	}
 	
-	public function appendStylesheets ( ) {
+	public function appendStylesheets ( $offset = 100 ) {
+		# Prepare
+		$App = $this->getApp();
+		$layout = $App->getMvc()->getLayout();
+		
 		# Locale
 		$locale = $this->getLocaleStylesheetUrl();
-		if ( $locale )	$this->headLink()->appendStylesheet($locale);
+		if ( $locale )	$this->view->headLink()->offsetSetStylesheet($offset+0, $locale);
 		
 		# Browser
 		$browser = $this->getBrowserStylesheetUrl();
-		if ( $browser )	$this->headLink()->appendStylesheet($browser);
+		if ( $browser )	$this->view->headLink()->offsetSetStylesheet($offset+1, $browser);
 		
 		# Style
-		$style = $this->getStylesheetUrl('style.css');
-		if ( $style )	$this->headLink()->appendStylesheet($style);
+		$style = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css');
+		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+2, $style);
 		
 		# Done
-		return $this->headLink();
+		return $this->view->headLink();
 	}
 	
-	public function appendScripts ( ) {
+	public function appendScripts ( $offset = 100 ) {
+		# Prepare
+		$App = $this->getApp();
+		$layout = $App->getMvc()->getLayout();
+		
 		# Style
-		$script = $this->getScriptUrl('script.js');
-		if ( $style )	$this->headScript()->appendFile($style);
+		$script = $this->getScriptUrl($layout === 'layout' ? 'script.js' : 'script-'.$layout.'.js');
+		if ( $script )	$this->view->headScript()->offsetSetFile($offset+0, $script);
 		
 		# Done
-		return $this->headScript();
+		return $this->view->headScript();
 	}
 	
 	public function getBrowserStylesheetUrl ( ) {
@@ -135,4 +129,6 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Done
 		return $url;
+	}
+	
 }
