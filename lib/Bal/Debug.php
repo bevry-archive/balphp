@@ -78,7 +78,7 @@ class Bal_Debug extends Zend_Debug
     }
     
     public static $options = array(
-    	'debugStart'	=> '<div class="debug">',
+    	'debugStart'	=> '<div class="debug sparkle-debug">',
     	'debugEnd'		=> '</div>',
     	
     	'nameStart'		=> '<span class="name">',

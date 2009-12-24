@@ -35,10 +35,17 @@ class Bal_View_Helper_Help extends Zend_View_Helper_Abstract {
 		$helpers = $this->_View->getHelpers();
 		$variables = $this->_View->getVars();
 		$result = Bal_Debug::render(array(
-			'Zend View Helpers' => $helpers,
 			'Available Variables' => $variables,
-			'Request' => $_REQUEST
-		), 'Zend View Helper');
+			'Received Params' => array(
+				'Request' => $_REQUEST,
+				'Post' => $_POST,
+				'Get' => $_GET,
+				'Files' => $_FILES,
+				'Cookies' => $_COOKIE,
+				'Server' => $_SERVER
+			),
+			'Zend View Helpers' => $helpers
+		), 'Help');
 		return $result;
 	}
 	
