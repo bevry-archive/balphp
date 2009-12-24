@@ -20,6 +20,18 @@
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
+if ( function_compare('strprefix', 1.0, true, __FILE__, __LINE__) ) {
+	function strprefix ( $haystack, $prefix = '' ) {
+		return $prefix.$haystack;
+	}
+}
+
+if ( function_compare('strsuffix', 1.0, true, __FILE__, __LINE__) ) {
+	function strsuffix ( $haystack, $suffix = '' ) {
+		return $haystack.$suffix;
+	}
+}
+
 if ( function_compare('strclean', 1.0, true, __FILE__, __LINE__) ) {
 
 	/**

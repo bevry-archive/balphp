@@ -21,6 +21,145 @@
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
 
+
+	
+if ( function_compare('array_first', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Return the first element of an array
+	 * @version 1, December 24, 2009
+	 * @param array $arr
+	 * @return mixed
+	 */
+	function array_first ( $arr ) {
+		$value = array_shift($arr);
+		return $value;
+	}
+}
+
+	
+if ( function_compare('array_last', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Return the last element of an array
+	 * @version 1, December 24, 2009
+	 * @param array $arr
+	 * @return mixed
+	 */
+	function array_last ( $arr ) {
+		$value = array_pop($arr);
+		return $value;
+	}
+}
+
+	
+if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array to apply a value from a set of keys
+	 * @version 1, December 24, 2009
+	 * @param array $arr
+	 * @param array $keys
+	 * @param mixed $value
+	 * @return array
+	 */
+	function array_apply ( &$arr, $keys, $value ) {
+		if ( !is_array($keys) ) $keys = array($keys);
+		$key = array_shift($keys);
+		if ( empty($key) ) {
+			$arr = $value;
+		} else {
+			$arr[$key] = array();
+			return array_apply($arr, $keys, $value);
+		}
+		return true;
+	}
+}
+
+
+if ( function_compare('array_delve', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array to return the value of a set of keys
+	 * @version 1, December 24, 2009
+	 * @param array $arr
+	 * @param array $keys
+	 * @return array
+	 */
+	function array_delve ( array $arr, $keys) {
+		if ( !is_array($keys) ) $keys = array($keys);
+		$key = array_shift($keys);
+		if ( empty($key) ) {
+			return $arr;
+		} else {
+			return array_delve($arr[$key], $keys);
+		}
+	}
+}
+
+
+if ( function_compare('array_walk_keys', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Walkthrough the keys of the array
+	 * @version 1, December 23, 2009
+	 * @param array $attr
+	 * @param callback $callback
+	 * @return array
+	 */
+	function array_walk_keys ( &$arr, $callback ) {
+		# Prpare
+		$args = func_get_args();
+		unsets($args[0], $args[1]);
+		# Handle
+		$keys = array_keys($arr);
+		$values = array_values($arr);
+		$keys = call_user_func_array('array_walk', array($keys, $callback, $args));
+		$result = array_combine($keys, $values);
+		# Done
+		return $result;
+	}
+}
+
+if ( function_compare('array_join', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Push an array into an array
+	 * @version 1, December 23, 2009
+	 * @param array $arr
+	 * @param array $args
+	 * @return array
+	 */
+	function array_join ( $arr, $args ) {
+		call_user_func_array('array_push', $arr, $args);
+		return $arr;
+	}
+}
+
+
+if ( function_compare('array_walk_nokey', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Walkthrough the keys of the array
+	 * @version 1, December 23, 2009
+	 * @param array $attr
+	 * @param callback $callback
+	 * @return array
+	 */
+	function array_walk_nokey ( &$arr, $callback ) {
+		# Prpare
+		$args = func_get_args();
+		unsets($args[0], $args[1]);
+		# Handle
+		foreach ( $arr as &$value ) {
+			$_args = array_join(array($value), $_args);
+			$_value = call_user_func_array($callback, $_args);
+			if ( $_value !== $value ) {
+				$value = $_value;
+			}
+		}
+		# Done
+		return $arr;
+	}
+}
+
 if ( function_compare('array_from_attributes', 1, true, __FILE__, __LINE__) ) {
 
 	/**
