@@ -36,7 +36,8 @@ class Bal_View_Helper_Help extends Zend_View_Helper_Abstract {
 		$variables = $this->_View->getVars();
 		$result = Bal_Debug::render(array(
 			'Zend View Helpers' => $helpers,
-			'Available Variables' => $variables
+			'Available Variables' => $variables,
+			'Request' => $_REQUEST
 		), 'Zend View Helper');
 		return $result;
 	}
