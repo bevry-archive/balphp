@@ -88,7 +88,25 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $url;
 	}
 	
-	public function appendStylesheets ( $offset = 100 ) {
+	public function headStyle ( ) {
+		return $this->view->headStyle();
+	}
+	
+	public function headTitle ( ) {
+		return $this->view->headTitle();
+	}
+	
+	public function headMeta ( ) {
+		# Meta
+		$this->view->headMeta()
+			->appendName('author', 'Benjamin \'balupton\' Lupton - http://www.balupton.com')
+			->appendName('generator', 'balCMS - http://www.balupton.com/balcms');
+		
+		# Done
+		return $this->view->headMeta();
+	}
+	
+	public function headLink ( $offset = 100 ) {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
@@ -105,11 +123,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$style = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css');
 		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+2, $style);
 		
+		# Favicon
+		$this->view->headLink(array('rel' => 'icon', 'href' => $App->getFileUrl('favicon.ico'), 'type' => 'image/x-icon'), 'PREPEND');
+		
 		# Done
 		return $this->view->headLink();
 	}
 	
-	public function appendScripts ( $offset = 100 ) {
+	public function headScript ( $offset = 100 ) {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();

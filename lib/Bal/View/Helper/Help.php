@@ -5,15 +5,15 @@ class Bal_View_Helper_Help extends Zend_View_Helper_Abstract {
 	 * The View in use
 	 * @var Zend_View_Interface
 	 */
-	protected $_View;
+	public $view;
 	
 	/**
 	 * Apply View
 	 * @param Zend_View_Interface $view
 	 */
-	public function setView (Zend_View_Interface $View) {
+	public function setView (Zend_View_Interface $view) {
 		# Set View
-		$this->_View = $View;
+		$this->view = $view;
 		
 		# Chain
 		return $this;
@@ -32,9 +32,9 @@ class Bal_View_Helper_Help extends Zend_View_Helper_Abstract {
 	 * @return string
 	 */
 	function render ( ) {
-		$helpers = $this->_View->getHelpers();
-		$variables = $this->_View->getVars();
-		$result = Bal_Debug::render(array(
+		$helpers = $this->view->getHelpers();
+		$variables = $this->view->getVars();
+		$help = array(
 			'Available Variables' => $variables,
 			'Received Params' => array(
 				'Request' => $_REQUEST,
@@ -45,7 +45,9 @@ class Bal_View_Helper_Help extends Zend_View_Helper_Abstract {
 				'Server' => $_SERVER
 			),
 			'Zend View Helpers' => $helpers
-		), 'Help');
+		);
+		if ( !empty($this->view->form) ) $help['Applicable Form'] = $this->view->form;
+		$result = Bal_Debug::render($help, 'Help');
 		return $result;
 	}
 	

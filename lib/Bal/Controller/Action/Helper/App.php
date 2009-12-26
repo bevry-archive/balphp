@@ -81,7 +81,7 @@ class Bal_Controller_Action_Helper_App extends Zend_Controller_Action_Helper_Abs
 	}
 
 	/**
-	 * Login the User
+	 * Login the User and forward
 	 * @see forwardIn
 	 * @see forwardOut
 	 * @param string $username
@@ -92,7 +92,7 @@ class Bal_Controller_Action_Helper_App extends Zend_Controller_Action_Helper_Abs
 	 * @param bool $logged_in_forward
 	 * @return bool
 	 */
-	public function login ( $username, $password, $locale = null, $remember = null, $logged_out_forward = false, $logged_in_forward = false ) {
+	public function loginForward ( $username, $password, $locale = null, $remember = null, $logged_out_forward = false, $logged_in_forward = false ) {
 		$this->getApp()->login($username, $password, $locale, $remember);
 		return $this->authenticate($logged_out_forward, $logged_in_forward);;
 	}

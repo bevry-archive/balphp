@@ -110,13 +110,24 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 		# Chain
 		return $this;
 	}
+	
+	/**
+	 * Login the User
+	 * @param User $User
+	 * @param string $locale
+	 * @param mixed $remember
+	 * @return bool
+	 */
+	public function loginUser ( $User, $locale = null, $remember = null ) {
+		return $this->login($User->username, $User->password, $locale, $remember);
+	}
 
 	/**
 	 * Login the User
 	 * @param string $username
 	 * @param string $password
 	 * @param string $locale
-	 * @param string $remember
+	 * @param mixed $remember
 	 * @return bool
 	 */
 	public function login ( $username, $password, $locale = null, $remember = null ) {

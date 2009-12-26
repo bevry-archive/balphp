@@ -71,7 +71,7 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
     		// Fetch User
 			$DQ = Doctrine_Query::create()
 			    ->from($this->getOption('tableName').' u')
-			    ->where('u.'.$this->getOption('indentityColumn').' = ? AND u.enabled = true', $this->_username);
+			    ->where('u.'.$this->getOption('indentityColumn').' = ?', $this->_username);
 			$User = $DQ->fetchOne();
 			
 			if ( empty($User) ) {

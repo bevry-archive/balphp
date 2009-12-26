@@ -70,7 +70,7 @@ if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 			$arr = $value;
 		} else {
 			$arr[$key] = array();
-			return array_apply($arr, $keys, $value);
+			return array_apply($arr[$key], $keys, $value);
 		}
 		return true;
 	}

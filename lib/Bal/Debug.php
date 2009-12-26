@@ -115,12 +115,12 @@ class Bal_Debug extends Zend_Debug
     	$type = strtolower(gettype($value));
     	switch ( $type ) {
     		case 'string':
-    			if ( strpos($value,"\n") || strpos($value,"\t") ) {
+    			if ( (strpos($value,"\n") !== false) || (strpos($value,"\t") !== false) ) {
     				$value = self::escape($value,false,true);
     				$value = '<pre>'.$value.'</pre>';
     				$return = self::renderVariable($value,$name,$type,false);
     			} else {
-    				$return = self::renderVariable($value,$name);
+    				$return = self::renderVariable($value,$name,$type,true);
     			}
     			break;
     			

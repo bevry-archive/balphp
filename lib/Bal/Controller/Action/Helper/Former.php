@@ -4,10 +4,7 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 
 	
 	public function fetch ( $fields ) {
-		$result = array(
-			'post' => array(),
-			'files' => array()
-		);
+		$result = array();
 		
 		$this->appendFields($result, $fields);
 		
@@ -15,7 +12,7 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 	}
 	
 	public function appendFields ( &$arr, $fields ) {
-		$result = $this->appendField($result, null, $fields);
+		$result = $this->appendField($arr, null, $fields);
 		return $result;
 	}
 	
@@ -56,14 +53,14 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 							$field_part_value = $field_part_value[$key_part];
 						}
 					}
-					array_apply($arr['files'], $keys, $field_value);
+					array_apply($arr, $keys, $field_value);
 					break;
 					
 				case 'enum':
 				case 'normal':
 				default:
-					$field_value = array_delve($_POST, $keys);
-					array_apply($arr['post'], $keys, $field_value);
+					$field_value = array_delve($_REQUEST, $keys);
+					array_apply($arr, $keys, $field_value);
 					break;
 			}
 		}
