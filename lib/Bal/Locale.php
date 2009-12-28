@@ -34,7 +34,7 @@ class Bal_Locale {
 		'en' => 'en_GB',
 		'ar' => 'ar_SD'
 	);
-	protected $languages_path;
+	protected $il8n_path;
 	
 	public function __construct ( $locale = null, $currency = null, $timezone = null ) {
 		// Options
@@ -49,7 +49,7 @@ class Bal_Locale {
 		// Prepare
 		$this->Session = new Zend_Session_Namespace('Application');
 		$this->Zend_Locale = new Zend_Locale();
-		$this->languages_path = APPLICATION_PATH . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'languages' . DIRECTORY_SEPARATOR;
+		$this->il8n_path = IL8N_PATH;
 		
 		// Detect
 		if ( $this->Session->locale ) {
@@ -130,7 +130,7 @@ class Bal_Locale {
 	}
 	
 	public function getFile ( $locale ) {
-		return $this->languages_path.$locale.'.php';
+		return $this->il8n_path . DIRECTORY_SEPARATOR . $locale . '.php';
 	}
 	public function hasFile ( $locale ) {
 		$file = $this->getFile($locale);
@@ -155,7 +155,7 @@ class Bal_Locale {
 		return $this->Zend_Locale->getTranslation($text, $type);
 	}
 	public function languages ( ) {
-		$files = scan_dir($this->languages_path);
+		$files = scan_dir($this->il8n_path);
 		$languages = array();
 		foreach ( $files as $file ) {
 			$language = substr($file, 0, strrpos($file, '.'));

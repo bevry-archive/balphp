@@ -98,9 +98,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 	public function headMeta ( ) {
 		# Meta
-		$this->view->headMeta()
-			->appendName('author', 'Benjamin \'balupton\' Lupton - http://www.balupton.com')
-			->appendName('generator', 'balCMS - http://www.balupton.com/balcms');
+		$this->view->headMeta();
 		
 		# Done
 		return $this->view->headMeta();
