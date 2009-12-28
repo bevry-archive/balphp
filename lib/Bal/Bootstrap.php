@@ -155,6 +155,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
 		
 		# Widgets
+		if ( array_key_exists('widget', $applicationConfig['bal']) )
 		$View->getHelper('widget')->addWidgets($applicationConfig['bal']['widget']);
 		
 		# Done
