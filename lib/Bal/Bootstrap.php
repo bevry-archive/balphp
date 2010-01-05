@@ -69,7 +69,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Create Writer: Email
 		$Writer_Mail = new Zend_Log_Writer_Mail($Mail);
-		$Writer_Mail->setSubjectPrependText('Error Log: mydance.com.au');
+		$Writer_Mail->setSubjectPrependText('Error Log');
 		//$Writer->addFilter(Zend_Log::WARN);
 		$Log->addWriter($Writer_Mail);
 		
