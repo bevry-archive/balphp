@@ -146,17 +146,19 @@ if ( function_compare('real_value', 2.4, true, __FILE__, __LINE__) ) {
 	/**
 	 * Convert a value from it's text value to it's real value
 	 *
-	 * @version 2.4, October 02, 2007
+	 * @version 2.5, January 05, 2010
 	 *
 	 * @param	mixed		$value
 	 * @param	boolean		$bool		convert from boolean?
 	 * @param	boolean		$null		convert from null?
 	 * @param	boolean		$numeric	convert from numeric?
 	 * @param	boolean		$question	convert question to boolean?
+	 * @param	boolean		$array		convert an array's values into real values?
 	 *
 	 * @return	mixed
 	 */
-	function real_value ( $value, $bool = true, $null = true, $numeric = true, $question = true ) { // Turns a value into it's actual value, regardless of strings
+	function real_value ( $value, $bool = true, $null = true, $numeric = true, $question = true, $array = true ) { // Turns a value into it's actual value, regardless of strings
+		// v2.5, January 05, 2010 - Added array option
 		// v2.4 - 02/10/2007
 		// v2.3 - 01/12/2006
 		
@@ -170,12 +172,18 @@ if ( function_compare('real_value', 2.4, true, __FILE__, __LINE__) ) {
 		elseif ( $numeric && is_numeric($value) ) {
 			$int = intval($value);
 			$float = floatval($value);
-			if ( $int == $float )
+			if ( $int == $float ) {
 				return $int;
-			else
+			} else {
 				return $float;
-		} else
+			}
+		} elseif ( $array && is_array($array) ){
+			foreach ( $value as $_key => &$_value ) {
+				$_value = real_value($_value, $bool, $null, $numeric, $question, $array);
+			}
+		} else {
 			return $value;
+		}
 	}
 }
 

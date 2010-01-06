@@ -32,49 +32,16 @@
  * @version     $Revision$
  * @author      Benjamin "balupton" Lupton <contact@balupton.com>
  */
-class Bal_Doctrine_Template_Addressable extends Bal_Doctrine_Template_Abstract {
+class Bal_Doctrine_Template_Loggable extends Doctrine_Template {
 	
     /**
      * Array of options
      * @var string
      */
     protected $_options = array(
-		'address1' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'address1',
-			'type'			=>	'string',
-			'length'		=>	60
-		),
-		'address2' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'address2',
-			'type'			=>	'string',
-			'length'		=>	60
-		),
-		'suburb' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'suburb',
-			'type'			=>	'string',
-			'length'		=>	60
-		),
-		'state' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'state',
-			'type'			=>	'string',
-			'length'		=>	60
-		),
-		'country' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'country',
-			'type'			=>	'string',
-			'length'		=>	60
-		),
-		'postcode' => array(
-			'disabled'		=>	false,
-        	'name'			=>	'postcode',
-			'type'			=>	'string',
-			'length'		=>	10
-		)
+		'insert' => true,
+		'save' => true,
+		'delete' => true
     );
 
     /**
@@ -82,42 +49,11 @@ class Bal_Doctrine_Template_Addressable extends Bal_Doctrine_Template_Abstract {
      * @return void
      */
     public function setTableDefinition() {
-    	# Prepare
-    	$column_helpers = array('address1','address2','suburb','state','country','postcode');
-    	
-    	# Handle
-		$this->hasColumnHelpers($this->_options, $column_helpers);
-		
-		# Done
-		return true;
-    }
-	
-    /**
-     * Setup table relations
-     * @return void
-     */
-    public function setUp(){
-    	# Handle
-        $this->getInvoker()->hasAccessor('address', 'getAddress');
+        # Listeners
+        $this->addListener(new Bal_Doctrine_Template_LoggableListener($this->_options));
         
         # Done
         return true;
-	}
-	
-	
-	/**
-	 * Get the address
-	 * @return string
-	 */
-	public function getAddress ( ) {
-		# Handle
-		$address = $this->address1;
-		if ( !$this->_options['address2']['disabled'] ){
-			$address .= "\n" . $this->address2;
-		}
-		
-		# Done
-		return $address;
-	}
-	
+    }
+
 }

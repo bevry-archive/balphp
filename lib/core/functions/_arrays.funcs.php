@@ -21,6 +21,115 @@
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
 
+if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Will merge the keys of arrays together. For a normal array we replace.
+	 * @version 1, January 06, 2010
+	 * @param array $array1
+	 * @param array $array2
+	 * @return array
+	 * @author Benjamin "balupton" Lupton <contact@balupton.com> {@link http://www.balupton.com/}
+	 * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
+	 * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
+	 */
+	function array_merge_recursive_keys ( ) {
+		# Prepare
+		$args = func_get_args();
+		$merged = array_shift($args);
+		# Handle
+		foreach ( $args as $array ) {
+			# Prepare
+			if ( !is_array($array) ) $array = array($array);
+			# Check if we have keys
+			if ( is_numeric(implode('',array_keys($array))) ) {
+				# We don't
+				$merged = $array;
+			}
+			else {
+				# We do, cycle through keys
+				foreach ( $array as $key => $value ) {
+					# Merge
+					if ( is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key]) ) {
+						# Array is keyed array
+						$merged[$key] = array_merge_recursive_keys($merged[$key], $value);
+					}
+					else {
+						# Normal
+						$merged[$key] = $value;
+					}
+				}
+			}
+		}
+		# Done
+		return $merged;
+	}
+	/*
+	$a = array(
+		'register' => array(
+			'user' => array(
+				'id' => 1,
+				'title' => 'hello'
+			)
+		),
+		'field' => array(
+			'one','two','three'
+		)
+	);
+	$b = array(
+		'register' => array(
+			'user' => array(
+				'id' => 1,
+				'avatar' => 'file'
+			)
+		),
+		'field' => array(
+			'four','five'
+		)
+	);
+	$c = array_merge_recursive_keys($a, $b);
+	$c = array (
+		'register' => array (
+			'user' => array (
+				'id' => 1,
+				'title' => 'hello',
+				'avatar' => 'file',
+			),
+		),
+		'field' => array (
+			0 => 'four',
+			1 => 'five',
+		),
+	)
+	*/
+}
+
+
+if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
+
+	function array_hydrate ( &$array ) {
+		foreach ( $array as $key => $value ) {
+			if ( is_array($value) ) {
+				array_hydrate($array[$key]);
+			} else {
+				$array[$key] = real_value($value);
+			}
+		}
+	}
+}
+
+
+if ( function_compare('array_set', 1, true, __FILE__, __LINE__) ) {
+
+	function array_set ( &$array ) {
+		$args = func_get_args();
+		unset($args[0]);
+		foreach ( $args as $arg ) {
+			if ( !isset($array[$arg]) )
+				$array[$arg] = null;
+		}
+	}
+}
 
 	
 if ( function_compare('array_first', 1, true, __FILE__, __LINE__) ) {
@@ -61,16 +170,30 @@ if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 	 * @param array $arr
 	 * @param array $keys
 	 * @param mixed $value
+	 * @param boolean $copy [optional]
 	 * @return array
 	 */
-	function array_apply ( &$arr, $keys, $value ) {
-		if ( !is_array($keys) ) $keys = array($keys);
+	function array_apply ( &$arr, $keys, &$value, $copy = false ) {
+		# Prepare
+		if ( !is_array($keys) ) {
+			if ( is_string($keys) ) {
+				$keys = explode('.', $keys);
+			} else {
+				$keys = array($keys);
+			}
+		}
+		
+		# Handle
 		$key = array_shift($keys);
 		if ( empty($key) ) {
-			$arr = $value;
+			if ( $copy ) {
+				$arr = $value;
+			} else {
+				$arr =& $value;
+			}
 		} else {
 			$arr[$key] = array();
-			return array_apply($arr[$key], $keys, $value);
+			return array_apply($arr[$key], $keys, $value, $copy);
 		}
 		return true;
 	}
@@ -83,16 +206,27 @@ if ( function_compare('array_delve', 1, true, __FILE__, __LINE__) ) {
 	 * Delve into an array to return the value of a set of keys
 	 * @version 1, December 24, 2009
 	 * @param array $arr
-	 * @param array $keys
+	 * @param mixed $keys
 	 * @return array
 	 */
 	function array_delve ( array $arr, $keys) {
-		if ( !is_array($keys) ) $keys = array($keys);
+		# Prepare
+		if ( !is_array($keys) ) {
+			if ( is_string($keys) ) {
+				$keys = explode('.', $keys);
+			} else {
+				$keys = array($keys);
+			}
+		}
+		
+		# Handle
 		$key = array_shift($keys);
 		if ( empty($key) ) {
 			return $arr;
-		} else {
+		} elseif ( array_key_exists($key, $arr) ) {
 			return array_delve($arr[$key], $keys);
+		} else {
+			return null;
 		}
 	}
 }

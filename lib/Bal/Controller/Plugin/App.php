@@ -100,6 +100,9 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param bool $redirect
 	 */
 	public function logout ( ) {
+		# Log
+		Bal_Log::getInstance()->log('system-logout', Bal_Log::SUCCESS);
+		
 		# Locale
 	   	Zend_Registry::get('Locale')->clearLocale();
 	   	
@@ -119,6 +122,7 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @return bool
 	 */
 	public function loginUser ( $User, $locale = null, $remember = null ) {
+		Bal_Log::getInstance()->log('system-login', Bal_Log::SUCCESS, array('data'=>$User->toArray()));
 		return $this->login($User->username, $User->password, $locale, $remember);
 	}
 
@@ -693,7 +697,52 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	
 	
 	# -----------
-	# Helpers
+	# Doctrine
+	
+	
+	/**
+	 * Determine and return a Record of $type using in
+	 * @param string $type The table/type of the record
+	 * @param mixed ... [optional] The input used to determine the record
+	 * @return
+	 */
+	public function getRecord ( $type ) {
+		# Prepare
+		$Record = null;
+		$args = func_get_args(); array_shift($args); // pop first (type)
+		
+		# Handle
+		foreach ( $args as $in ) {
+			if ( $in instanceof $type ) {
+				$Record = $in;
+			} elseif ( is_object($in) ) {
+				$Record = $this->getRecord($type, $in->id);
+			} elseif ( is_int($in) ) {
+				$Record = Doctrine::getTable($type)->find($in);
+			} elseif ( is_string($in) ) {
+				$Record = Doctrine::getTable($type)->findByCode($in);
+			} elseif ( is_array($in) ) {
+				if ( !empty($in['id']) ) {
+					$Record = $this->getRecord($type, $in['id']);
+				} elseif ( !empty($in['code']) ) {
+					$Record = $this->getRecord($type, $in['code']);
+				}
+			}
+		}
+		
+		# Check
+		if ( empty($Record) ) {
+			$Record = new $type;
+		}
+		
+		# Done
+		return $Record;
+	}
+	
+	
+	# -----------
+	# Paging
+	
 	
 	/**
 	 * Get the Pager

@@ -48,6 +48,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 */
 	protected function _initLog ( ) {
 		# Prepare
+		$this->bootstrap('config');
 		$this->bootstrap('autoload');
 		
 		# Config
@@ -60,12 +61,12 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$Mail->addTo($mail['log']['address'], $mail['log']['name']);
 		
 		# Create Log
-		$Log = new Zend_Log();
+		$Log = new Bal_Log();
 		Zend_Registry::set('Log', $Log);
 		
 		# Create Writer: SysLog
-		$Writer_Syslog = new Zend_Log_Writer_Syslog();
-		$Log->addWriter($Writer_Syslog);
+		//$Writer_Syslog = new Zend_Log_Writer_Syslog();
+		//$Log->addWriter($Writer_Syslog);
 		
 		# Create Writer: Email
 		$Writer_Mail = new Zend_Log_Writer_Mail($Mail);

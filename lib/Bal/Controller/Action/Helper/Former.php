@@ -6,8 +6,33 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 	public function fetch ( $fields ) {
 		$result = array();
 		
-		$this->appendFields($result, $fields);
 		
+		return $result;
+	}
+	
+	public function fetchField ( $field, $from = null ) {
+		# Prepare
+		$keys = array();
+		if ( $from === null ) {
+			$from =& $_REQUEST;
+		}
+		
+		# Determine Keys
+		if ( is_string($field) ) {
+			$keys = explode($field, '.');
+		} elseif ( is_array($field) ) {
+			$keys = $field;
+		} else {
+			$keys = array($field);
+		}
+		
+		# Fetch
+		$result = array_delve($from, $keys);
+		
+		# Convert
+		$result = real_value($result);
+		
+		# Done
 		return $result;
 	}
 	
@@ -16,9 +41,11 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 		return $result;
 	}
 	
-	public function appendField ( &$arr, $keys, $value ) {
+	public function appendField ( &$result, $keys, $value ) {
 		# Prepare
-		if ( !is_array($keys) ) $keys = empty($keys) ? array() : array($keys);
+		if ( !is_array($keys) ) {
+			$keys = empty($keys) ? array() : array($keys);
+		}
 		
 		# Handle
 		if ( is_array($value) ) {
@@ -53,6 +80,7 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 							$field_part_value = $field_part_value[$key_part];
 						}
 					}
+					$field_value = real_value($field_value);
 					array_apply($arr, $keys, $field_value);
 					break;
 					
@@ -60,13 +88,14 @@ class Bal_Controller_Action_Helper_Former extends Zend_Controller_Action_Helper_
 				case 'normal':
 				default:
 					$field_value = array_delve($_REQUEST, $keys);
+					$field_value = real_value($field_value);
 					array_apply($arr, $keys, $field_value);
 					break;
 			}
 		}
 		
 		# Done
-		return $arr;
+		return $result;
 	}
 	
 }

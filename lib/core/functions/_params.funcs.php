@@ -103,15 +103,16 @@ if ( function_compare('regenerate_params', 2, true, __FILE__, __LINE__) ) {
 if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Do something
-	 *
-	 * @version 1
-	 *
-	 * @todo figure out what the hell this does
-	 *
+	 * Get the param
+	 * @version 2
+	 * @param string $name
+	 * @param mixed $default [optional]
+	 * @param boolean $hydrate [optional]
+	 * @param mixed $stripslashes [optional]
+	 * @param boolean $hydrate [optional]
 	 */
-	function get_param ( $name, $default = NULL, $convert = true, $stripslashes = NULL ) {
-		if ( $stripslashes === NULL )
+	function get_param ( $name, $default = null, $hydrate = true, $stripslashes = null, $delve = true ) {
+		if ( $stripslashes === null )
 			$stripslashes = get_magic_quotes_gpc() ? true : false;
 		
 		switch ( true ) {
@@ -140,8 +141,154 @@ if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Initialise our hydrated params
+	 * @version 1, January 06, 2010
+	 */
+	function hydrate_param_init ( $once = true ) {
+		# Init
+		if ( defined('REQUEST_HYDRATED') ) {
+			if ( $once ) return;
+		} else 
+			define('REQUEST_HYDRATED', 1);
+	
+		# Prepare
+		global $_POST_HYDRATED, $_GET_HYDRATED, $_REQUEST_HYDRATED, $_FILES_HYDRATED, $_PARAMS_HYDRATED;
+		$_POST_HYDRATED = $_POST;
+		$_GET_HYDRATED = $_GET;
+		$_REQUEST_HYDRATED = $_REQUEST;
+		$_FILES_HYDRATED = $_FILES;
+		
+		# Apply
+		array_hydrate($_POST_HYDRATED);
+		array_hydrate($_GET_HYDRATED);
+		array_hydrate($_REQUEST_HYDRATED);
+		array_hydrate($_FILES_HYDRATED);
+		liberate_files($_FILES_HYDRATED);
+		
+		# Merge
+		$_PARAMS_HYDRATED = array_merge_recursive_keys($_FILES_HYDRATED, $_GET_HYDRATED, $_POST_HYDRATED);
+		
+		# Done
+		return true;
+	}
+}
+
+if ( function_compare('fetch_param', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Fetch a hydrated param
+	 * @version 1, January 06, 2010
+	 */
+	function fetch_param ( $name ) {
+		# Prepare
+		hydrate_param_init();
+		global $_PARAMS_HYDRATED;
+		$value = null;
+		
+		# Handle
+		$value = array_delve($_PARAMS_HYDRATED, $name);
+		
+		# Hydrate the Param
+		hydrate_param($value);
+		
+		# Done
+		return $value;	
+	}
+}
+
+
+if ( function_compare('hydrate_param', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Hydrate a param
+	 * @version 1, January 06, 2010
+	 */
+	function hydrate_param ( &$value, $realvalue = true, $stripslashes = null, $trim = true ) {
+		# Prepare
+		if ( $stripslashes === null )
+			$stripslashes = ini_get('magic_quotes_gpc') ? true : false;
+		
+		# Handle
+		if ( is_array($value) ) {
+			# Array
+			foreach ( $value as $_key => &$_value )
+				hydrate_param($_value, $realvalue, $stripslashes, $trim);
+		}
+		else {
+			# Value
+			if ( is_string($value) ) {
+				# Stripslashes
+				if ( $stripslashes ) $value = stripslashes($value);
+	
+				# Trim
+				if ( $trim ) $value = trim($value);
+			}
+		
+			# Realvalue
+			if ( $realvalue ) $value = real_value($value);
+		}
+		
+		# Done
+		return true;
+	}
+}
+
+if ( function_compare('liberate_subfiles', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Liberate subfiles
+	 * @version 1, January 06, 2010
+	 */
+	function liberate_subfiles ( &$where, $prefix, $suffix, $subfile ) {
+		# Prepare
+		$prefix = trim($prefix, '.');
+		$suffix = trim($suffix, '.');
+	
+		# Handle
+		if ( !is_array($subfile) ) {
+			# We have reached the bottom
+			array_apply($where, $prefix.'.'.$suffix, $subfile, false);
+		}
+		else {
+			# More sub files
+			foreach ( $subfile as $key => $value ) {
+				liberate_subfiles($prefix.'.'.$key, $suffix, $value);
+			}
+		}
+	
+		# Done
+		return true;
+	}
+}
+
+if ( function_compare('liberate_files', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Liberate files
+	 * The purpose of this is when using $_FILE with param arrays, we want to be able to do this $_FILE['user']['avatar']['tmpname'] instead of $_FILE['user']['tmpname']['avatar']
+	 * @version 1, January 06, 2010
+	 */
+	function liberate_files ( &$where ) {
+		# Handle
+		foreach ( $_FILES as $fileKey => $fileValue ) {
+			foreach ( $fileValue as $filePartKey => $filePartValue ) {
+				if ( is_array($filePartValue) ) {
+					# We have a multiple file
+					liberate_subfiles($where, $fileKey, $filePartKey, $filePartValue);
+				}
+			}
+		}
+	}
+}
+
 if ( function_compare('fix_magic_quotes', 1, true, __FILE__, __LINE__) ) {
 
+	/**
+	 * Fix magic quotes
+	 */
 	function fix_magic_quotes ( ) {
 		if ( ini_get('magic_quotes_gpc') ) {
 			$_POST = array_map('stripslashes_deep', $_POST);
@@ -153,25 +300,18 @@ if ( function_compare('fix_magic_quotes', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
-
-	function array_hydrate ( &$array ) {
-		foreach ( $array as $key => $value ) {
-			if ( is_array($value) ) {
-				array_hydrate($array[$key]);
-			} else {
-				$array[$key] = real_value($value);
-			}
-		}
-	}
-}
-
 if ( function_compare('hydrate_params', 1, true, __FILE__, __LINE__) ) {
 
+	/**
+	 * Fix magic quotes, hydrate params, and liberate files
+	 */
 	function hydrate_params ( ) {
+		fix_magic_quotes();
 		array_hydrate($_REQUEST);
 		array_hydrate($_POST);
 		array_hydrate($_GET);
+		array_hydrate($_FILES);
+		liberate_files($_FILES);
 	}
 }
 
@@ -186,17 +326,6 @@ if ( function_compare('until', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('array_set', 1, true, __FILE__, __LINE__) ) {
-
-	function array_set ( &$array ) {
-		$args = func_get_args();
-		unset($args[0]);
-		foreach ( $args as $arg ) {
-			if ( !isset($array[$arg]) )
-				$array[$arg] = null;
-		}
-	}
-}
 
 /*
 if( function_comp('set_param', 1) )
