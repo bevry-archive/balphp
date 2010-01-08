@@ -122,16 +122,20 @@ E_USER_WARNING;// same major, different minors
 
 if ( function_compare('baldebug', 1, true, __FILE__, __LINE__) ) {
 	function baldebug ( ) {
-		$args = func_get_args(); if ( sizeof($args) === 1 ) $args = $args[0];
-		echo '<pre>'.var_export($args,true).'</pre>';
+		$args = func_get_args();
+		echo '<pre>'; 
+		foreach ( $args as $arg ) var_export($arg);
+	 	echo '</pre><br/>';
 	}
 }
 
 
 if ( function_compare('baldump', 1, true, __FILE__, __LINE__) ) {
 	function baldump ( ) {
-		$args = func_get_args(); if ( sizeof($args) === 1 ) $args = $args[0];
-		echo '<pre>'; var_dump($args); echo '</pre>';
+		$args = func_get_args();
+		echo '<pre>'; 
+		foreach ( $args as $arg ) var_dump($arg);
+	 	echo '</pre><br/>';
 	}
 }
 

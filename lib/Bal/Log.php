@@ -31,11 +31,8 @@ class Bal_Log extends Zend_Log {
 		$this->addWriter($this->Writer);
 		$Formatter_Rich = new Zend_Log_Formatter_Simple('hello %message%' . PHP_EOL);
 		$this->Writer->setFormatter($Formatter_Rich);
-		# Priorities
-		$this->addPriority('INSERT',	Bal_Log::INSERT);
-		$this->addPriority('SAVE',		Bal_Log::SAVE);
-		$this->addPriority('DELETE',	Bal_Log::DELETE);
-		$this->addPriority('SUCCESS',	Bal_Log::SUCCESS);
+		# Parent Construct
+		parent::__construct(); // will handle priorities for us
 	}
 
 	public static function getInstance ( ) {

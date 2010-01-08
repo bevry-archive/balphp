@@ -61,6 +61,31 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	# -----------
 	# View stuff
 	
+	public function get ( $var, $default = null ) {
+		# Prepare
+		$result = null;
+		
+		# Prepare Vars
+		if ( !is_array($var) )
+			$var = array($var);
+		
+		# Cycle
+		foreach ( $var as $in ) {
+			$result = delve($this->view, $in, null);
+			if ( $result !== null ) {
+				break;
+			}
+		}
+		
+		# Default
+		if ( $result === null ) {
+			$result = $default;
+		}
+		
+		# Done
+		return $result;
+	}
+	
 	public function getStylesheetUrl ( $file ) {
 		$file = 'styles/' . $file;
 		$url = $this->getApp()->getFileUrl($file);

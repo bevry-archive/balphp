@@ -162,6 +162,35 @@ if ( function_compare('array_last', 1, true, __FILE__, __LINE__) ) {
 }
 
 	
+if ( function_compare('ensure_keys', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Ensure keys to use to delve into an array or object
+	 * @version 1, January 08, 2010
+	 * @param mixed $keys
+	 * @param mixed $holder
+	 * @return array
+	 */
+	function ensure_keys ( &$keys, $holder = null ) {
+		# Handle
+		if ( !is_array($keys) ) {
+			if ( is_string($keys) ) {
+				if ( (is_array($holder) && array_key_exists($keys, $holder)) || (is_object($holder) && !empty($holder->$keys)) ) {
+					$keys = array($keys);
+				} else {
+					$keys = explode('.', $keys);
+				}
+			} else {
+				$keys = array($keys);
+			}
+		}
+	
+		# Done
+		return $keys;
+	}
+}
+
+
 if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -175,13 +204,7 @@ if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_apply ( &$arr, $keys, &$value, $copy = false ) {
 		# Prepare
-		if ( !is_array($keys) ) {
-			if ( is_string($keys) ) {
-				$keys = explode('.', $keys);
-			} else {
-				$keys = array($keys);
-			}
-		}
+		ensure_keys($keys, $arr);
 		
 		# Handle
 		$key = array_shift($keys);
@@ -199,6 +222,53 @@ if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array or object to return the value of a set of keys
+	 * @version 1, December 24, 2009
+	 * @param mixed $holder
+	 * @param mixed $keys
+	 * @return array
+	 */
+	function delve ( $holder, $keys, $default = null) {
+		# Prepare
+		$result = $default;
+		
+		# Prepare Keys
+		ensure_keys($keys, $holder);
+		
+		# Handle
+		$key = array_shift($keys);
+		if ( empty($key) ) {
+			# We are at the end of recursion
+			$result = $holder;
+		} else {
+			switch ( gettype($holder) ) {
+				case 'array':
+					if ( array_key_exists($key, $holder) ) {
+						# We exist, so recurse
+						$result = delve($holder[$key], $keys, $default);
+					}
+					break;
+				
+				case 'object':
+					if ( isset($holder->$key) || (method_exists($holder, 'get') && $holder->get($key)) ) {
+						# We exist, so recurse
+						$result = delve($holder->$key, $keys, $default);
+					}
+					break;
+				
+				default:
+					break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
 
 if ( function_compare('array_delve', 1, true, __FILE__, __LINE__) ) {
 
@@ -211,13 +281,7 @@ if ( function_compare('array_delve', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_delve ( array $arr, $keys) {
 		# Prepare
-		if ( !is_array($keys) ) {
-			if ( is_string($keys) ) {
-				$keys = explode('.', $keys);
-			} else {
-				$keys = array($keys);
-			}
-		}
+		ensure_keys($keys, $arr);
 		
 		# Handle
 		$key = array_shift($keys);
@@ -329,15 +393,18 @@ if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 	 * Unset the keys from the array
 	 * @version 1, August 09, 2009
 	 * @param array $array
-	 * @param array $unsets
+	 * @param mixed ... what to remove
 	 * @return mixed
 	 */
-	function array_unset ( &$array, $unsets ) {
+	function array_unset ( &$array ) {
 		# Prepare
-		if ( !is_array($unsets) ) $unsets = array($unsets);
+		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
+		$args = func_get_args(); array_shift($args);
+		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
 		# Apply
-		foreach ( $unsets as $unset )
-			unset($array[$unset]);
+		foreach ( $args as $var ) {
+			unset($array[$var]);
+		}
 		# Done
 		return $array;
 	}
@@ -348,15 +415,16 @@ if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
 	 * Unset the keys from the array
 	 * @version 1, November 9, 2009
 	 * @param array $array
-	 * @param array $keeps
+	 * @param mixed ... what to keep
 	 * @return mixed
 	 */
-	function array_keep ( &$array, $keeps ) {
+	function array_keep ( &$array ) {
 		# Prepare
-		if ( !is_array($array) ) $array = array($array);
-		if ( !is_array($keeps) ) $keeps = array($keeps);
+		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
+		$args = func_get_args(); array_shift($args);
+		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
 		# Apply
-		$keys = array_flip($keeps);
+		$keys = array_flip($args);
 		# Done
 		return array_intersect_key($array, $keys);
 	}

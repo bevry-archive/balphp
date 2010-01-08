@@ -716,17 +716,23 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 			if ( $in instanceof $type ) {
 				$Record = $in;
 			} elseif ( is_object($in) ) {
-				$Record = $this->getRecord($type, $in->id);
+				if ( !empty($in->id) )
+					$Record = $this->getRecord($type, $in->id);
 			} elseif ( is_int($in) ) {
 				$Record = Doctrine::getTable($type)->find($in);
 			} elseif ( is_string($in) ) {
-				$Record = Doctrine::getTable($type)->findByCode($in);
+				if ( Doctrine::getTable($type)->hasColumn($in) )
+					$Record = Doctrine::getTable($type)->findByCode($in);
 			} elseif ( is_array($in) ) {
 				if ( !empty($in['id']) ) {
 					$Record = $this->getRecord($type, $in['id']);
 				} elseif ( !empty($in['code']) ) {
 					$Record = $this->getRecord($type, $in['code']);
 				}
+			}
+			
+			if ( !empty($Record->id) ) {
+				break;
 			}
 		}
 		
