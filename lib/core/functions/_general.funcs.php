@@ -120,8 +120,8 @@ E_USER_WARNING;// same major, different minors
 }
 
 
-if ( function_compare('baldebug', 1, true, __FILE__, __LINE__) ) {
-	function baldebug ( ) {
+if ( function_compare('balexport', 1, true, __FILE__, __LINE__) ) {
+	function balexport ( ) {
 		$args = func_get_args();
 		echo '<pre>'; 
 		foreach ( $args as $arg ) var_export($arg);

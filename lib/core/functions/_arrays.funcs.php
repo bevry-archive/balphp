@@ -191,18 +191,24 @@ if ( function_compare('ensure_keys', 1, true, __FILE__, __LINE__) ) {
 }
 
 
-if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Delve into an array to apply a value from a set of keys
-	 * @version 1, December 24, 2009
+	 * @version 2, January 08, 2010
 	 * @param array $arr
 	 * @param array $keys
 	 * @param mixed $value
 	 * @param boolean $copy [optional]
 	 * @return array
 	 */
-	function array_apply ( &$arr, $keys, &$value, $copy = false ) {
+	/* Changelog:
+	 * 2, January 08, 2010
+	 * - Made it so instead of replace of every delve, only the end result will replace.
+	 * 1, December 24, 2009
+	 * - Init
+	 */
+	function array_apply ( &$arr, $keys, &$value, $copy = true ) {
 		# Prepare
 		ensure_keys($keys, $arr);
 		
@@ -215,7 +221,8 @@ if ( function_compare('array_apply', 1, true, __FILE__, __LINE__) ) {
 				$arr =& $value;
 			}
 		} else {
-			$arr[$key] = array();
+			if ( !array_key_exists($key, $arr) || !is_array($arr[$key]) )
+				$arr[$key] = array();
 			return array_apply($arr[$key], $keys, $value, $copy);
 		}
 		return true;
@@ -279,7 +286,7 @@ if ( function_compare('array_delve', 1, true, __FILE__, __LINE__) ) {
 	 * @param mixed $keys
 	 * @return array
 	 */
-	function array_delve ( array $arr, $keys) {
+	function array_delve ( $arr, $keys) {
 		# Prepare
 		ensure_keys($keys, $arr);
 		

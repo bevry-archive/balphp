@@ -49,11 +49,11 @@ class Bal_Log extends Zend_Log {
 	
 	public function log ( $message, $code = null, array $extras = null ) {
 		if ( $code === null ) $code = Zend_Log::INFO;
-		foreach ( $extras as $key => $value ) {
+		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
 			parent::setEventItem($key,$value);
 		}
 		parent::log($message, $code);
-		foreach ( $extras as $key => $value ) {
+		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
 			parent::setEventItem($key,null);
 		}
 	}

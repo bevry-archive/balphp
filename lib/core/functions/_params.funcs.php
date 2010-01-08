@@ -151,7 +151,7 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 		# Init
 		if ( defined('REQUEST_HYDRATED') ) {
 			if ( $once ) return;
-		} else 
+		} else
 			define('REQUEST_HYDRATED', 1);
 	
 		# Prepare
@@ -159,7 +159,7 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 		$_POST_HYDRATED = $_POST;
 		$_GET_HYDRATED = $_GET;
 		$_REQUEST_HYDRATED = $_REQUEST;
-		$_FILES_HYDRATED = $_FILES;
+		$_FILES_HYDRATED = array();
 		
 		# Apply
 		array_hydrate($_POST_HYDRATED);
@@ -195,7 +195,7 @@ if ( function_compare('fetch_param', 1, true, __FILE__, __LINE__) ) {
 		hydrate_param($value);
 		
 		# Done
-		return $value;	
+		return $value;
 	}
 }
 
@@ -236,26 +236,29 @@ if ( function_compare('hydrate_param', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
 if ( function_compare('liberate_subfiles', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Liberate subfiles
 	 * @version 1, January 06, 2010
 	 */
-	function liberate_subfiles ( &$where, $prefix, $suffix, $subfile ) {
+	function liberate_subfiles ( &$where, $prefix, $suffix, $subvalue ) {
 		# Prepare
 		$prefix = trim($prefix, '.');
 		$suffix = trim($suffix, '.');
 	
 		# Handle
-		if ( !is_array($subfile) ) {
+		if ( !is_array($subvalue) ) {
 			# We have reached the bottom
-			array_apply($where, $prefix.'.'.$suffix, $subfile, false);
+			$name = $prefix.'.'.$suffix;
+			array_apply($where, $name, $subvalue, true); // when setting to false, PHP memory reference error occurs...
+			// baldump($name, array_delve($where, $name), $subvalue);
 		}
 		else {
 			# More sub files
-			foreach ( $subfile as $key => $value ) {
-				liberate_subfiles($prefix.'.'.$key, $suffix, $value);
+			foreach ( $subvalue as $key => $value ) {
+				liberate_subfiles($where, $prefix.'.'.$key, $suffix, $value);
 			}
 		}
 	
@@ -263,6 +266,7 @@ if ( function_compare('liberate_subfiles', 1, true, __FILE__, __LINE__) ) {
 		return true;
 	}
 }
+
 
 if ( function_compare('liberate_files', 1, true, __FILE__, __LINE__) ) {
 
