@@ -202,7 +202,7 @@ class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_A
 				$response->sendResponse();
 				exit;
 			}  elseif ( $xhr === 'param' ) {
-				// Sepecial
+				// Special
 				$this->_json->suppressExit = true;
 				$this->_json->sendJson($data);
       			$response = $this->_json->getResponse();
