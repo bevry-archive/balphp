@@ -75,7 +75,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		# Prepare
 		$result = '';
 		
-		# Prepare Attribs
+		# Prepare Attributes
 		if ( !is_array($attribs) ) $attribs = empty($attribs) ? array() : array($attribs);
 		array_keys_ensure($attribs, array('class'), '');
 		
@@ -141,29 +141,29 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			
 			case 'bool':
 			case 'boolean':
-				$options = array(
-					'true' => 'Yes',
-					'false' => 'No'
-				);
-				$result .= $this->view->formSelect($name, $value, $attribs, $options);
+				$result .= $this->view->formBoolean($name, $value, $attribs);
 				break;
 			
 			case 'datetime':
+				$result .= $this->view->formDatetime($name, $value, $attribs);
+				break;
+				
 			case 'date':
-				$_attribs = $attribs; $_attribs['class'] .= ' sparkle-date';
-				$result .= $this->view->formText($name, $value, $_attribs);
-				if ( $type === 'date' ) break;
+				$result .= $this->view->formDate($name, $value, $attribs);
+				break;
+				
 			case 'time':
-				$_attribs = $attribs; $_attribs['class'] .= ' sparkle-time';
-				$result .= $this->view->formText($name, $value, $_attribs);
+				$result .= $this->view->formTime($name, $value, $attribs);
 				break;
 			
 			case 'currency':
-				echo $this->view->locale->Zend_Currency->getSymbol();
+				$result .= $this->view->formCurrency($name, $value, $attribs);
+				break;
+				
 			case 'integer':
 			case 'decimal':
-				$_attribs = $attribs; $_attribs['class'] .= ' sparkle-number';
-				$result .= $this->view->formText($name, $value, $_attribs);
+			case 'float':
+				$result .= $this->view->formNumber($name, $value, $attribs);
 				break;
 			
 			case 'text':
