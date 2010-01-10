@@ -249,7 +249,11 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 		$key = array_shift($keys);
 		if ( empty($key) ) {
 			# We are at the end of recursion
-			$result = $holder;
+			if ( empty($holder) ) {
+				$result = $default;
+			} else {
+				$result = $holder;
+			}
 		} else {
 			switch ( gettype($holder) ) {
 				case 'array':

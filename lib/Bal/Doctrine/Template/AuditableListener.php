@@ -86,7 +86,7 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		$save = false;
 		
 		// Ensure
-		if ( $Invoker->ensureConsistency() ) {
+		if ( $Invoker->ensureAuditableConsistency() ) {
 			$save = true;
 		}
 		
@@ -105,7 +105,7 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		$save = false;
 		
 		// Ensure
-		if ( $Invoker->ensureConsistency() ) {
+		if ( $Invoker->ensureAuditableConsistency() ) {
 			$save = true;
 		}
 		

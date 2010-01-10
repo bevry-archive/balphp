@@ -179,10 +179,10 @@ class Bal_Model_Media extends Base_Media {
 	public function download ( ) {
 		global $Application;
 		
-		// Get path
+		# Get path
 		$file_path = $this->path;
 		
-		// Output result and download
+		# Output result and download
 		become_file_download($file_path, null, null);
 		die();
 	}
@@ -193,17 +193,76 @@ class Bal_Model_Media extends Base_Media {
 	 */
 	public function postDelete ( $Event ) {
 		global $Application;
-		// Prepare
+		# Prepare
 		$Invoker = $Event->getInvoker();
 		
-		// Get Path
+		# Get Path
 		$file_path = $Invoker->path;
 		
-		// Delete the file
+		# Delete the file
 		unlink($file_path);
 		
-		// Done
+		# Done
 		return true;
 	}
 	
+	/**
+	 * Ensure Consistency
+	 * @return bool
+	 */
+	public function ensureConsistency(){
+		# Prepare
+		$save = false;
+		
+		# Url
+		if ( $this->_get('url') !== $this->getUrl() ) {
+			$this->_set('url', $this->getUrl(), false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Done
+		return $save;
+	}
+	
+	/**
+	 * preSave
+	 * @param Doctrine_Event $Event
+	 */
+	public function preSave ( $Event ) {
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		$save = false;
+		
+		# Ensure
+		if ( $Invoker->ensureConsistency() ) {
+			$save = true;
+		}
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * postSave
+	 * @param Doctrine_Event $Event
+	 * @return string
+	 */
+	public function postSave ( $Event ) {
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		$save = false;
+	
+		# Ensure
+		if ( $Invoker->ensureConsistency() ) {
+			$save = true;
+		}
+		
+		# Apply
+		if ( $save ) {
+			$Invoker->save();
+		}
+		
+		# Done
+		return true;
+	}
 }

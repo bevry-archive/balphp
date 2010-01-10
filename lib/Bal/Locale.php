@@ -145,6 +145,7 @@ class Bal_Locale {
 		return $this->Zend_Currency->getSymbol();
 	}
 	public function currency ( $amount ) {
+		$amount = floatval($amount);
 		return $this->Zend_Currency->toCurrency($amount);
 	}
 	

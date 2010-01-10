@@ -170,7 +170,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 	 * Ensure Consistency
 	 * @return bool
 	 */
-	public function ensureConsistency ( ) {
+	public function ensureAuditableConsistency ( ) {
 		# Prepare
 		$save = false;
 		
