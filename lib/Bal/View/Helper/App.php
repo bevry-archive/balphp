@@ -61,26 +61,13 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	# -----------
 	# View stuff
 	
-	public function get ( $var, $default = null ) {
+	public function get ( ) {
 		# Prepare
 		$result = null;
-		
-		# Prepare Vars
-		if ( !is_array($var) )
-			$var = array($var);
+		$args = func_get_args();
 		
 		# Cycle
-		foreach ( $var as $in ) {
-			$result = delve($this->view, $in, null);
-			if ( $result !== null ) {
-				break;
-			}
-		}
-		
-		# Default
-		if ( $result === null ) {
-			$result = $default;
-		}
+		$result = delver_array($this->view, $args);
 		
 		# Done
 		return $result;

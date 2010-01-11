@@ -60,7 +60,7 @@ class Zend_View_Helper_FormCurrency extends Zend_View_Helper_FormElement
 		
 		# Handle
 		$result .=
-			$this->view->locale->Zend_Currency->getSymbol().
+			$this->view->locale()->currencySymbol().
 			$this->view->formNumber($name, $value, $attribs);
 		
 		# Done

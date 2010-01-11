@@ -31,7 +31,7 @@
  * @version     $Revision$
  * @author      Benjamin Lupton <contact@balupton.com>
  */
-class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
+class Bal_Doctrine_Template_FileListener extends Doctrine_Record_Listener {
 	/**
 	 * Array of options
 	 * @var string
@@ -47,29 +47,19 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 	public function __construct ( array $options ) {
 		$this->_options = $options;
 	}
-
+	
 	/**
-	 * Set the published field
-	 * @param Doctrine_Event $event
-	 * @return void
+	 * preSave
+	 * @param Doctrine_Event $Event
 	 */
-	public function preInsert ( Doctrine_Event $Event ) {
+	public function preSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
-		$created_column = $this->_options['created_at']['name'];
-		$published_column = $this->_options['published_at']['name'];
+		$save = false;
 		
-		# Published
-		if ( empty($Invoker->$published_column) && !$this->_options['published_at']['disabled'] ) {
-			$Invoker->$published_column = $Invoker->$created_column;
-		}
-		
-		# Author
-		if ( empty($Invoker->author_id) ) {
-			$User = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App')->getUser();
-			if ( $User && $User->id ) {
-				$Invoker->Author = $User;
-			}
+		# Ensure
+		if ( $Invoker->ensureFileConsistency() ) {
+			$save = true;
 		}
 		
 		# Done
@@ -77,35 +67,17 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 	}
 	
 	/**
-	 * Backup old values
-	 * @param Doctrine_Event $Event
-	 */
-	public function preSave ( Doctrine_Event $Event ) {
-		# Prepare
-		$Invoker = $Event->getInvoker();
-		$save = false;
-		
-		# Ensure
-		if ( $Invoker->ensureAuditableConsistency() ) {
-			$save = true;
-		}
-		
-		# Done
-		return true;
-	}
-
-	/**
-	 * Handle tagstr, authorstr, and code changes
+	 * postSave
 	 * @param Doctrine_Event $Event
 	 * @return string
 	 */
-	public function postSave ( Doctrine_Event $Event ) {
+	public function postSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
 		$save = false;
-		
+	
 		# Ensure
-		if ( $Invoker->ensureAuditableConsistency() ) {
+		if ( $Invoker->ensureFileConsistency() ) {
 			$save = true;
 		}
 		
@@ -113,6 +85,25 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		if ( $save ) {
 			$Invoker->save();
 		}
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Delete the physical file
+	 * @return
+	 */
+	public function postDelete ( $Event ) {
+		global $Application;
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		
+		# Get Path
+		$file_path = $Invoker->path;
+		
+		# Delete the file
+		if ( $file_path ) unlink($file_path);
 		
 		# Done
 		return true;

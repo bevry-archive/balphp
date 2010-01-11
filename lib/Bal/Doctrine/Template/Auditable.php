@@ -106,11 +106,11 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      * @return void
      */
     public function setTableDefinition() {
+    	# Prepare
+    	$column_helpers = array('published_at','author','enabled','status');
+    	
     	# Handle
-		$this->hasColumnHelper($this->_options['published_at']);
-		$this->hasColumnHelper($this->_options['author']);
-		$this->hasColumnHelper($this->_options['enabled']);
-		$this->hasColumnHelper($this->_options['status']);
+		$this->hasColumnHelpers($this->_options, $column_helpers);
 		
 		# Behaviors
         $timestampable0 = new Doctrine_Template_Timestampable(array(

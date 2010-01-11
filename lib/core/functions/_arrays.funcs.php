@@ -254,6 +254,70 @@ if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('delver', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array or object reptively until all arguments are exhausted, return the first true value
+	 * @version 1, January 12, 2010
+	 * @param mixed $holder
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function delver ( $holder ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args(); array_shift($args);
+		array_push($args, null);
+	
+		# Cycle through and delve each
+		foreach ( $args as $arg ) {
+			# Delve the result
+			if ( is_string($arg) && !is_numeric($arg) ) {
+				$result = delve($holder, $arg, null);
+			} else {
+				$result = $arg;
+			}
+			# Check
+			if ( $result === null ) {
+				# We have received a negative result, set the arg as we may be a static value, and continue
+				$result = $arg;
+			} else {
+				# We have received a positive result
+				break;
+			}
+		}
+	
+		# Done
+		return $result;
+	}
+}
+
+
+if ( function_compare('delver_array', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array or object reptively until all arguments are exhausted, return the first true value
+	 * @version 1, January 12, 2010
+	 * @param mixed $holder
+	 * @param array $array
+	 * @return mixed
+	 */
+	function delver_array ( $holder, $array ) {
+		# Prepare
+		$result = null;
+		if ( !is_array($array) ) $array = empty($array) ? array() : array($array);
+		
+		# Place holder as first
+		array_unshift($array, $holder);
+		
+		# Delver
+		$result = call_user_func_array('delver', $array);
+		
+		# Done
+		return $result;
+	}
+}
+
 if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -262,7 +326,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 	 * @param mixed $holder
 	 * @param mixed $keys
 	 * @param mixed $default
-	 * @return array
+	 * @return mixed
 	 */
 	function delve ( $holder, $keys, $default = null) {
 		# Prepare

@@ -187,24 +187,6 @@ class Bal_Model_Media extends Base_Media {
 		die();
 	}
 
-	/**
-	 * Delete the physical file
-	 * @return
-	 */
-	public function postDelete ( $Event ) {
-		global $Application;
-		# Prepare
-		$Invoker = $Event->getInvoker();
-		
-		# Get Path
-		$file_path = $Invoker->path;
-		
-		# Delete the file
-		unlink($file_path);
-		
-		# Done
-		return true;
-	}
 	
 	/**
 	 * Ensure Consistency
@@ -261,6 +243,25 @@ class Bal_Model_Media extends Base_Media {
 		if ( $save ) {
 			$Invoker->save();
 		}
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Delete the physical file
+	 * @return
+	 */
+	public function postDelete ( $Event ) {
+		global $Application;
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		
+		# Get Path
+		$file_path = $Invoker->path;
+		
+		# Delete the file
+		unlink($file_path);
 		
 		# Done
 		return true;

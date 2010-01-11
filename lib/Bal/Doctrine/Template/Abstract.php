@@ -33,6 +33,18 @@
  * @author      Benjamin "balupton" Lupton <contact@balupton.com>
  */
 abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
+	
+	protected $_options = array();
+	
+	protected function optionEnabled ( $option ) {
+		return
+				array_key_exists($option, $this->_options)
+			&&	(
+						!array_key_exists('disabled', $this->_options[$option])
+					||	$this->_options[$option]['disabled']
+				)
+		;	
+	}
 
 	protected function hasColumnHelpers ( $array, array $keys = array() ) {
 		# Prepare

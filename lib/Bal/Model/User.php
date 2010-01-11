@@ -13,6 +13,73 @@
 class Bal_Model_User extends Base_User {
 
 	/**
+	 * Apply accessors and modifiers
+	 * @return
+	 */
+	public function setUp ( ) {
+		$this->hasAccessor('fullname', 'getFullname');
+		$this->hasMutator('avatar', 'setAvatar');
+		parent::setUp();
+	}
+	
+	/**
+	 * Set the User's Avatar
+	 * @return string
+	 */
+	protected function setMediaAttachment ( $what, $value ) {
+		# Prepare
+		$Media = false;
+		
+		# Create Media
+		if ( is_array($value) ) {
+			if ( array_key_exists('delete', $value) && $value['delete'] ) {
+				$this->_set($what, null);
+			} elseif ( array_key_exists('id', $value) ) {
+				$Media = Doctrine::getTable('Media')->find($value);
+			} elseif ( array_key_exists('tmpname', $value) ) {
+				if ( empty($value['error']) ) {
+					$Media = new Media();
+					$Media->file = $value;
+				}
+			} elseif ( array_key_exists('file', $value) ) {
+				if ( empty($value['file']['error']) ) {
+					$Media = new Media();
+					$Media->file = $value['file'];
+				}
+			}
+		}
+		
+		# Apply Media
+		if ( $Media ) {
+			if ( isset($this->$what) ) {
+				$this->$what->delete();
+			}
+			$this->_set($what, $Media);
+		}
+		
+		# Done
+		return true;
+	}
+	
+	
+	/**
+	 * Set the User's Avatar
+	 * @return string
+	 */
+	public function setAvatar ( $value ) {
+		return $this->setMediaAttachment('Avatar', $value);
+	}
+	
+	/**
+	 * Get the User's fullname
+	 * @return string
+	 */
+	public function getFullname ( ) {
+		$fullname = array($this->title, $this->firstname, $this->lastname);
+		return implode(' ', $fullname);
+	}
+	
+	/**
 	 * Set the Role(s) for a User (clear others)
 	 * @param mixed $role
 	 */
@@ -76,5 +143,26 @@ class Bal_Model_User extends Base_User {
 		// Done
 		return $result;
 	}
+	
+	/**
+	 * Ensure Consistency
+	 * @return bool
+	 */
+	public function ensureConsistency(){
+		# Prepare
+		$save = false;
+		
+		# Url
+		if ( $this->_get('fullname') !== $this->getFullname() ) {
+			$this->_set('fullname', $this->getFullname(), false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Done
+		return $save;
+	}
+	
+	
+	
 	
 }
