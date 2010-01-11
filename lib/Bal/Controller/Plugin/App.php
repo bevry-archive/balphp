@@ -718,7 +718,7 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 			} elseif ( is_object($in) ) {
 				if ( !empty($in->id) )
 					$Record = $this->getRecord($type, $in->id);
-			} elseif ( is_int($in) ) {
+			} elseif ( is_numeric($in) ) {
 				$Record = Doctrine::getTable($type)->find($in);
 			} elseif ( is_string($in) ) {
 				if ( Doctrine::getTable($type)->hasColumn($in) )

@@ -197,11 +197,11 @@ if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
 	 * Return the array as a name value pair array
 	 * @version 1, January 11, 2010
 	 * @param array $arr
-	 * @param string $name
-	 * @param string $value
+	 * @param string $name [optional]
+	 * @param string $value [optional]
 	 * @return array
 	 */
-	function nvp ( $arr, $name, $value ) {
+	function nvp ( $arr, $name = 'id', $value = 'title' ) {
 		# Prepare
 		$result = array();
 		
