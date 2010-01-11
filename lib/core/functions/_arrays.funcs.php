@@ -191,6 +191,31 @@ if ( function_compare('ensure_keys', 1, true, __FILE__, __LINE__) ) {
 }
 
 
+if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Return the array as a name value pair array
+	 * @version 1, January 11, 2010
+	 * @param array $arr
+	 * @param string $name
+	 * @param string $value
+	 * @return array
+	 */
+	function nvp ( $arr, $name, $value ) {
+		# Prepare
+		$result = array();
+		
+		# Cycle
+		foreach ( $arr as $item ) {
+			$result[$item[$name]] = $item[$value];
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+
 if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -236,11 +261,13 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 	 * @version 1, December 24, 2009
 	 * @param mixed $holder
 	 * @param mixed $keys
+	 * @param mixed $default
 	 * @return array
 	 */
 	function delve ( $holder, $keys, $default = null) {
 		# Prepare
-		$result = $default;
+		$result = null;
+		$end = false;
 		
 		# Prepare Keys
 		ensure_keys($keys, $holder);
@@ -248,31 +275,38 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 		# Handle
 		$key = array_shift($keys);
 		if ( empty($key) ) {
-			# We are at the end of recursion
-			if ( empty($holder) ) {
-				$result = $default;
-			} else {
-				$result = $holder;
-			}
+			# Reched the end of our key array, so holder must be what we want
+			$result = $holder;
+			$end = true;
 		} else {
 			switch ( gettype($holder) ) {
 				case 'array':
 					if ( array_key_exists($key, $holder) ) {
 						# We exist, so recurse
 						$result = delve($holder[$key], $keys, $default);
+					} else {
+						$end = true;
 					}
 					break;
 				
 				case 'object':
-					if ( isset($holder->$key) || (method_exists($holder, 'get') && $holder->get($key)) ) {
+					if ( isset($holder->$key) || (is_a($holder, 'Doctrine_Record') && ($holder->hasAccessor($key) || $holder->getTable()->hasField($key))) || (!is_a($holder, 'Doctrine_Record') && method_exists($holder, 'get') && $holder->get($key)) ) {
 						# We exist, so recurse
 						$result = delve($holder->$key, $keys, $default);
+					} else {
+						$end = true;
 					}
 					break;
 				
 				default:
+					$end = true;
 					break;
 			}
+		}
+		
+		# Check Default
+		if ( $end && $result === null ) {
+			$result = $default;
 		}
 		
 		# Done

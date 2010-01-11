@@ -319,9 +319,11 @@ if ( function_compare('hydrate_params', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('until', 1, true, __FILE__, __LINE__) ) {
-
-	function until ( ) {
+if ( function_compare('has_true', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks all arguments for one which is loosely true
+	 */
+	function has_true ( ) {
 		$args = func_get_args();
 		foreach ( $args as $arg ) {
 			if ( $arg )
@@ -330,6 +332,30 @@ if ( function_compare('until', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('cycle', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Cycle through param until find one which is set and return that one
+	 * @version 1, January 11, 2010
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function cycle ( ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args();
+		
+		# Handle
+		foreach ( $args as $arg ) {
+			$result = $arg;
+			if ( !empty($result) ) {
+				break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
 
 /*
 if( function_comp('set_param', 1) )
