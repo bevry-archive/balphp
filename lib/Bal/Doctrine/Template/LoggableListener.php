@@ -59,7 +59,7 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		if ( !$this->_options['insert'] ) return;
 		
 		# Published
-		Bal_Log::getInstance()->log('orm-insert', Bal_Log::INSERT, array('data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		Bal_Log::getInstance()->log('orm-insert', Bal_Log::DEBUG, array('action'=>'insert','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
 		
 		# Done
 		return true;
@@ -75,7 +75,7 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		if ( !$this->_options['save'] ) return;
 		
 		# Published
-		Bal_Log::getInstance()->log('orm-save', Bal_Log::SAVE, array('data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		Bal_Log::getInstance()->log('orm-save', Bal_Log::DEBUG, array('action'=>'save','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
 		
 		# Done
 		return true;
@@ -92,7 +92,7 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		if ( !$this->_options['delete'] ) return;
 		
 		# Published
-		Bal_Log::getInstance()->log('orm-delete', Bal_Log::DELETE, array('data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		Bal_Log::getInstance()->log('orm-delete', Bal_Log::DEBUG, array('action'=>'delete','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
 		
 		# Done
 		return true;

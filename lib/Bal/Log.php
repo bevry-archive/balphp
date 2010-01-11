@@ -19,10 +19,10 @@
  */
 class Bal_Log extends Zend_Log {
 	
-    const INSERT	= 8;
+    /*const INSERT	= 8;
     const SAVE		= 9;
     const DELETE	= 10;
-    const SUCCESS	= 11;
+    const SUCCESS	= 11;*/
 
 	protected $Writer = null;
 	

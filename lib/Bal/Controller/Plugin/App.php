@@ -122,7 +122,7 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @return bool
 	 */
 	public function loginUser ( $User, $locale = null, $remember = null ) {
-		Bal_Log::getInstance()->log('system-login', Bal_Log::SUCCESS, array('data'=>$User->toArray()));
+		//Bal_Log::getInstance()->log('system-login', Bal_Log::SUCCESS, array('data'=>$User->toArray()));
 		return $this->login($User->username, $User->password, $locale, $remember);
 	}
 
