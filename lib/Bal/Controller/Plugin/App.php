@@ -101,7 +101,7 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function logout ( ) {
 		# Log
-		Bal_Log::getInstance()->log('system-logout', Bal_Log::SUCCESS);
+		//Bal_Log::getInstance()->log('system-logout', Bal_Log::SUCCESS);
 		
 		# Locale
 	   	Zend_Registry::get('Locale')->clearLocale();
