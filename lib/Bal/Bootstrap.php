@@ -24,13 +24,15 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initMail ( ) {
 		# Prepare
 		$this->bootstrap('config');
+		$online = APPLICATION_ENV === 'production';
+		if ( !$online ) return false;
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		
 		# Fetch
-		$smtp_host = $applicationConfig['mail']['transport']['smtp']['host'];
-		$smtp_config = $applicationConfig['mail']['transport']['smtp']['config'];
+		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host');
+		$smtp_config = delve($applicationConfig, 'mail.transport.smtp.config');
 		if ( empty($smtp_config) )
 			$smtp_config = array();
 			
@@ -50,15 +52,10 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('config');
 		$this->bootstrap('autoload');
+		$online = APPLICATION_ENV === 'production';
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
-		
-		# Mail
-		$mail = $applicationConfig['mail'];
-		$Mail = new Zend_Mail();
-		$Mail->setFrom($mail['from']['address'], $mail['from']['name']);
-		$Mail->addTo($mail['log']['address'], $mail['log']['name']);
 		
 		# Create Log
 		$Log = new Bal_Log();
@@ -68,16 +65,25 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		//$Writer_Syslog = new Zend_Log_Writer_Syslog();
 		//$Log->addWriter($Writer_Syslog);
 		
-		# Create Writer: Email
-		$Writer_Mail = new Zend_Log_Writer_Mail($Mail);
-		$Writer_Mail->setSubjectPrependText('Error Log');
-		//$Writer->addFilter(Zend_Log::WARN);
-		$Log->addWriter($Writer_Mail);
-		
 		# Create Writer: Firebug
 		if ( DEBUG_MODE ) {
 			//$Writer_Firebug = new Zend_Log_Writer_Firebug();
 		//$Log->addWriter($Writer_Firebug);
+		}
+		
+		# Check if we are online so that we may send the log via email
+		if ( $online ) {
+			# Mail
+			$mail = $applicationConfig['mail'];
+			$Mail = new Zend_Mail();
+			$Mail->setFrom($mail['from']['address'], $mail['from']['name']);
+			$Mail->addTo($mail['log']['address'], $mail['log']['name']);
+		
+			# Create Writer: Email
+			$Writer_Mail = new Zend_Log_Writer_Mail($Mail);
+			$Writer_Mail->setSubjectPrependText('Error Log');
+			$Writer_Mail->addFilter(Zend_Log::WARN);
+			$Log->addWriter($Writer_Mail);
 		}
 		
 		# Done

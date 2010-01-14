@@ -204,10 +204,34 @@ if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
 	function nvp ( $arr, $name = 'id', $value = 'title' ) {
 		# Prepare
 		$result = array();
+		if ( !is_array($arr) ) return array();
 		
 		# Cycle
 		foreach ( $arr as $item ) {
 			$result[$item[$name]] = $item[$value];
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+
+if ( function_compare('array_values_to_keys', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Copy the array values to the keys
+	 * @version 1, January 15, 2010
+	 * @param array $arr
+	 * @return array
+	 */
+	function array_values_to_keys ( $arr ) {
+		# Prepare
+		$result = array();
+		
+		# Cycle
+		foreach ( $arr as $value ) {
+			$result[$value] = $value;
 		}
 		
 		# Done
@@ -267,7 +291,7 @@ if ( function_compare('delver', 1, true, __FILE__, __LINE__) ) {
 		# Prepare
 		$result = null;
 		$args = func_get_args(); array_shift($args);
-		array_push($args, null);
+		if ( sizeof($args) < 2 ) array_push($args, null);
 	
 		# Cycle through and delve each
 		foreach ( $args as $arg ) {
@@ -286,7 +310,7 @@ if ( function_compare('delver', 1, true, __FILE__, __LINE__) ) {
 				break;
 			}
 		}
-	
+		
 		# Done
 		return $result;
 	}
@@ -519,15 +543,15 @@ if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_keys_keep', 1, true, __FILE__, __LINE__) ) {
 	/**
-	 * Unset the keys from the array
+	 * Keep the keys in the array
 	 * @version 1, November 9, 2009
 	 * @param array $array
 	 * @param mixed ... what to keep
-	 * @return mixed
+	 * @return array
 	 */
-	function array_keep ( &$array ) {
+	function array_keys_keep ( &$array ) {
 		# Prepare
 		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
 		$args = func_get_args(); array_shift($args);
@@ -535,7 +559,25 @@ if ( function_compare('array_keep', 1, true, __FILE__, __LINE__) ) {
 		# Apply
 		$keys = array_flip($args);
 		# Done
-		return array_intersect_key($array, $keys);
+		$array = array_intersect_key($array, $keys);
+		return $array;
+	}
+}
+
+
+if ( function_compare('array_keys_keep_ensure', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Keep the keys in the array and ensure their value
+	 * @version 1, November 9, 2009
+	 * @param array $array
+	 * @param array $keys
+	 * @param mixed $default [optional]
+	 * @return array
+	 */
+	function array_keys_keep_ensure ( &$array, $keys, $default = null ) {
+		array_keys_keep($array, $keys);
+		array_keys_ensure($array, $keys);
+		return $array;
 	}
 }
 
@@ -633,7 +675,6 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 		if ( !is_array($array) )
 			return $array;
 		foreach ( $array as $key => &$value ) {
-			$value = trim($value);
 			if ( $value === '' || $value === NULL ) {
 				// Empty value, only key
 				if ( $to === 'remove' ) {
@@ -643,10 +684,38 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 				}
 			} elseif ( is_array($value) ) {
 				array_clean($array[$key]);
+			} else {
+				$value = trim($value);
 			}
 		}
 		$array = array_merge($array); // reset keys
 		return $array;
+	}
+}
+
+
+if ( function_compare('implode_recursive', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Implode an array recursively
+	 * @version 1, July 22, 2008
+	 * @param array &$array
+	 * @param mixed $to [optional]
+	 * @return mixed
+	 */
+	function implode_recursive ( $glue, $array ) {
+		# Prepare
+		if ( !is_array($array) ) return $array;
+		# Handle
+		foreach ( $array as &$value ) {
+			if ( is_array($value) ) {
+				$value = implode_recursive($glue, $value);
+			}
+		}
+		# Implode
+		$result = implode(', ', $array);
+		# Done
+		return $result;
 	}
 }
 

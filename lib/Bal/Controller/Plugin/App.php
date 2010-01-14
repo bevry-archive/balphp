@@ -809,6 +809,11 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param unknown_type $pages_chunk
 	 */
 	public function getPaging($DQ, $page_current = 1, $page_items = 5, $pages_chunk = 5){
+		# Prepare
+		$page_current = intval($page_current);
+		$page_items = intval($page_items);
+		$pages_chunk = intval($pages_chunk);
+		
 		# Fetch
 		$Pager = $this->getPager($DQ, $page_current, $page_items);
 		
