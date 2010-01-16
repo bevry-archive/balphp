@@ -47,12 +47,20 @@ class Bal_Log extends Zend_Log {
 		return '<pre>'.var_export($this->getEvents(),true).'</pre>';
 	}
 	
-	public function log ( $message, $code = null, array $extras = null ) {
-		if ( $code === null ) $code = Zend_Log::INFO;
+    /**
+     * Log a message at a priority with extras
+     * @param  string   $message   Message to log
+     * @param  integer  $priority  Priority of message
+     * @param  array    $extras    Extras to add
+     * @return void
+     * @throws Zend_Log_Exception
+     */
+	public function log ( $message, $priority = null, array $extras = null ) {
+		if ( $priority === null ) $priority = Zend_Log::INFO;
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
 			parent::setEventItem($key,$value);
 		}
-		parent::log($message, $code);
+		parent::log($message, $priority);
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
 			parent::setEventItem($key,null);
 		}

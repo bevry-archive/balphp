@@ -378,7 +378,22 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 					break;
 				
 				case 'object':
-					if ( isset($holder->$key) || (is_a($holder, 'Doctrine_Record') && ($holder->hasAccessor($key) || $holder->hasRelation($key) || $holder->getTable()->hasField($key))) || (!is_a($holder, 'Doctrine_Record') && method_exists($holder, 'get') && $holder->get($key)) ) {
+					if (
+						/* Already accessible via normal object means */
+						isset($holder->$key)
+						/* Is Doctrine Record */
+						||	(	($holder instanceOf Doctrine_Record)
+								&&	($holder->hasAccessor($key)
+										||	$holder->hasRelation($key)
+										||	$holder->getTable()->hasField($key)
+									)
+							)
+						/* Is normal object */
+						||	(	!($holder instanceOf Doctrine_Record)
+								&&	method_exists($holder, 'get')
+								&&	$holder->get($key)
+							)
+					) {
 						# We exist, so recurse
 						$result = delve($holder->$key, $keys, $default);
 					} else {
