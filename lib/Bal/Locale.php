@@ -96,6 +96,10 @@ class Bal_Locale {
 		// Done
 		return $this;
 	}
+	
+	public static function getInstance ( ) {
+		return Zend_Registry::get('Locale');
+	}
 
 	public function clearLocale() {
 		$this->Session->locale = null;
@@ -179,6 +183,9 @@ class Bal_Locale {
 		if ( $numargs === 2 && is_array($args[1]) ) {
 			// We are wanting to do advanced replace
 			$data = $args[1];
+			if ( is_object($data) ) {
+				$data = $data->toArray();
+			}
 			// Translate
 			$text = $this->Zend_Translate->_($text);
 			$text = preg_replace('/\$(\w+)/ie', '\$data[\'${1}\']', $text);
@@ -202,6 +209,9 @@ class Bal_Locale {
 		return $Date;
 	}
 	
+	public function timestamp ( $timestamp, $format_datetime = null, $locale = null ) {
+		return $this->datetime($timestamp,$format_datetime,$locale);
+	}
 	public function datetime ( $timestamp, $format_datetime = null, $locale = null ) {
 		$Date = $this->getDate($timestamp);
 		if ( $format_datetime === null ) $format_datetime = $this->format_datetime;
