@@ -1,11 +1,12 @@
 <?php
 require_once 'Zend/Controller/Plugin/Abstract.php';
-class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
+class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	
 	# ========================
 	# VARIABLES
 	
 	protected $_User = null;
+	
 	protected $_options = array(
 	);
 	
@@ -17,79 +18,14 @@ class Bal_Controller_Plugin_App extends Zend_Controller_Plugin_Abstract {
 	 * @param array $options
 	 */
 	public function __construct ( array $options = array() ) {
+		# Options
 		$this->mergeOptions($options);
+		
+		# Identity
 		$this->getIdentity();
-	}
-	
-	
-	# ========================
-	# CONFIG
-	
-	
-	/**
-	 * Gets the Application Configuration (as array) or specific config variable
-	 * @param string $confs [optional]
-	 * @return array
-	 */
-	public function getConfig ( $confs = null ) {
-		# Prepare:
-		$applicationConfig = array();
-		
-		# Load
-		if ( Zend_Registry::isRegistered('applicationConfig') ) {
-			$applicationConfig = Zend_Registry::get('applicationConfig');
-		}
-		
-		# Check
-		if ( !$confs ) {
-			return $applicationConfig;
-		}
-		
-		# Detailed
-		$confs = explode('.', $confs);
-		$value = $applicationConfig;
-		
-		# Cycle
-		foreach ( $confs as $conf ) {
-			if ( !is_array($value) || !array_key_exists($conf, $value) ) return null;
-			$value = $value[$conf];
-		}
 		
 		# Done
-		return $value;
-	}
-	
-	/**
-	 * Get the helper option
-	 * @param string $name
-	 * @param mixed $default
-	 */
-	public function getOption ( $name, $default = null ) {
-		# Get
-		return empty($this->_options[$name]) ? $default : $this->_options[$name];
-	}
-	
-	/**
-	 * Set the helper option
-	 * @param string $name
-	 * @param mixed $value
-	 */
-	public function setOption ( $name, $value ) {
-		# Set
-		$this->_options[$name] = $value;
-		# Chain
-		return $this;
-	}
-	
-	/**
-	 * Merge the helper options
-	 * @param array $options
-	 */
-	public function mergeOptions ( array $options ) {
-		# Merge
-		$this->_options = array_merge($this->_options, $options);
-		# Chain
-		return $this;
+		return true;
 	}
 	
 	# -----------

@@ -1,66 +1,29 @@
 <?php
 require_once 'Zend/Controller/Action/Helper/Abstract.php';
-class Bal_Controller_Action_Helper_App extends Zend_Controller_Action_Helper_Abstract {
+class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abstract {
 
-	protected $_App = null;
-	
 	protected $_options = array(
 		'logged_out_forward' => array('login'),
 		'logged_in_forward' => array('index')
 	);
+	
+	protected $_App = null;
 	
 	/**
 	 * Construct
 	 * @param array $options
 	 */
 	public function __construct ( array $options = array() ) {
+		# Apply
 		$this->_App = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
+		
+		# Options
 		$this->mergeOptions($options);
+		
+		# Done
+		return true;
 	}
 	
-	/**
-	 * Returns @see Bal_Controller_Plugin_App
-	 */
-	public function getApp(){
-		return $this->_App;
-	}
-	
-	
-	# -----------
-	# Options
-	
-	/**
-	 * Get the helper option
-	 * @param string $name
-	 * @param mixed $default
-	 */
-	public function getOption ( $name, $default = null ) {
-		# Get
-		return empty($this->_options[$name]) ? $default : $this->_options[$name];
-	}
-	
-	/**
-	 * Set the helper option
-	 * @param string $name
-	 * @param mixed $value
-	 */
-	public function setOption ( $name, $value ) {
-		# Set
-		$this->_options[$name] = $value;
-		# Chain
-		return $this;
-	}
-	
-	/**
-	 * Merge the helper options
-	 * @param array $options
-	 */
-	public function mergeOptions ( array $options ) {
-		# Merge
-		$this->_options = array_merge($this->_options, $options);
-		# Chain
-		return $this;
-	}
 	
 	# -----------
 	# Authentication
@@ -164,15 +127,21 @@ class Bal_Controller_Action_Helper_App extends Zend_Controller_Action_Helper_Abs
 		return $result;
 	}
 	
+	/**
+	 * Returns @see Bal_Controller_Plugin_App
+	 */
+	public function getApp(){
+		return $this->_App;
+	}
 
 	/**
 	 * Magic
 	 * @return mixed
 	 */
 	function __call ( $method, $args ) {
-		$App = $this->getApp();
-		if ( method_exists($App, $method) ) {
-			return call_user_func_array(array($App, $method), $args);
+		$Parent = $this->getApp();
+		if ( method_exists($Parent, $method) ) {
+			return call_user_func_array(array($Parent, $method), $args);
 		} else {
 			throw new Zend_Exception('Could not find the method: '.$method);
 		}

@@ -809,7 +809,7 @@ if ( function_compare('array_tree_round', 1, true, __FILE__, __LINE__) ) {
 			$parent = $node[$parentKey];
 			$position = $node[$positionKey];
 			# Trim
-			if ( $keep ) $node = array_keep($node, $keep);
+			if ( $keep ) $node = array_keys_keep($node, $keep);
 			# Apply
 			if ( $parent ) {
 				$map[$parent][$childrenKey][$position] = &$node;
