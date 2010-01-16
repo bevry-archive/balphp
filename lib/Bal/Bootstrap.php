@@ -289,6 +289,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('config');
 		$this->bootstrap('routes');
 		$this->bootstrap('doctrine');
+		$this->bootstrap('balphp');
 		
 		# Load
 		$FrontController = Zend_Controller_Front::getInstance();
@@ -301,7 +302,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			
 			# Configure
 			$applicationConfig = $App->getConfig();
-			$appConfig = empty($applicationConfig['bal']['app']) ? array() : $applicationConfig['bal']['app'];
+			$appConfig = delve($applicationConfig, 'bal.app', array());
 			$App->mergeOptions($appConfig);
 			
 			# Register

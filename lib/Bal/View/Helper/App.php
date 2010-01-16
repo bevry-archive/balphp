@@ -1,11 +1,8 @@
 <?php
 class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 
-	/**
-	 * The App Plugin
-	 * @var Bal_Controller_Plugin_App
-	 */
-	protected $_App = null;
+	# ========================
+	# CONSTRUCTORS
 	
 	/**
 	 * The View in use
@@ -29,6 +26,24 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	}
 	
 	/**
+	 * Self reference
+	 */
+	public function app ( ) {
+		# Chain
+		return $this;
+	}
+	
+	# ========================
+	# PARENT
+	
+	/**
+	 * The App Plugin
+	 * @var Bal_Controller_Plugin_App
+	 */
+	protected $_App = null;
+	
+	
+	/**
 	 * Returns @see Bal_Controller_Plugin_App
 	 */
 	public function getApp(){
@@ -37,29 +52,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	}
 	
 	/**
-	 * Self reference
-	 */
-	public function app ( ) {
-		# Chain
-		return $this;
-	}
-	
-	/**
 	 * Magic
 	 * @return mixed
 	 */
 	function __call ( $method, $args ) {
-		$App = $this->getApp();
-		if ( method_exists($App, $method) ) {
-			return call_user_func_array(array($App, $method), $args);
+		$Parent = $this->getApp();
+		if ( method_exists($Parent, $method) ) {
+			return call_user_func_array(array($Parent, $method), $args);
 		} else {
 			throw new Zend_Exception('Could not find the method: '.$method);
 		}
 		return false;
 	}
 	
-	# -----------
-	# View stuff
+	# ========================
+	# CUSTOM
 	
 	public function get ( ) {
 		# Prepare
