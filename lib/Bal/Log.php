@@ -30,7 +30,8 @@ class Bal_Log {
 	
 	public function __construct ( ) {
 		# Log
-		$Log = $this->Log = new Zend_Log();
+		$this->Log = new Zend_Log();
+		$Log = $this->getLog();
 		
 		# Writer
 		$this->Writer = new Zend_Log_Writer_Mock();
@@ -40,6 +41,10 @@ class Bal_Log {
 		
 		# Parent Construct
 		// parent::__construct(); // will handle priorities for us
+	}
+	
+	public function getLog ( ) {
+		return $this->Log;
 	}
 
 	public static function getInstance ( ) {
@@ -64,7 +69,7 @@ class Bal_Log {
      */
 	public function log ( $message, $priority = null, array $extras = null ) {
 		# Prepare
-		$Log = $this->Log;
+		$Log = $this->getLog();
 		
 		# Handle
 		if ( $priority === null ) $priority = Zend_Log::INFO;
