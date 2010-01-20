@@ -17,22 +17,29 @@
  * @copyright Copyright (c) 2008-2009, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
-class Bal_Log extends Zend_Log {
+require_once 'Zend/Log.php';
+class Bal_Log {
 	
     /*const INSERT	= 8;
     const SAVE		= 9;
     const DELETE	= 10;
     const SUCCESS	= 11;*/
 
+	protected $Log = null;
 	protected $Writer = null;
 	
 	public function __construct ( ) {
+		# Log
+		$Log = $this->Log = new Zend_Log();
+		
+		# Writer
 		$this->Writer = new Zend_Log_Writer_Mock();
-		$this->addWriter($this->Writer);
+		$Log->addWriter($this->Writer);
 		$Formatter_Rich = new Zend_Log_Formatter_Simple('hello %message%' . PHP_EOL);
 		$this->Writer->setFormatter($Formatter_Rich);
+		
 		# Parent Construct
-		parent::__construct(); // will handle priorities for us
+		// parent::__construct(); // will handle priorities for us
 	}
 
 	public static function getInstance ( ) {
@@ -56,14 +63,21 @@ class Bal_Log extends Zend_Log {
      * @throws Zend_Log_Exception
      */
 	public function log ( $message, $priority = null, array $extras = null ) {
+		# Prepare
+		$Log = $this->Log;
+		
+		# Handle
 		if ( $priority === null ) $priority = Zend_Log::INFO;
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			parent::setEventItem($key,$value);
+			$Log->setEventItem($key,$value);
 		}
-		parent::log($message, $priority);
+		$Log::log($message, $priority);
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			parent::setEventItem($key,null);
+			$Log::setEventItem($key,null);
 		}
+		
+		# Chain
+		return $this;
 	}
 	
 }
