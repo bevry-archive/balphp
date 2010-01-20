@@ -18,43 +18,47 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 require_once 'Zend/Log.php';
-class Bal_Log {
+class Bal_Log extends Zend_Log {
 	
     /*const INSERT	= 8;
     const SAVE		= 9;
     const DELETE	= 10;
     const SUCCESS	= 11;*/
 
-	protected $Log = null;
 	protected $Writer = null;
 	
 	public function __construct ( ) {
-		# Log
-		$this->Log = new Zend_Log();
-		$Log = $this->getLog();
-		
 		# Writer
 		$this->Writer = new Zend_Log_Writer_Mock();
-		$Log->addWriter($this->Writer);
+		$this->addWriter($this->Writer);
 		$Formatter_Rich = new Zend_Log_Formatter_Simple('hello %message%' . PHP_EOL);
 		$this->Writer->setFormatter($Formatter_Rich);
 		
 		# Parent Construct
-		// parent::__construct(); // will handle priorities for us
+		return parent::__construct(); // will handle priorities for us
 	}
 	
-	public function getLog ( ) {
-		return $this->Log;
-	}
-
+	
+    /**
+     * Get the Log Instance
+     * @return Zend_Log
+     */
 	public static function getInstance ( ) {
 		return Zend_Registry::get('Log');
 	}
 	
+    /**
+     * Get the log entries
+     * @return array
+     */
 	public function getEvents ( ) {
 		return $this->Writer->events;
 	}
 	
+    /**
+     * Get a rendered list of log entries
+     * @return array
+     */
 	public function render ( ) {
 		return '<pre>'.var_export($this->getEvents(),true).'</pre>';
 	}
@@ -67,18 +71,17 @@ class Bal_Log {
      * @return void
      * @throws Zend_Log_Exception
      */
-	public function log ( $message, $priority = null, array $extras = null ) {
-		# Prepare
-		$Log = $this->getLog();
+	public function log ( $message, $priority, array $extras = null ) {
+		# Prepare Priority
+		if ( $priority === null ) $priority = Bal_Log::INFO;
 		
-		# Handle
-		if ( $priority === null ) $priority = Zend_Log::INFO;
+		# Perform Log
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			$Log->setEventItem($key,$value);
+			$this->setEventItem($key,$value);
 		}
-		$Log::log($message, $priority);
+		parent::log($message, $priority);
 		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			$Log::setEventItem($key,null);
+			$this->setEventItem($key,null);
 		}
 		
 		# Chain
