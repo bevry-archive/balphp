@@ -362,7 +362,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		$key = array_shift($keys);
-		if ( empty($key) ) {
+		if ( $key === null ) {
 			# Reched the end of our key array, so holder must be what we want
 			$result = $holder;
 			$end = true;
