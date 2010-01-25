@@ -190,6 +190,10 @@ class Bal_Locale {
 			$text = $this->Zend_Translate->_($text);
 			$text = preg_replace('/\$(\w+)/ie', '\$data[\'${1}\']', $text);
 		} else {
+			if ( $numargs === 1 && is_array($args[0]) ) {
+				$text = $args[0][0];
+				$args = $args[0];
+			}
 			$text = $this->Zend_Translate->_($text);
 			if ( $numargs !== 1 ) {
 				$args[0] = $text;
