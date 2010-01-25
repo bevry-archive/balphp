@@ -57,7 +57,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	 */
 	public function loginForward ( $username, $password, $locale = null, $remember = null, $logged_out_forward = false, $logged_in_forward = false ) {
 		$this->getApp()->login($username, $password, $locale, $remember);
-		return $this->authenticate($logged_out_forward, $logged_in_forward);;
+		return $this->authenticate($logged_out_forward, $logged_in_forward);
 	}
 	
 	/**

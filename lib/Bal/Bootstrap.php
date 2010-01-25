@@ -52,7 +52,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('config');
 		$this->bootstrap('autoload');
-		$online = APPLICATION_ENV === 'production';
+		$friendly = $online = APPLICATION_ENV === 'production';
 		$friendly = true;
 		
 		# Config
@@ -89,7 +89,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			# Create Writer: Email
 			$Writer_Mail = new Zend_Log_Writer_Mail($Mail);
 			$Writer_Mail->setSubjectPrependText('Error Log');
-			$Writer_Mail->addFilter(Zend_Log::ERR);
+			$Writer_Mail->addFilter(Zend_Log::CRIT);
 			$Log->addWriter($Writer_Mail);
 		}
 		

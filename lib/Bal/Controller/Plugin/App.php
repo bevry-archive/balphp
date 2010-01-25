@@ -36,6 +36,9 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	 * @param bool $redirect
 	 */
 	public function logout ( ) {
+		# Prepare
+		//$Log = Bal_Log::getInstance();
+		
 		# Locale
 	   	Zend_Registry::get('Locale')->clearLocale();
 	   	
@@ -44,8 +47,8 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		Zend_Session::forgetMe();
 		
 		# Create Log Message
-		$log_details = array();
-		$Log->log(array('log-user_logout',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+		//$log_details = array();
+		//$Log->log(array('log-user_logout',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		
 		# Chain
 		return $this;
@@ -59,14 +62,19 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	 * @return bool
 	 */
 	public function loginUser ( $User, $locale = null, $remember = null ) {
+		# Prepare
+		//$Log = Bal_Log::getInstance();
+		
 		# Login
 		$result = $this->login($User->username, $User->password, $locale, $remember);
+		
 		# Log
-		if ( $result ) {
-			# Create Log Message
-			$log_details = $User->toArray();
-			$Log->log(array('log-user_login',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
-		}
+		//if ( $result ) {
+		//	# Create Log Message
+		//	$log_details = $User->toArray();
+		//	$Log->log(array('log-user_login',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+		//}
+		
 		# Done
 		return $result;
 	}
