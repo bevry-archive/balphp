@@ -28,12 +28,6 @@ class Bal_Log extends Zend_Log {
 	protected $Writer = null;
 	
 	public function __construct ( ) {
-		# Writer
-		$this->Writer = new Zend_Log_Writer_Mock();
-		$this->addWriter($this->Writer);
-		$Formatter_Rich = new Zend_Log_Formatter_Simple('hello %message%' . PHP_EOL);
-		$this->Writer->setFormatter($Formatter_Rich);
-		
 		# Parent Construct
 		return parent::__construct(); // will handle priorities for us
 	}
@@ -47,12 +41,34 @@ class Bal_Log extends Zend_Log {
 		return Zend_Registry::get('Log');
 	}
 	
+	/**
+	 * Set the Writer used to render the log
+	 * @param Zend_Log_Writer_Abstract $Writer
+	 * @return
+	 */
+	public function setRenderWriter ( $Writer ) {
+		# Add Writer
+		$this->addWriter($Writer);
+		# Set Default
+		$this->_Writer = $Writer;
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * GEt the Render Writer
+	 * @return Zend_Log_Writer_Abstract
+	 */
+	public function getRenderWriter ( ) {
+		return $this->_Writer;
+	}
+	
     /**
      * Get the log entries
      * @return array
      */
 	public function getEvents ( ) {
-		return $this->Writer->events;
+		return $this->getRenderWriter()->events;
 	}
 	
     /**
@@ -60,7 +76,7 @@ class Bal_Log extends Zend_Log {
      * @return array
      */
 	public function render ( ) {
-		return '<pre>'.var_export($this->getEvents(),true).'</pre>';
+		return $this->getRenderWriter()->render();
 	}
 	
     /**

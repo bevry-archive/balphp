@@ -36,15 +36,16 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	 * @param bool $redirect
 	 */
 	public function logout ( ) {
-		# Log
-		//Bal_Log::getInstance()->log('system-logout', Bal_Log::SUCCESS);
-		
 		# Locale
 	   	Zend_Registry::get('Locale')->clearLocale();
 	   	
 		# Logout
 		$this->getAuth()->clearIdentity();
 		Zend_Session::forgetMe();
+		
+		# Create Log Message
+		$log_details = array();
+		$Log->log(array('log-user_logout',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		
 		# Chain
 		return $this;
@@ -58,8 +59,16 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	 * @return bool
 	 */
 	public function loginUser ( $User, $locale = null, $remember = null ) {
-		//Bal_Log::getInstance()->log('system-login', Bal_Log::SUCCESS, array('data'=>$User->toArray()));
-		return $this->login($User->username, $User->password, $locale, $remember);
+		# Login
+		$result = $this->login($User->username, $User->password, $locale, $remember);
+		# Log
+		if ( $result ) {
+			# Create Log Message
+			$log_details = $User->toArray();
+			$Log->log(array('log-user_login',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+		}
+		# Done
+		return $result;
 	}
 
 	/**
@@ -85,6 +94,7 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 			$error = implode($AuthResult->getMessages(),"\n");
 			$error = empty($error) ? 'The credentials that were supplied are invalid' : $error;
 			throw new Zend_Auth_Exception($error);
+			return false;
 		}
 		
 		# Passed

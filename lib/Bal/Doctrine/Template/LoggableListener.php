@@ -58,8 +58,14 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		$Invoker = $Event->getInvoker();
 		if ( !$this->_options['insert'] ) return;
 		
-		# Published
-		Bal_Log::getInstance()->log('orm-insert', Bal_Log::DEBUG, array('action'=>'insert','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		# Prepare Log
+		$data = $Invoker->toArray();
+		$table = $Invoker->getTable()->getTableName();
+		$log_details = array('action'=>'insert','data'=>$data,'table'=>$table);
+		$log_info = $data; $log_info['_table'] = $table;
+		
+		# Log
+		Bal_Log::getInstance()->log('log-orm-insert', Bal_Log::DEBUG, array('class'=>'success','details'=>$log_details));
 		
 		# Done
 		return true;
@@ -74,8 +80,14 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		$Invoker = $Event->getInvoker();
 		if ( !$this->_options['save'] ) return;
 		
-		# Published
-		Bal_Log::getInstance()->log('orm-save', Bal_Log::DEBUG, array('action'=>'save','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		# Prepare Log
+		$data = $Invoker->toArray();
+		$table = $Invoker->getTable()->getTableName();
+		$log_details = array('action'=>'save','data'=>$data,'table'=>$table);
+		$log_info = $data; $log_info['_table'] = $table;
+		
+		# Log
+		Bal_Log::getInstance()->log('log-orm-save', Bal_Log::DEBUG, array('class'=>'success','details'=>$log_details));
 		
 		# Done
 		return true;
@@ -91,8 +103,14 @@ class Bal_Doctrine_Template_LoggableListener extends Doctrine_Record_Listener {
 		$Invoker = $Event->getInvoker();
 		if ( !$this->_options['delete'] ) return;
 		
-		# Published
-		Bal_Log::getInstance()->log('orm-delete', Bal_Log::DEBUG, array('action'=>'delete','data'=>$Invoker->toArray(),'table'=>$Invoker->getTable()->getTableName()));
+		# Prepare Log
+		$data = $Invoker->toArray();
+		$table = $Invoker->getTable()->getTableName();
+		$log_details = array('action'=>'delete','data'=>$data,'table'=>$table);
+		$log_info = $data; $log_info['_table'] = $table;
+		
+		# Log
+		Bal_Log::getInstance()->log('log-orm-delete', Bal_Log::DEBUG, array('class'=>'success','details'=>$log_details));
 		
 		# Done
 		return true;

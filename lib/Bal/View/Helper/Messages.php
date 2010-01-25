@@ -1,6 +1,6 @@
 <?php
 require_once 'Zend/View/Helper/Abstract.php';
-class Bal_View_Helper_Message extends Zend_View_Helper_Abstract {
+class Bal_View_Helper_Messages extends Zend_View_Helper_Abstract {
 
 	public $messages = array();
 
@@ -9,7 +9,7 @@ class Bal_View_Helper_Message extends Zend_View_Helper_Abstract {
 		$this->view = $view;
 	}
 
-	public function message ( ) {
+	public function messages ( ) {
 		return $this;
 	}
 

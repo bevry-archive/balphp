@@ -53,6 +53,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('config');
 		$this->bootstrap('autoload');
 		$online = APPLICATION_ENV === 'production';
+		$friendly = true;
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
@@ -60,6 +61,12 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Create Log
 		$Log = new Bal_Log();
 		Zend_Registry::set('Log', $Log);
+		
+		# Default Writer
+		$Writer_Rich = new Bal_Log_Writer_Rich();
+		//$Writer_Rich->setFormatter(new Zend_Log_Formatter_Simple('%message%'));
+		$Writer_Rich->isFriendly($friendly);
+		$Log->setRenderWriter($Writer_Rich);
 		
 		# Create Writer: SysLog
 		//$Writer_Syslog = new Zend_Log_Writer_Syslog();
@@ -82,9 +89,22 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			# Create Writer: Email
 			$Writer_Mail = new Zend_Log_Writer_Mail($Mail);
 			$Writer_Mail->setSubjectPrependText('Error Log');
-			$Writer_Mail->addFilter(Zend_Log::WARN);
+			$Writer_Mail->addFilter(Zend_Log::ERR);
 			$Log->addWriter($Writer_Mail);
 		}
+		
+		# Log Request Details
+		$details = array(
+			'server'	=> $_SERVER,
+			'request'	=> array(
+				'get'		=> $_GET,
+				'post'		=> $_POST,
+				'session'	=> $_SESSION,
+				'cookie'	=> $_COOKIE,
+				'params' 	=> $_REQUEST,
+			)
+		);
+		$Log->log('log-request_details', Bal_Log::DEBUG, array('details'=>$details));
 		
 		# Done
 		return true;

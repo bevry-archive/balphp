@@ -43,20 +43,18 @@ class Bal_Exceptor {
 				$this->priority = Bal_Log::ERR;
 				# Message
 				$message = $Exception->getMessage();
-				$message = $Locale->translate($message);
-				$this->messages[] = $message;
+				$this->addMessage($message, array(), null, array());
 				break;
 			
 			case 'Zend_Controller_Action_Exception':
-				if ( 404 == $Exception->getId() ) {
+				if ( 404 == $Exception->getCode() ) {
 					# Apply
 					$this->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ACTION;
 					$this->id = 'error-application-404';
 					$this->priority = Bal_Log::ERR;
 					# Message
 					$message = $Exception->getMessage();
-					$message = $Locale->translate($message);
-					$this->messages[] = $message;
+					$this->addMessage($message, array(), null, array());
 				} else {
 					# Type
 					$this->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_OTHER;
@@ -65,8 +63,7 @@ class Bal_Exceptor {
 					$this->priority = Bal_Log::CRIT;
 					# Message
 					$message = $Exception->getMessage();
-					$message = $Locale->translate($message);
-					$this->messages[] = $message;
+					$this->addMessage($message, array(), null, array());
 				}
 				break;
 			
@@ -77,8 +74,7 @@ class Bal_Exceptor {
 				$this->priority = Bal_Log::CRIT;
 				# Message
 				$message = $Exception->getPortableMessage();
-				$message = $Locale->translate($message);
-				$this->messages[] = $message;
+				$this->addMessage($message, array(), null, array());
 				break;
 				
 			case 'Doctrine_Validator_Exception':
@@ -115,14 +111,13 @@ class Bal_Exceptor {
 								default:
 									break;
 							}
-							# Translate
+							# Prepare for future Translate
 							$message['field'] = $Locale->translate($message['table'].'-field-'.$message['field']);
 							$message['plural'] = $Locale->translate($message['table'].'-title-plural');
 							$message['singular'] = $Locale->translate($message['table'].'-title-singular');
 							$message['ownership'] = $Locale->translate($message['table'].'-title-ownership');
-							$message = $Locale->translate($message['id'], $message);
-							# Apply
-							$this->messages[] = $message;
+							# Add Message
+							$this->addMessage($message['id'], $message, null, array('details'=>$message));
 						}
 					}
 				}
@@ -135,8 +130,7 @@ class Bal_Exceptor {
 				$this->priority = Bal_Log::CRIT;
 				# Message
 				$message = $Exception->getMessage();
-				$message = $Locale->translate($message);
-				$this->messages[] = $message;
+				$this->addMessage($message, array(), null, array());
 				break;
 		}
 		
@@ -161,8 +155,13 @@ class Bal_Exceptor {
 	}
 	
 	public function getTitle ( ) {
-		$Locale = $this->getLocale();
-		return $Locale->translate($this->id);
+		return $this->id;
+	}
+	
+	public function addMessage ( $message, array $information = array(), $priority = null, array $extra = array() ) {
+		$extra['friendly'] = true;
+		if ( is_null($priority) ) $priority = $this->getPriority();
+		$this->messages[] = array($message, $information, $priority, $extra);
 	}
 	
 	public function getMessages ( ) {
@@ -173,28 +172,18 @@ class Bal_Exceptor {
 		return $this->priority;
 	}
 	
-	public function log ( ) {
+	public function log ( $Log = null ) {
 		# Prepare
-		$Log = Bal_Log::getInstance();
-		
-		# Extra Information
-		$info = array(
-			'details' => array(
-				'server'	=> $_SERVER,
-				'request'	=> array(
-					'get'		=> $_GET,
-					'post'		=> $_POST,
-					'session'	=> $_SESSION,
-					'cookie'	=> $_COOKIE,
-					'params' 	=> $_REQUEST,
-				),
-				'exceptor' => $this->toArray()
-			)
-		);
+		$Log = $Log?$Log:Bal_Log::getInstance();
 		
 		# Log Exception
-		$Log->log($this->Exception, $this->getPriority());
-		$Log->log($info, Bal_Log::DEBUG);
+		$Log->log($this->Exception, $this->getPriority(), array('details'=>$this->toArray()));
+		
+		# Log Messages
+		$messages = $this->getMessages();
+		foreach ( $messages as $message ) {
+			$Log->log(array($message[0],$message[1]),$message[2],$message[3]);
+		}
 		
 		# Chain
 		return $this;
