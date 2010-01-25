@@ -681,7 +681,6 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		return $Record;
 	}
 	
-	
 	# -----------
 	# Paging
 	
@@ -770,8 +769,23 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		if ( $page_current > $page_last ) $page_current = $page_last;
 		elseif ( $page_current < $page_first ) $page_current = $page_first;
 		
+		# Totals
+		$start = ($page_current-1)*$page_items+1;
+		$finish = $start+count($Items)-1;
+		$total = $page_last==$page_current ? $finish : $page_last*$page_items;
+		
 		# Done
-		return array($Items, $Pages, $page_current);
+		return array($Items, array(
+			'first' => $page_first,
+			'last' => $page_last,
+			'current' => $page_current,
+			'pages' => $Pages,
+			'items' => $page_items,
+			'chunk' => $pages_chunk,
+			'start' => $start,
+			'finish' => $finish,
+			'total' => $total
+		));
 	}
 	
 }
