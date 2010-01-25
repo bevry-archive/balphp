@@ -770,9 +770,9 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		elseif ( $page_current < $page_first ) $page_current = $page_first;
 		
 		# Totals
+		$total = $page_last*$page_items;
 		$start = ($page_current-1)*$page_items+1;
-		$finish = $start+count($Items)-1;
-		$total = $page_last==$page_current ? $finish : $page_last*$page_items;
+		$finish = $page_last==$page_current ? $total : $page_current*$page_items;
 		
 		# Done
 		return array($Items, array(

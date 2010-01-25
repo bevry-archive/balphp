@@ -137,10 +137,7 @@ class Zend_View_Helper_Pager extends Zend_View_Helper_Abstract {
 		# Render
 		$result .=
 			($wrap?'<div class="totals">':'')
-				.($last==$current
-					?$this->view->locale()->translate('pager-totals-actual', compact('start','finish','total'))
-					:$this->view->locale()->translate('pager-totals-approx', compact('start','finish','total'))
-				)
+				.$this->view->locale()->translate('pager-totals', compact('start','finish','total'))
 			.($wrap?'</div>':'');
 		
 		# Done
