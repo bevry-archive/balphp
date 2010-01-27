@@ -138,5 +138,3 @@ if ( function_compare('baldump', 1, true, __FILE__, __LINE__) ) {
 	 	echo '</pre><br/>';
 	}
 }
-
-?>

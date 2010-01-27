@@ -90,5 +90,3 @@ class Licence extends ShopObject
 	
 	// ===========================
 }
-
-?>

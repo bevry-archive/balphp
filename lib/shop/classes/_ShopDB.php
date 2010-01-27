@@ -30,5 +30,3 @@ class ShopDB extends DataBase
 		return $this->DataBase($structure);
 	}
 }
-
-?>

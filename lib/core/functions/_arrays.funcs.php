@@ -923,5 +923,3 @@ if ( !function_exists('array_combine') && function_compare('array_combine', 1, t
 		return $out;
 	}
 }
-
-?>

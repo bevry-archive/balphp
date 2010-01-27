@@ -3984,5 +3984,3 @@ class DataBase
 		return $columns;
 	}
 }
-
-?>

@@ -171,5 +171,3 @@ if ( function_compare('decrypt', 1.1, true, __FILE__, __LINE__) ) {
 		return $result;
 	}
 }
-
-?>

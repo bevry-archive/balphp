@@ -58,5 +58,3 @@ if ( function_compare('create_password', 1.1, true, __FILE__, __LINE__) ) {
 		return ($password);
 	}
 }
-
-?>

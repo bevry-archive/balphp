@@ -2511,5 +2511,3 @@ function create ( $add_log_on_success = true )
 	}
 	
 }
-
-?>

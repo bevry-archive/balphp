@@ -136,5 +136,3 @@ if ( function_compare('regen_url', 1, true, __FILE__, __LINE__) ) {
 		return $url;
 	}
 }
-
-?>

@@ -104,5 +104,3 @@ class Discount extends ShopObject
 	
 	// ===========================
 }
-
-?>

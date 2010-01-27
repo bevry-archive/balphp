@@ -35,5 +35,3 @@ class Customer_Type extends ShopObject
 	// ===========================
 	
 }
-
-?>

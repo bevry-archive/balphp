@@ -83,4 +83,3 @@ if ( function_compare('in_range', 3, true, __FILE__, __LINE__) ) {
 	
 }
 
-?>

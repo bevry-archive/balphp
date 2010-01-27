@@ -47,5 +47,3 @@ if ( function_compare('get_ancestors', 2, true, __FILE__, __LINE__) ) {
 		return $classes;
 	}
 }
-
-?>

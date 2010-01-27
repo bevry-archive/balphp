@@ -93,6 +93,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$Log->addWriter($Writer_Mail);
 		}
 		
+		global $_SESSION;
 		# Log Request Details
 		$details = array(
 			'server'	=> $_SERVER,

@@ -313,6 +313,3 @@ if ( function_compare('scan_dir', 6, true, __FILE__, __LINE__) ) {
 	}
 
 } // END: function_exists
-
-
-?>

@@ -953,5 +953,3 @@ if ( function_compare('move_dir', 1, true, __FILE__, __LINE__) ) {
 		return rename_dir($source, $dest, $overwrite);
 	}
 }
-
-?>

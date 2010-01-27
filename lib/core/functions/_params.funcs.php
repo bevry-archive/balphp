@@ -367,5 +367,3 @@ if( function_comp('set_param', 1) )
 	}
 }
 */
-
-?>

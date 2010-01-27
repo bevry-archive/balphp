@@ -129,5 +129,3 @@ class Email extends ShopObject
 		return $result;
 	}
 }
-
-?>

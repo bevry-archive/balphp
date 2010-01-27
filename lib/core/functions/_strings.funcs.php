@@ -406,5 +406,3 @@ if ( !function_exists('strright') && function_compare('strright', 1, true, __FIL
 		return substr($haystack, $pos + strlen($needle));
 	}
 }
-
-?>

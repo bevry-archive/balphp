@@ -75,5 +75,3 @@ class Serial extends ShopObject
 		return $result;
 	}
 }
-
-?>

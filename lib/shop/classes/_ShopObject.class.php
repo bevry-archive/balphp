@@ -232,5 +232,3 @@ class ShopObject extends DataObject
 	}
 	
 }
-
-?>

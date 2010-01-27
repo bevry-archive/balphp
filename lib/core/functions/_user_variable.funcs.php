@@ -76,5 +76,3 @@ if ( function_compare('get_user_variable', 4, true, __FILE__, __LINE__) ) {
 		return $value;
 	}
 }
-
-?>

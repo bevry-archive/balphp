@@ -309,5 +309,3 @@ class Customer extends ShopObject
 		
 	}
 }
-
-?>

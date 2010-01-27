@@ -1289,5 +1289,3 @@ class Product extends ShopObject
 	}
 	
 }
-
-?>

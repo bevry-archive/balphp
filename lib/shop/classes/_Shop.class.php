@@ -1303,5 +1303,3 @@ class Shop
 		return true;
 	}
 }
-
-?>

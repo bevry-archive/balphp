@@ -126,5 +126,3 @@ class Order_Detail extends ShopObject
 	// ===========================
 	
 }
-
-?>

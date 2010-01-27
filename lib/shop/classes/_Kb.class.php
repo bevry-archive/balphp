@@ -33,5 +33,3 @@ class Kb extends ShopObject
 	// ===========================
 	
 }
-
-?>

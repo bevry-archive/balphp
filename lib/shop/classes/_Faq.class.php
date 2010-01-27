@@ -33,5 +33,3 @@ class Faq extends ShopObject
 	// ===========================
 	
 }
-
-?>

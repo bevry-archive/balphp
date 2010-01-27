@@ -106,5 +106,3 @@ if ( function_compare('newsletter_resubscribe', 1, true, __FILE__, __LINE__) )
 		return true;
 	}
 }
-	
-?>

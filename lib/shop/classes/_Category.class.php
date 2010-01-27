@@ -48,5 +48,3 @@ class Category extends ShopObject
 	}
 
 }
-
-?>

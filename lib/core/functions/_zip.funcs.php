@@ -83,5 +83,3 @@ if ( class_exists('ZipArchive') && function_compare('Zip__append_dir', 1, true, 
 		return true;
 	}
 }
-
-?>

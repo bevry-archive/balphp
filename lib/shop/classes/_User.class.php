@@ -175,5 +175,3 @@ class User extends ShopObject
 	// ===========================
 
 }
-
-?>

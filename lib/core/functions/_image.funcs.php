@@ -987,5 +987,3 @@ if ( function_compare('image_remake', 9.2, true, __FILE__, __LINE__) ) {
 		return $image;
 	}
 }
-
-?>
