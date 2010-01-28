@@ -21,7 +21,7 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
     public function __construct($username, $password, $options = array()) {
         $this->_username = $username;
         $this->_password = $password;
-		// Apply the options
+		# Apply the options
 		$this->mergeOptions($options);
     }
 	
@@ -68,14 +68,17 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
     	$Result = null;
 
     	try {
-    		// Fetch User
-			$DQ = Doctrine_Query::create()
+    		# Prepare Query
+			$Query = Doctrine_Query::create()
 			    ->from($this->getOption('tableName').' u')
 			    ->where('u.'.$this->getOption('indentityColumn').' = ?', $this->_username);
-			$User = $DQ->fetchOne();
 			
+			# Fetch User
+			$User = $Query->fetchOne();
+			
+			# Check
 			if ( empty($User) ) {
-				// Invalid user
+				# Invalid user
 				$Result = new Zend_Auth_Result(
 		            Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND,
 		            null,
@@ -84,7 +87,7 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
 			}
 			else {
 				if ( $User->get($this->getOption('credentialColumn')) !== $this->_password) {
-					// Invalid password
+					# Invalid password
 					$Result = new Zend_Auth_Result(
 			            Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID,
 			            $User->id,
@@ -92,21 +95,33 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
 					);
 				}
 				else {
-					// Everything went well
-					$Result = new Zend_Auth_Result(
-			            Zend_Auth_Result::SUCCESS,
-			            $User->id,
-			            array()
-					);
+					# Check Enabled
+					$Table = Doctrine::getTable($this->getOption('tableName'));
+					if ( $Table->hasField('enabled') && !$User->enabled ) {
+						# Account Disabled
+						$Result = new Zend_Auth_Result(
+				            Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID,
+				            $User->id,
+				            array('The account is currently disabled')
+						);
+					}
+					else {
+						# Everything went well
+						$Result = new Zend_Auth_Result(
+				            Zend_Auth_Result::SUCCESS,
+				            $User->id,
+				            array()
+						);
+					}
 				}
 			}
     	}
 		catch ( Exception $e ) {
-			// Error
+			# Error
     		throw new Zend_Auth_Adapter_Exception($e->getMessage());
     	}
 		
-		// Done
+		# Done
 		return $Result;
     }
 }

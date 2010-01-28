@@ -24,8 +24,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initMail ( ) {
 		# Prepare
 		$this->bootstrap('config');
-		$online = APPLICATION_ENV === 'production';
-		if ( !$online ) return false;
+		$use_mail = true; // APPLICATION_ENV === 'production';
+		if ( !$use_mail ) return false;
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
@@ -52,8 +52,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('config');
 		$this->bootstrap('autoload');
-		$friendly = $online = APPLICATION_ENV === 'production';
-		$friendly = true;
+		$use_mail = true; // APPLICATION_ENV === 'production';
+		$friendly = true; // $use_mail;
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
@@ -79,7 +79,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		}
 		
 		# Check if we are online so that we may send the log via email
-		if ( $online ) {
+		if ( $use_mail ) {
 			# Mail
 			$mail = $applicationConfig['mail'];
 			$Mail = new Zend_Mail();
