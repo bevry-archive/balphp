@@ -47,16 +47,6 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
 	 */
 	protected $_friendly = false;
 	
-    /**
-     * Write a message to the log.
-     *
-     * @param  array  $event  event data
-     * @return void
-     */
-    public function _write($event) {
-        $this->events[] = $event;
-    }
-
 	/**
 	 * Handle whether or not we are friendly
 	 */
@@ -141,6 +131,17 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
     }
 	
     /**
+     * Write a message to the log.
+     *
+     * @param  array  $event  event data
+     * @return void
+     */
+    public function _write($event)
+    {
+        $this->events[] = $event;
+    }
+
+    /**
      * Record shutdown
      *
      * @return void
@@ -148,6 +149,18 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
     public function shutdown()
     {
         $this->shutdown = true;
+    }
+
+    /**
+     * Create a new instance of Zend_Log_Writer_Mock
+     * 
+     * @param  array|Zend_Config $config
+     * @return Zend_Log_Writer_Mock
+     * @throws Zend_Log_Exception
+     */
+    static public function factory($config) 
+    {
+        return new self();
     }
 	
 }

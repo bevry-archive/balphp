@@ -79,29 +79,5 @@ class Bal_Log extends Zend_Log {
 		return $this->getRenderWriter()->render();
 	}
 	
-    /**
-     * Log a message at a priority with extras
-     * @param  string   $message   Message to log
-     * @param  integer  $priority  Priority of message
-     * @param  array    $extras    Extras to add
-     * @return void
-     * @throws Zend_Log_Exception
-     */
-	public function log ( $message, $priority, array $extras = null ) {
-		# Prepare Priority
-		if ( $priority === null ) $priority = Bal_Log::INFO;
-		
-		# Perform Log
-		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			$this->setEventItem($key,$value);
-		}
-		parent::log($message, $priority);
-		if ( !empty($extras) ) foreach ( $extras as $key => $value ) {
-			$this->setEventItem($key,null);
-		}
-		
-		# Chain
-		return $this;
-	}
 	
 }
