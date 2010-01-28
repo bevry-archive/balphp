@@ -73,7 +73,7 @@ class Bal_Exceptor {
 				$this->id = 'error-doctrine-connection';
 				$this->priority = Bal_Log::CRIT;
 				# Message
-				$message = $Exception->getPortableMessage();
+				$message = $Exception->getMessage();
 				$this->addMessage($message, array(), null, array());
 				break;
 				

@@ -87,3 +87,31 @@ if ( function_compare('doctrine_timestamp', 1, true, __FILE__, __LINE__) ) {
 		return $result;
 	}
 }
+
+if ( function_compare('month_start', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the start of the month
+	 * @version 1, January 28, 2010
+	 * @param integer	$month
+	 * @param integer	$year
+	 * @return timestamp
+	 */
+	function month_start ( $month, $year ) {
+		$result = mktime(0,0,0,$month,1,$year);
+		return $result;
+	}
+}
+
+if ( function_compare('month_finish', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the finish of the month
+	 * @version 1, January 28, 2010
+	 * @param integer	$month
+	 * @param integer	$year
+	 * @return timestamp
+	 */
+	function month_finish ( $month, $year ) {
+		$result = mktime(23,59,59,$month+1,0,$year);
+		return $result;
+	}
+}
