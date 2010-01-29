@@ -24,6 +24,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initMail ( ) {
 		# Prepare
 		$this->bootstrap('config');
+		$this->bootstrap('balphp');
 		$use_mail = true; // APPLICATION_ENV === 'production';
 		if ( !$use_mail ) return false;
 		
@@ -50,10 +51,14 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 */
 	protected function _initLog ( ) {
 		# Prepare
-		$this->bootstrap('config');
-		$this->bootstrap('autoload');
 		$use_mail = true; // APPLICATION_ENV === 'production';
 		$friendly = true; // $use_mail;
+		
+		# Prepare Loads
+		$this->bootstrap('config');
+		$this->bootstrap('autoload');
+		$this->bootstrap('balphp');
+		if ( $use_mail ) $this->bootstrap('mail');
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
@@ -311,6 +316,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('routes');
 		$this->bootstrap('doctrine');
 		$this->bootstrap('balphp');
+		$this->bootstrap('mail'); // we require mailing in case something goes wrong
+		$this->bootstrap('log'); // we require logging in various areas
 		
 		# Load
 		$FrontController = Zend_Controller_Front::getInstance();
@@ -373,9 +380,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Apply Extensions
 		$Manager->registerExtension('Taggable');
-		
-		# Apply Listener
-		$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		
 		# Cache
 		//$cacheConn = Doctrine_Manager::connection(new PDO('sqlite::memory:'));

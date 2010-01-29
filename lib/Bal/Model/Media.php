@@ -189,14 +189,14 @@ class Bal_Model_Media extends Base_Media {
 
 	
 	/**
-	 * Ensure Consistency
-	 * @return bool
+	 * Ensure Url
+	 * @return boolean	wheter or not to save
 	 */
-	public function ensureConsistency(){
+	public function ensureUrl(){
 		# Prepare
 		$save = false;
 		
-		# Url
+		# Ensure URL
 		if ( $this->_get('url') !== $this->getUrl() ) {
 			$this->_set('url', $this->getUrl(), false); // false at end to prevent comparison
 			$save = true;
@@ -207,55 +207,61 @@ class Bal_Model_Media extends Base_Media {
 	}
 	
 	/**
-	 * preSave
-	 * @param Doctrine_Event $Event
+	 * Ensure Consistency
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensure ( ) {
+		$ensure = array(
+			$this->ensureUrl()
+		);
+		return in_array(true,$ensure);
+	}
+	
+	/**
+	 * preSave Event
+	 * @return
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
-		$save = false;
+		$result = true;
 		
 		# Ensure
-		if ( $Invoker->ensureConsistency() ) {
-			$save = true;
+		if ( self::ensure($Event) ) {
+			// will save naturally
 		}
 		
 		# Done
-		return true;
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
 	/**
-	 * postSave
-	 * @param Doctrine_Event $Event
-	 * @return string
+	 * postSave Event
+	 * @return
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
-		$save = false;
-	
-		# Ensure
-		if ( $Invoker->ensureConsistency() ) {
-			$save = true;
-		}
+		$result = true;
 		
-		# Apply
-		if ( $save ) {
-			$Invoker->save();
+		# Ensure
+		if ( self::ensure($Event) ) {
+			$this->save();
 		}
 		
 		# Done
-		return true;
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
 	/**
-	 * Delete the physical file
+	 * postDelete Event
 	 * @return
 	 */
 	public function postDelete ( $Event ) {
-		global $Application;
 		# Prepare
+		global $Application;
 		$Invoker = $Event->getInvoker();
+		$result = true;
 		
 		# Get Path
 		$file_path = $Invoker->path;
@@ -264,6 +270,7 @@ class Bal_Model_Media extends Base_Media {
 		unlink($file_path);
 		
 		# Done
-		return true;
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
+	
 }

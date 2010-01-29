@@ -145,14 +145,14 @@ class Bal_Model_User extends Base_User {
 	}
 	
 	/**
-	 * Ensure Consistency
-	 * @return bool
+	 * Ensure Fullname
+	 * @return boolean	wheter or not to save
 	 */
-	public function ensureConsistency(){
+	public function ensureFullname(){
 		# Prepare
 		$save = false;
 		
-		# Url
+		# Fullname
 		if ( $this->_get('fullname') !== $this->getFullname() ) {
 			$this->_set('fullname', $this->getFullname(), false); // false at end to prevent comparison
 			$save = true;
@@ -162,7 +162,51 @@ class Bal_Model_User extends Base_User {
 		return $save;
 	}
 	
+	/**
+	 * Ensure Consistency
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensure(){
+		$ensure = array(
+			$this->ensureFullname()
+		);
+		return in_array(true,$ensure);
+	}
 	
+	/**
+	 * preSave Event
+	 * @return
+	 */
+	public function preSave ( $Event ) {
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event) ) {
+			// will save naturally
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
 	
+	/**
+	 * postSave Event
+	 * @return
+	 */
+	public function postSave ( $Event ) {
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event) ) {
+			$this->save();
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
 	
 }

@@ -60,14 +60,14 @@ class Bal_Model_Subscriber extends Base_Subscriber
 	}
 
 	/**
-	 * Ensure Consistency
-	 * @return bool
+	 * Ensure Tagstr
+	 * @return boolean	wheter or not to save
 	 */
-	public function ensureConsistency(){
+	public function ensureTagstr(){
 		# Prepare
 		$save = false;
 		
-		# Tags
+		# Tagstr
 		if ( $this->setTagstr() ) {
 			$save = true;
 		}
@@ -77,45 +77,50 @@ class Bal_Model_Subscriber extends Base_Subscriber
 	}
 	
 	/**
-	 * Backup old values
-	 * @param Doctrine_Event $Event
+	 * Ensure Consistency
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensure(){
+		$ensure = array(
+			$this->ensureTagstr()
+		);
+		return in_array(true,$ensure);
+	}
+	
+	/**
+	 * preSave Event
+	 * @return
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
-		$save = false;
+		$result = true;
 		
 		# Ensure
-		if ( $Invoker->ensureConsistency() ) {
-			$save = true;
+		if ( self::ensure($Event) ) {
+			// will save naturally
 		}
 		
 		# Done
-		return true;
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
 	/**
-	 * Handle tagstr, authorstr, and code changes
-	 * @param Doctrine_Event $Event
-	 * @return string
+	 * postSave Event
+	 * @return
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
 		$Invoker = $Event->getInvoker();
-		$save = false;
-	
-		# Ensure
-		if ( $Invoker->ensureConsistency() ) {
-			$save = true;
-		}
+		$result = true;
 		
-		# Apply
-		if ( $save ) {
-			$Invoker->save();
+		# Ensure
+		if ( self::ensure($Event) ) {
+			$this->save();
 		}
 		
 		# Done
-		return true;
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
 }

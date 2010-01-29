@@ -923,3 +923,15 @@ if ( !function_exists('array_combine') && function_compare('array_combine', 1, t
 		return $out;
 	}
 }
+
+if ( function_compare('is_simple_array', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks if the array is a simple array
+	 * @version 1, January 30, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function is_simple_array ( array $array ) {
+		return is_numeric(implode('',array_keys($array)));
+	}
+}

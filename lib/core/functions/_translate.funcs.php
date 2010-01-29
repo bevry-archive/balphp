@@ -19,20 +19,52 @@
  */
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
+require_once (dirname(__FILE__) . '/_arrays.funcs.php');
 
 if ( !function_exists('__') && function_compare('__', 1, true, __FILE__, __LINE__) ) {
-
 	/**
-	 * Do something
-	 *
+	 * Translate some text with some params using a simple vsprintf
 	 * @version 1
-	 *
-	 * @todo figure out what the hell this does
-	 *
 	 */
 	function __ ( $text, $params = NULL ) {
 		return vsprintf($text, $params);
 	}
 }
 
-?>
+if ( function_compare('populate', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Populates some text with a set of params
+	 * @version 1, January 30, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function populate ( $text, $params = null, $sprintf = null ) {
+		# Prepare
+		$result = '';
+		
+		# Ensure params is an array
+		if ( !$params ) $params = array(); elseif ( !is_array($params) ) $params = array($params);
+		
+		# Use sprintf?
+		if ( $sprintf === null ) {
+			# Detect
+			$sprintf = is_simple_array($params);
+		}
+		
+		# Apply sprintf?
+		if ( $sprintf ) {
+			# Populate simple
+			$result = vsprintf($text, $params);
+		}
+		else {
+			# Populate advanced
+			$result = ' '.$text;
+			$result = preg_replace('/([^\\\\])\\$([\\w.]+)/ie', '\'${1}\' . delve(\\$params, \'${2}\')', $result);
+			$result = substr($result,1);
+			$result = str_replace(array('\\$','\\.'), array('$','.'), $result);
+		}
+		
+		# Return result
+		return $result;
+	}
+}
