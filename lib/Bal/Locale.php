@@ -351,7 +351,7 @@ class Bal_Locale {
 			$data = $args; unset($args[0]);
 			
 			# Recurse correctly
-			$text = $this-translate($text, $data);
+			$text = $this->translate($text, $data);
 		}
 		
 		# Return translation

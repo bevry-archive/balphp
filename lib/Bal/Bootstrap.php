@@ -405,6 +405,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			Zend_Registry::set('Profiler', $Profiler);
 		}
 		
+		# Apply Listener
+		$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		
 		# Return Manager
 		return $Manager;
 	}
