@@ -20,10 +20,10 @@
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 
-if ( function_compare('create_password', 1.1, true, __FILE__, __LINE__) ) {
+if ( function_compare('generate_password', 1.1, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Create a random user password
+	 * Generate a random user password
 	 *
 	 * @version 1.1, April 24, 2008
 	 *
@@ -37,7 +37,8 @@ if ( function_compare('create_password', 1.1, true, __FILE__, __LINE__) ) {
 	 * @return string
 	 *
 	 */
-	function create_password ( $length = 8, $upper = true, $lower = true, $number = true, $symbols = false, $custom = false ) { // Prepare
+	function generate_password ( $length = 8, $upper = true, $lower = true, $number = true, $symbols = false, $custom = false ) {
+		# Prepare
 		if ( $upper === true )
 			$upper = 'ABCDEFGHJKMNPQRSTUVWXYZ';
 		if ( $lower === true )
@@ -46,15 +47,29 @@ if ( function_compare('create_password', 1.1, true, __FILE__, __LINE__) ) {
 			$number = '123456789';
 		if ( $symbols === true )
 			$symbols = '~!@#$%^&*()_+-={}[]:;,.?';
-			// Append
+		
+		# Append
 		$seed = $upper . $lower . $number . $symbols . $custom;
 		$seed_length = strlen($seed);
-		// Generate
+		
+		# Generate
 		$password = '';
 		for($i = 0, $n = $length, $z = $seed_length - 1; $i < $n; ++$i) { // Append random char to password for length
 			$password .= $seed[rand(0, $z)];
 		}
-		// Return
+		
+		# Return
 		return ($password);
+	}
+}
+
+if ( function_compare('create_password', 1.1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Alias for Generate Password
+	 * @see generate_password
+	 */
+	function create_password ( $length = 8, $upper = true, $lower = true, $number = true, $symbols = false, $custom = false ) {
+		return generate_password($length,$upper,$lower,$number,$symbols,$custom);
 	}
 }
