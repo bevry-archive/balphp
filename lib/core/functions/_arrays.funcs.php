@@ -558,6 +558,20 @@ if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('array_keys_unset', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unset the keys from the array
+	 * @version 1, February 01, 2010
+	 * @param array $array
+	 * @param array $unset
+	 * @return mixed
+	 */
+	function array_keys_unset ( &$array, array $unset ) {
+		return array_unset($array, $unset);
+	}
+}
+
 if ( function_compare('array_keys_keep', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Keep the keys in the array
