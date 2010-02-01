@@ -20,6 +20,7 @@
 
 require_once (dirname(__FILE__) . '/_general.funcs.php');
 require_once (dirname(__FILE__) . '/_arrays.funcs.php');
+require_once (dirname(__FILE__) . '/_strings.funcs.php');
 
 if ( !function_exists('__') && function_compare('__', 1, true, __FILE__, __LINE__) ) {
 	/**
@@ -59,7 +60,7 @@ if ( function_compare('populate', 1, true, __FILE__, __LINE__) ) {
 		else {
 			# Populate advanced
 			$result = ' '.$text;
-			$result = preg_replace('/([^\\\\])\\$([\\w.]+)/ie', '\'${1}\' . delve(\\$params, \'${2}\')', $result);
+			$result = preg_replace('/([^\\\\])\\$([a-zA-Z0-9_.]+)/ie', 'preg_unescape("${1}") . delve(\\$params, preg_unescape("${2}"))', $result);
 			$result = substr($result,1);
 			$result = str_replace(array('\\$','\\.'), array('$','.'), $result);
 		}

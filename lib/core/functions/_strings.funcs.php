@@ -406,3 +406,23 @@ if ( !function_exists('strright') && function_compare('strright', 1, true, __FIL
 		return substr($haystack, $pos + strlen($needle));
 	}
 }
+
+
+if ( function_compare('preg_unescape', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unescape a string a pregex replace function
+	 * @version 1, February 01, 2010
+	 * @param string	$value
+	 * @return string
+	 */
+	function preg_unescape ( $value ) {
+		/*
+		 * When using the e modifier, this function escapes some characters (namely ', ", \ and NULL) in the strings that replace the backreferences.
+		 * This is done to ensure that no syntax errors arise from backreference usage with either single or double quotes (e.g. 'strlen(\'$1\')+strlen("$2")').
+		 * Make sure you are aware of PHP's string syntax to know exactly how the interpreted string will look like.
+		 */
+		$result = str_replace(array("\\'", '\\"', '\\\\', '\\0'), array("'", '"', '\\', '\0'), $value);
+		return $result;
+	}
+}
