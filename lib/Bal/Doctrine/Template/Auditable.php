@@ -132,8 +132,8 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      */
     public function setUp(){
     	# Getters/Setters
-    	if ( !$this->_options['authorstr']['disabled'] )
-			$this->getInvoker()->hasMutator('authorstr', 'setAuthorstr');
+    	//if ( !$this->_options['authorstr']['disabled'] )
+		//	$this->getInvoker()->hasMutator('authorstr', 'setAuthorstr');
         
 		# Relations
 		$this->hasOneHelper($this->_options['author']);
@@ -143,21 +143,24 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 	}
 
 	/**
-	 * Sets the authorstr field
+	 * Ensure the authorstr field
 	 * @param int $position [optional] defaults to id
 	 * @return bool
 	 */
-	public function setAuthorstr ( $author = null ) {
+	public function ensureAuthorstr ( $author = null ) {
+		# Prepare
+		$Record = $this->getInvoker();
+		
 		# Default
 		if ( is_null($author) ) {
-			if ( isset($this->Author) && $this->Author->exists() ) {
-				$author = $this->Author->displayname;
+			if ( isset($Record->Author) && $Record->Author->exists() ) {
+				$author = $Record->Author->displayname;
 			}
 		}
 		
 		# Has changed?
-		if ( $this->authorstr != $author ) {
-			$this->_set('authorstr', $author);
+		if ( $Record->authorstr != $author ) {
+			$Record->set('authorstr', $author, false);
 			return true;
 		}
 		
@@ -175,7 +178,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 		$save = false;
 		
 		# Author
-    	if ( !$this->_options['authorstr']['disabled'] && $this->setAuthorstr() ) {
+    	if ( !$this->_options['authorstr']['disabled'] && $this->ensureAuthorstr() ) {
 			$save = true;
 		}
 		
