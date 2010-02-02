@@ -76,7 +76,9 @@ class Bal_Log extends Zend_Log {
      * @return array
      */
 	public function render ( ) {
-		return $this->getRenderWriter()->render();
+		$cli = empty($_SERVER['HTTP_HOST']);
+		$render = $this->getRenderWriter()->render();
+		return $cli ? strip_tags($render) : $render;
 	}
 	
 	
