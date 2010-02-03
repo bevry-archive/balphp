@@ -95,8 +95,18 @@ class Bal_App {
 		# Prepare
 		if ( $cli ) {
 			# Ensure Args
-			if ( count($args) == 1 ) {
+			$argc = count($args);
+			if ( $argc == 1 ) {
+				# Read Mode
 				$args['mode'] = readstdin('What would you like to do?', array('install','update'));
+			} else {
+				# Use Custom + Additional? Modes
+				$modes = $args; array_shift($modes);
+				$args['mode'] = array_shift($modes);
+				foreach ( $modes as $mode ) {
+					$args[$mode] = true;
+				}
+				unset($modes);
 			}
 		}
 		else {
@@ -114,7 +124,7 @@ class Bal_App {
 		switch ( $mode ) {
 			
 			case 'install':
-				$ensure = array('createindex', 'reload', 'optimiseindex', 'media');
+				$ensure = array('createindex', 'reload', 'optimiseindex', 'media', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
@@ -131,8 +141,9 @@ class Bal_App {
 				echo 'Setup: mode: debug ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
+			case 'custom':
 			default:
-				echo 'Setup: mode: normal ['.implode(array_keys($args),',').']'."\n";
+				echo 'Setup: mode: custom ['.implode(array_keys($args),',').']'."\n";
 				break;
 		}
 		
@@ -141,6 +152,28 @@ class Bal_App {
 		if ( !$cli && delve($args,'debug') ) {
 			echo 'Debug: Enabling Debug Mode'."\n";
 			setcookie('debug',DEBUG_SECRET,0,'/');
+		}
+		
+		
+		# Media: media
+		if ( delve($args,'permissions') ) {
+			echo '- [permissions] -'."\n";
+			echo 'Permissions: Setting up Permissions'."\n";
+			# Run a Bunch of Command Line Stuff
+			$cwd = APPLICATION_ROOT_PATH;
+			$commands = array(
+				'mkdir -p '.$cwd.'/application/models/Base',
+				'sudo chmod -R 755 '.$cwd,
+				"sudo chmod +X $cwd $cwd/index.php ".
+					"$cwd/public/media/*.php ".
+					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
+				"sudo chmod -R 777 $cwd/application/data/dump ".
+					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
+					"$cwd/public/media/images $cwd/public/media/uploads"
+			);
+			$result = systems($commands);
+			# Output what we did
+			//echo 'Permissions: Adjusted permissions across the site successfully'."\n";
 		}
 		
 		

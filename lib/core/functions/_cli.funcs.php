@@ -56,3 +56,19 @@ if ( function_compare('readstdin', 1, true, __FILE__, __LINE__) ) {
 		return $read;
 	}
 }
+
+
+if ( function_compare('systems', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Perform a series of system commands
+	 * @version 1, February 02, 2010
+	 * @param string $text
+	 * @param array $params [optional]
+	 * @param integer $max_tries [optional]
+	 * @return mixed
+	 */
+	function systems ( array $commands ) {
+		$system = implode(';',$commands);
+		return system($system);
+	}
+}

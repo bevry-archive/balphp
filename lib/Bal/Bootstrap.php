@@ -25,11 +25,13 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('config');
 		$this->bootstrap('balphp');
-		$use_mail = true; // APPLICATION_ENV === 'production';
-		if ( !$use_mail ) return false;
 		
-		# Config
+		# Load Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
+		
+		# Prepare Options
+		$use_mail = delve($applicationConfig, 'mail.send_email', true);
+		if ( !$use_mail ) return false;
 		
 		# Fetch
 		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host');
@@ -50,18 +52,18 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 * @return
 	 */
 	protected function _initLog ( ) {
-		# Prepare
-		$use_mail = true; // APPLICATION_ENV === 'production';
-		$friendly = true; // $use_mail;
-		
 		# Prepare Loads
 		$this->bootstrap('config');
 		$this->bootstrap('autoload');
 		$this->bootstrap('balphp');
-		if ( $use_mail ) $this->bootstrap('mail');
 		
-		# Config
+		# Load Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
+		
+		# Prepare Options
+		$use_mail = delve($applicationConfig, 'mail.send_email', true);
+		$friendly = delve($applicationConfig, 'bal.error.friendly', true);
+		if ( $use_mail ) $this->bootstrap('mail');
 		
 		# Create Log
 		$Log = new Bal_Log();
