@@ -108,6 +108,7 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
 
 	function array_hydrate ( &$array ) {
+		if ( !is_array($array) ) $array = array();
 		foreach ( $array as $key => $value ) {
 			if ( is_array($value) ) {
 				array_hydrate($array[$key]);
@@ -116,6 +117,16 @@ if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
 			}
 		}
 	}
+}
+
+
+if ( function_compare('array_prepare', 1, true, __FILE__, __LINE__) ) {
+
+	function array_prepare ( &$array ) {
+		array_clean($array);
+		array_hydrate($array);
+	}
+	
 }
 
 
@@ -700,9 +711,14 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	 * @param mixed $to [optional]
 	 * @return mixed
 	 */
-	function array_clean ( &$array, $to = 'remove' ) {
+	function array_clean ( &$array, $to = null ) {
+		# Prepare
 		if ( !is_array($array) )
 			return $array;
+		if ( is_null($to) )
+			$to = 'remove';
+		
+		# Cycle
 		foreach ( $array as $key => &$value ) {
 			if ( $value === '' || $value === NULL ) {
 				// Empty value, only key
@@ -717,7 +733,9 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 				$value = trim($value);
 			}
 		}
-		$array = array_merge($array); // reset keys
+		// $array = array_merge($array); // reset keys
+		
+		# Return
 		return $array;
 	}
 }
@@ -947,5 +965,22 @@ if ( function_compare('is_simple_array', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function is_simple_array ( array $array ) {
 		return is_numeric(implode('',array_keys($array)));
+	}
+}
+
+
+if ( function_compare('check_flow', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks the flow of a state conversion
+	 * @version 1, February 05, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function check_flow ( $current, $who, $to, array $state ) {
+		# Handle
+		$result = ($current === $to) || ( array_key_exists($current, $state) && array_key_exists($who, $state[$current]) && in_array($to, $state[$current][$who]) );
+	
+		# Return
+		return $result;
 	}
 }

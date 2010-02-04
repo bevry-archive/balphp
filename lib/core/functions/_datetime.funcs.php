@@ -164,7 +164,7 @@ if ( function_compare('month_finish', 1, true, __FILE__, __LINE__) ) {
 if ( function_compare('week_start', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Get the start of the week
-	 * @version 1, January 28, 2010
+	 * @version 1, February 05, 2010
 	 * @param timestamp	$timestamp
 	 * @param string	$day [optional]
 	 * @return timestamp
@@ -181,7 +181,7 @@ if ( function_compare('week_start', 1, true, __FILE__, __LINE__) ) {
 if ( function_compare('week_finish', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Get the finish of the week
-	 * @version 1, January 28, 2010
+	 * @version 1, February 05, 2010
 	 * @param timestamp	$timestamp
 	 * @param string	$day [optional]
 	 * @return timestamp
@@ -190,6 +190,44 @@ if ( function_compare('week_finish', 1, true, __FILE__, __LINE__) ) {
 		$result = ensure_timestamp($timestamp);
 		if ( date('l',$result) !== $day )
 			$result = strtotime('next '.$day, $result);
+		return $result;
+	}
+}
+
+
+if ( function_compare('day_start', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the start of the day
+	 * @version 1, February 05, 2010
+	 * @param timestamp	$timestamp
+	 * @param string	$day [optional]
+	 * @return timestamp
+	 */
+	function day_start ( $timestamp ) {
+		$timestamp = ensure_timestamp($timestamp);
+		$year = date('Y', $timestamp);
+		$month = date('n', $timestamp);
+		$day = date('j', $timestamp);
+		$result = mktime(0,0,0,$month,$day,$year);
+		return $result;
+	}
+}
+
+
+if ( function_compare('day_finish', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the finish of the day
+	 * @version 1, February 05, 2010
+	 * @param timestamp	$timestamp
+	 * @param string	$day [optional]
+	 * @return timestamp
+	 */
+	function day_finish ( $timestamp ) {
+		$timestamp = ensure_timestamp($timestamp);
+		$year = date('Y', $timestamp);
+		$month = date('n', $timestamp);
+		$day = date('j', $timestamp);
+		$result = mktime(23,59,59,$month,$day,$year);
 		return $result;
 	}
 }

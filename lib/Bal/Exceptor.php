@@ -93,10 +93,12 @@ class Bal_Exceptor {
 						foreach ( $errors as $error ) {
 							# Prepare
 							$Table = $Record->getTable();
+							$fieldName = $field;
+							$tableName = $Table->getComponentName();
 							$message = array(
 								'id' 	=> 'error-doctrine-validation-'.$error,
-								'table' => strtolower($Table->getComponentName()),
-								'field' => $field,
+								'table' => strtolower($tableName),
+								'field' => $fieldName,
 								'value' => $Record->get($field)
 							);
 							# Handle Special Errors (ones which we can get more info)
@@ -112,10 +114,10 @@ class Bal_Exceptor {
 									break;
 							}
 							# Prepare for future Translate
-							$message['field'] = $Locale->translate($message['table'].'-field-'.$message['field']);
-							$message['plural'] = $Locale->translate($message['table'].'-title-plural');
-							$message['singular'] = $Locale->translate($message['table'].'-title-singular');
-							$message['ownership'] = $Locale->translate($message['table'].'-title-ownership');
+							$message['field'] = $Locale->translate_default($message['table'].'-field-'.$field, array(), $fieldName);
+							$message['plural'] = $Locale->translate_default($message['table'].'-title-plural', array(), $tableName.'s');
+							$message['singular'] = $Locale->translate_default($message['table'].'-title-singular', array(), $tableName);
+							$message['ownership'] = $Locale->translate_default($message['table'].'-title-ownership', array(), $tableName.'\'s');
 							# Add Message
 							$this->addMessage($message['id'], $message, null, array('details'=>$message));
 						}

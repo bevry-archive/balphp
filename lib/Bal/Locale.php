@@ -313,20 +313,38 @@ class Bal_Locale {
 		return $this->translation($lang, 'language');
 	}
 	
+	
+	/**
+	 * Translate some text with default
+	 * @param string $text
+	 * @param array $info
+	 * @param string $default
+	 * @return string
+	 */
+	public function translate_default ( $text, array $info = array(), $default = null ) {
+		$translation = $this->translate($text, $info);
+		if ( $translation === $text && $default ) {
+			$translation = $default;
+		}
+		return $translation;
+	}
+	
 	/**
 	 * Translate some text
 	 * @param string $text
 	 * @param mixed ...
 	 * @return string
 	 */
-	public function translate ( $text ) {
+	public function translate ( ) {
 		# Prepare Arrguments
 		$numargs = func_num_args();
 		$args = func_get_args();
+		$data = array();
 		
 		# Check Arg TYpes
 		if ( $numargs === 2 && is_array($args[1]) ) {
 			# We were passed the data as the second argument
+			$text = $args[0];
 			$data = $args[1];
 			if ( is_object($data) ) {
 				$data = $data->toArray();
@@ -348,7 +366,8 @@ class Bal_Locale {
 		}
 		else {
 			# We were passed the data as arguments
-			$data = $args; unset($args[0]);
+			$data = $args;
+			$text = array_shift($data);
 			
 			# Recurse correctly
 			$text = $this->translate($text, $data);

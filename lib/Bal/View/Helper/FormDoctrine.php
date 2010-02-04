@@ -133,8 +133,8 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			case 'enum':
 				$options = $Table->getEnumValues($field);
 				$options = array_flip($options);
-				foreach ( $options as $value => &$text ) {
-					$text = $this->view->translate($table.'-'.$field.'-'.$value);
+				foreach ( $options as $enum => &$text ) {
+					$text = $this->view->locale()->translate_default($table.'-'.$field.'-'.$enum, array(), $enum);
 				}
 				$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				break;
