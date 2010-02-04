@@ -74,6 +74,48 @@ if ( function_compare('days_between', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('weeks_between', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Gets the weeks between two timestamps
+	 * @version 1, February 05, 2010
+	 * @param timestamp	$start
+	 * @param timestamp	$finish
+	 * @param boolean	$invlusive
+	 * @return integer
+	 */
+	function weeks_between ( $start, $finish, $inclusive = null ) {
+		# Prepare
+		$start = ensure_timestamp($start);
+		$finish = ensure_timestamp($finish);
+		
+		# Check
+		if ( $start > $finish ) {
+			# Stat is longer, swap
+			$tmp = $start;
+			$start = $finish;
+			$finish = $start;
+		}
+		
+		# Calculate
+		$offset = $finish-$start;
+		$between = floor($offset/60/60/24/7);
+		
+		# Adjust
+		if ( $inclusive === true ) {
+			++$between;
+		} elseif ( $inclusive === false ) {
+			if ( $between > 0 ) {
+				--$between;
+			}
+		}
+		
+		# Done
+		return $between;
+	}
+}
+
+
 if ( function_compare('doctrine_timestamp', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Create a doctrine timestamp
@@ -87,6 +129,7 @@ if ( function_compare('doctrine_timestamp', 1, true, __FILE__, __LINE__) ) {
 		return $result;
 	}
 }
+
 
 if ( function_compare('month_start', 1, true, __FILE__, __LINE__) ) {
 	/**
@@ -102,6 +145,7 @@ if ( function_compare('month_start', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
 if ( function_compare('month_finish', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Get the finish of the month
@@ -112,6 +156,40 @@ if ( function_compare('month_finish', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function month_finish ( $month, $year ) {
 		$result = mktime(23,59,59,$month+1,0,$year);
+		return $result;
+	}
+}
+
+
+if ( function_compare('week_start', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the start of the week
+	 * @version 1, January 28, 2010
+	 * @param timestamp	$timestamp
+	 * @param string	$day [optional]
+	 * @return timestamp
+	 */
+	function week_start ( $timestamp, $day = 'Monday' ) {
+		$result = ensure_timestamp($timestamp);
+		if ( date('l',$result) !== $day )
+			$result = strtotime('last '.$day, $result);
+		return $result;
+	}
+}
+
+
+if ( function_compare('week_finish', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get the finish of the week
+	 * @version 1, January 28, 2010
+	 * @param timestamp	$timestamp
+	 * @param string	$day [optional]
+	 * @return timestamp
+	 */
+	function week_finish ( $timestamp, $day = 'Sunday' ) {
+		$result = ensure_timestamp($timestamp);
+		if ( date('l',$result) !== $day )
+			$result = strtotime('next '.$day, $result);
 		return $result;
 	}
 }
