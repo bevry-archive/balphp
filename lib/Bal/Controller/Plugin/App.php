@@ -596,11 +596,23 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 	# -----------
 	# Menu
 	
-	
-	public function getFileUrl ( $file ) {
+	public function getPublicFileUrl ( $file ) {
 		# Prepare
 		$publicPath = $this->getPublicPath();
 		$publicUrl = $this->getPublicUrl();
+		$result = false;
+		
+		# Handle
+		if ( file_exists($publicPath . DIRECTORY_SEPARATOR . $file) ) {
+			$result = $publicUrl . '/' . $file;
+		}
+		
+		# Done
+		return $result;
+	}
+	
+	public function getThemeFileUrl ( $file ) {
+		# Prepare
 		$themePath = $this->getThemePath();
 		$themeUrl = $this->getThemeUrl();
 		$result = false;
@@ -608,9 +620,20 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		# Handle
 		if ( file_exists($themePath . DIRECTORY_SEPARATOR . $file) ) {
 			$result = $themeUrl . '/' . $file;
-		} elseif ( file_exists($publicPath . DIRECTORY_SEPARATOR . $file) ) {
-			$result = $publicUrl . '/' . $file;
 		}
+		
+		# Done
+		return $result;
+	}
+	
+	public function getFileUrl ( $file, $for = null ) {
+		# Prepare
+		$result = false;
+		
+		# Handle
+		if ( $for === 'theme' || !$for )
+		$result = $this->getThemeFileUrl($file);
+		if ( $for === 'public' || (!$for && !$result) ) $result = $this->getPublicFileUrl($file);
 		
 		# Done
 		return $result;

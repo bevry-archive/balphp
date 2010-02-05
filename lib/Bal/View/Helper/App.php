@@ -80,27 +80,27 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $result;
 	}
 	
-	public function getStylesheetUrl ( $file ) {
+	public function getStylesheetUrl ( $file, $for = null ) {
 		$file = 'styles/' . $file;
-		$url = $this->getApp()->getFileUrl($file);
+		$url = $this->getApp()->getFileUrl($file, $for);
 		return $url;
 	}
 	
-	public function getScriptUrl ( $file ) {
+	public function getScriptUrl ( $file, $for = null ) {
 		$file = 'scripts/' . $file;
-		$url = $this->getApp()->getFileUrl($file);
+		$url = $this->getApp()->getFileUrl($file, $for);
 		return $url;
 	}
 	
-	public function getLocaleStylesheetUrl ( ) {
+	public function getLocaleStylesheetUrl ( $for = null ) {
 		# Attempt Locale
 		$file = 'locale/'.$this->view->locale()->getFullLocale().'.css';
-		$url = $this->getStylesheetUrl($file);
+		$url = $this->getStylesheetUrl($file, $for);
 		
 		# Attempt Language
 		if ( !$url ) {
 			$file = 'locale/'.$this->view->locale()->getLanguage().'.css';
-			$url = $this->getStylesheetUrl($file);
+			$url = $this->getStylesheetUrl($file, $for);
 		}
 		
 		# Done
@@ -137,8 +137,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $browser )	$this->view->headLink()->offsetSetStylesheet($offset+1, $browser);
 		
 		# Style
-		$style = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css');
+		$style = $this->getStylesheetUrl('style.css', 'public');
 		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+2, $style);
+		$style = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css', 'theme');
+		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+3, $style);
 		
 		# Favicon
 		$this->view->headLink(array('rel' => 'icon', 'href' => $App->getFileUrl('favicon.ico'), 'type' => 'image/x-icon'), 'PREPEND');
@@ -153,8 +155,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$layout = $App->getMvc()->getLayout();
 		
 		# Style
-		$script = $this->getScriptUrl($layout === 'layout' ? 'script.js' : 'script-'.$layout.'.js');
+		$script = $this->getScriptUrl('script.js', 'public');
 		if ( $script )	$this->view->headScript()->offsetSetFile($offset+0, $script);
+		$script = $this->getScriptUrl($layout === 'layout' ? 'script.js' : 'script-'.$layout.'.js', 'theme');
+		if ( $script )	$this->view->headScript()->offsetSetFile($offset+1, $script);
 		
 		# Done
 		return $this->view->headScript();
