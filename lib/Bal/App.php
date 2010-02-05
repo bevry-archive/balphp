@@ -162,7 +162,7 @@ class Bal_App {
 			# Run a Bunch of Command Line Stuff
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
-				'mkdir -p '.$cwd.'/application/models/Base',
+				"mkdir -p $cwd/application/models/Base $cwd/application/data/dump",
 				'sudo chmod -R 755 '.$cwd,
 				"sudo chmod +X $cwd $cwd/index.php ".
 					"$cwd/public/media/*.php ".
