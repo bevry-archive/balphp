@@ -410,6 +410,13 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Apply Listener
 		$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		
+		# Transaction
+		$Connection->beginTransaction();
+		
+		# Store
+		Zend_Registry::set('Doctrine_Connection', $Connection);
+		Zend_Registry::set('Doctrine_Manager', $Manager);
+		
 		# Return Manager
 		return $Manager;
 	}

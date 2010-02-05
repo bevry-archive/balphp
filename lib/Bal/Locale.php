@@ -387,7 +387,10 @@ class Bal_Locale {
 	 * @param timezone $timezone
 	 * @return Zend_Date
 	 */
-	public function getDate($timestamp = null, $timezone = null){
+	public function getDate ($timestamp = null, $timezone = null) {
+		# Ensure Timestamp
+		if ( $timestamp ) $timestamp = ensure_timestamp($timestamp);
+		
 		# Get the Date for Timestamp
 		$Date = new Zend_Date($timestamp);
 		
@@ -441,9 +444,6 @@ class Bal_Locale {
 	 * @return string
 	 */
 	public function datetime ( $timestamp, $format_datetime = null, $locale = null ) {
-		# Ensure Timestamp
-		$timestamp = ensure_timestamp($timestamp);
-		
 		# Get the Date for the Timestamp
 		$Date = $this->getDate($timestamp);
 		
