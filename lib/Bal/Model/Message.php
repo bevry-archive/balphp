@@ -43,7 +43,7 @@ class Bal_Model_Message extends Base_Message
 		$params['sender'] = delve($Message,'Sender.fullname','System');
 		
 		# Apply URLs
-		$messageUrl = $rootUrl.$View->burn()->getMessageUrl($Message);
+		$messageUrl = $rootUrl.$View->app()->getMessageUrl($Message);
 		$params['rootUrl'] = $rootUrl;
 		$params['baseUrl'] = $baseUrl;
 		$params['messageUrl'] = $messageUrl;
@@ -86,7 +86,7 @@ class Bal_Model_Message extends Base_Message
 		$Receiver = $this->Receiver;
 		
 		# Prepare URL
-		$activateUrl = $rootUrl.$View->burn()->getActivateUrl($Receiver);
+		$activateUrl = $rootUrl.$View->app()->getActivateUrl($Receiver);
 		$params['activateUrl'] = $activateUrl;
 
 		# --------------------------

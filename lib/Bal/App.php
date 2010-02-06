@@ -348,10 +348,14 @@ class Bal_App {
 		return Zend_Registry::get('Log');
 	}
 	
+	static public function getBootstrap ( ) {
+		return self::getInstance()->getApplication()->getBootstrap();
+	}
+	
 	static public function getView ( $clone = false ) {
 		# Prepare
 		$View = null;
-		$Bootstrap = $GLOBALS['Application']->getBootstrap();
+		$Bootstrap = self::getBootstrap();
 		
 		# Find
 		if ( $Bootstrap->hasResource('view') && is_object($View = $Bootstrap->getResource('view')) && method_exists($View,'getScriptPaths') && ($tmp = $View->getScriptPaths()) && !empty($tmp) ) {

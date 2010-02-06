@@ -147,4 +147,5 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		}
 		return false;
 	}
+	
 }

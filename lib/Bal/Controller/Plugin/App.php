@@ -829,4 +829,58 @@ class Bal_Controller_Plugin_App extends Bal_Controller_Plugin_Abstract {
 		));
 	}
 	
+
+	# ========================
+	# GETTERS: URLS
+	
+	
+	
+	/**
+	 * Fetch the Activate Url for a User
+	 * @param mixed $user 
+	 * @param array $params [optional]
+	 * @param boolean $reset [optional]
+	 * @return string
+	 */
+	public function getActivateUrl($code, array $params = array(), $reset=true){
+		# Prepare
+		$params['action'] = 'activate';
+		
+		# Ensure Seller
+		$code = (is_string($code)||is_numeric($code)) ? $code : delve($code, 'code');
+		
+		# Apply Seller
+		$params['code'] = $code;
+		
+		# Handle
+		$url = $this->getRouter()->assemble($params, 'default', $reset);
+		
+		# Done
+		return $url;
+	}
+	
+	/**
+	 * Fetch the Message Url
+	 * @param mixed $message 
+	 * @param array $params [optional]
+	 * @param boolean $reset [optional]
+	 * @return string url of the page
+	 */
+	public function getMessageUrl($message, array $params = array(), $reset=true){
+		# Prepare
+		$params['action'] = 'message';
+		
+		# Ensure Seller
+		$message_id = is_numeric($message) ? $message : delve($message, 'id');
+		
+		# Apply Seller
+		$params['id'] = $message_id;
+		
+		# Handle
+		$url = $this->getRouter()->assemble($params, 'default', $reset);
+		
+		# Done
+		return $url;
+	}
+	
 }
