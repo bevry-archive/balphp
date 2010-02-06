@@ -49,15 +49,15 @@ class Bal_Controller_Plugin_Abstract extends Zend_Controller_Plugin_Abstract {
 	/**
 	 * Get the Front Controller
 	 */
-	public function getFront ( ) {
-		return Zend_Controller_Front::getInstance();
+	public function getFrontController ( ) {
+		return Bal_App::getFrontController();
 	}
 	
 	/**
 	 * Get the Front Controller's Router
 	 */
 	public function getRouter ( ) {
-		return $this->getFront()->getRouter();
+		return Bal_App::getRouter();
 	}
 	
 	
@@ -72,24 +72,7 @@ class Bal_Controller_Plugin_Abstract extends Zend_Controller_Plugin_Abstract {
 	 * @return mixed
 	 */
 	public function getConfig ( $delve = null, $default = null ) {
-		# Prepare:
-		$applicationConfig = array();
-		
-		# Load
-		if ( Zend_Registry::isRegistered('applicationConfig') ) {
-			$applicationConfig = Zend_Registry::get('applicationConfig');
-		}
-		
-		# Check
-		if ( !$delve ) {
-			return $applicationConfig;
-		}
-		
-		# Delve
-		$value = delve($applicationConfig, $delve, $default);
-		
-		# Done
-		return $value;
+		return Bal_App::getConfig($delve, $default);
 	}
 	
 	

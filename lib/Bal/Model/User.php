@@ -19,8 +19,55 @@ class Bal_Model_User extends Base_User {
 	public function setUp ( ) {
 		$this->hasAccessor('fullname', 'getFullname');
 		$this->hasMutator('avatar', 'setAvatar');
-		parent::setUp();
+		$this->hasMutator('password', 'setPassword');
+		return parent::setUp();
 	}
+	
+	/**
+	 * Prepare a User's Password
+	 * @return
+	 */
+	public function preparePassword ( $value ) {
+		$password = md5($value);
+		return $password;
+	}
+	
+	/**
+	 * Reset the User's Password
+	 * @return
+	 */
+	public function resetPassword ( ) {
+		# Reset Password
+		$password = generate_password();
+		$this->password = $password;
+		
+		# Create Welcome Message
+		$Message = new Message();
+		$Message->Receiver = $this;
+		$Message->setCode('user-password-reset',false,compact('password'));
+		$Message->save();
+		
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * Set the User's Password
+	 * @return
+	 */
+	public function setPassword ( $value ) {
+		$password = $this->preparePassword($value);
+		return $this->_set('password',$password);
+	}
+	
+	/**
+	 * Compare the User's Credentials with passed
+	 * @return boolean
+	 */
+	public function compareCredentials ( $username, $password ) {
+		return $this->username === $username && ($this->password === $password || $this->password === $this->preparePassword($password));
+	}
+	
 	
 	/**
 	 * Set the User's Avatar
@@ -145,10 +192,51 @@ class Bal_Model_User extends Base_User {
 	}
 	
 	/**
+	 * Activate this User
+	 * @return string
+	 */
+	public function activate ( ) {
+		# Proceed
+		$this->enabled = true;
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Has the user been activated?
+	 * @return string
+	 */
+	public function isActive ( ) {
+		return $this->enabled === true;
+	}
+	
+	/**
+	 * Ensure Code
+	 * @param Doctrine_Event $Event
+	 * @return bool
+	 */
+	public function ensureCode ( $Event ) {
+		# Prepare
+		$code = md5($this->username.$this->email);
+		$save = false;
+		
+		# Is it different?
+		if ( $this->_get('code') != $code ) {
+			$this->_set('code', $code, false);
+			$save = true;
+		}
+		
+		# Done
+		return $save;
+	}
+	
+	/**
 	 * Ensure Fullname
+	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureFullname(){
+	public function ensureFullname ( $Event ) {
 		# Prepare
 		$save = false;
 		
@@ -164,17 +252,20 @@ class Bal_Model_User extends Base_User {
 	
 	/**
 	 * Ensure Consistency
+	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure(){
+	public function ensure ( $Event ) {
 		$ensure = array(
-			$this->ensureFullname()
+			$this->ensureCode($Event),
+			$this->ensureFullname($Event)
 		);
 		return in_array(true,$ensure);
 	}
 	
 	/**
 	 * preSave Event
+	 * @param Doctrine_Event $Event
 	 * @return
 	 */
 	public function preSave ( $Event ) {
@@ -193,6 +284,7 @@ class Bal_Model_User extends Base_User {
 	
 	/**
 	 * postSave Event
+	 * @param Doctrine_Event $Event
 	 * @return
 	 */
 	public function postSave ( $Event ) {
@@ -204,6 +296,26 @@ class Bal_Model_User extends Base_User {
 		if ( self::ensure($Event) ) {
 			$this->save();
 		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
+	
+	/**
+	 * Post Insert Event
+	 * @param Doctrine_Event $Event
+	 * @return string
+	 */
+	public function postInsert ( $Event ) {
+		# Prepare
+		$Invoker = $Event->getInvoker();
+		$result = true;
+	
+		# Create Welcome Message
+		$Message = new Message();
+		$Message->Receiver = $Invoker;
+		$Message->code = 'user-insert';
+		$Message->save();
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;

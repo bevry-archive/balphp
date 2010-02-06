@@ -414,8 +414,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		//$Connection->beginTransaction();
 		
 		# Store
-		Zend_Registry::set('Doctrine_Connection', $Connection);
-		Zend_Registry::set('Doctrine_Manager', $Manager);
+		Bal_App::setDataConnection($Connection);
+		Bal_App::setDataManager($Manager);
 		
 		# Return Manager
 		return $Manager;

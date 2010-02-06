@@ -426,3 +426,21 @@ if ( function_compare('preg_unescape', 1, true, __FILE__, __LINE__) ) {
 		return $result;
 	}
 }
+
+
+if ( function_compare('magic_function', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Convert a function name into a magic camel case one
+	 * @version 1, February 06, 2010
+	 * @param string	$value
+	 * @return string
+	 */
+	function magic_function ( $value ) {
+		$value = str_replace(array('-','_',"\t","\n"),' ',$value);
+		$value = preg_replace('/[^a-zA-Z0-9_ ]/', '', $value);
+		$value = ucwords($value);
+		$value = str_replace(' ', '', $value);
+		return $value;
+	}
+}

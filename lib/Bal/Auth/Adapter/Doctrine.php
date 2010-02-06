@@ -113,7 +113,9 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
 				if ( method_exists($tableName, 'compareCredentials') )
 					$credentialsMatch = $User->compareCredentials($username,$password);
 				elseif ( $credentialColumn )
-					$credentialsMatch = $User->get($credentialColumn) !== $password;
+					$credentialsMatch = $User->get($credentialColumn) === $password;
+				else
+					$credentialsMatch = true;
 				
 				# Check Credentials
 				if ( !$credentialsMatch ) {
@@ -131,7 +133,9 @@ class Bal_Auth_Adapter_Doctrine implements Zend_Auth_Adapter_Interface {
 						$isActive = $User->isActive();
 					elseif ( $activeColumn )
 						$isActive = $User->get($activeColumn) ? true : false;
-				
+					else
+						$isActive = true;
+					
 					# Check Enabled
 					if ( !$isActive ) {
 						# Account Disabled

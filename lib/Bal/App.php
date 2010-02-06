@@ -320,4 +320,88 @@ class Bal_App {
 		return $this;
 	}
 	
+	static public function setDataConnection ( $Doctrine_Connection ) {
+		return Zend_Registry::set('Doctrine_Connection', $Doctrine_Connection);
+	}
+	static public function getDataConnection ( ) {
+		return Zend_Registry::get('Doctrine_Connection');
+	}
+	
+	static public function setDataManager ( $Doctrine_Manager ) {
+		return Zend_Registry::set('Doctrine_Manager', $Doctrine_Manager);
+	}
+	static public function getDataManager ( ) {
+		return Zend_Registry::get('Doctrine_Manager');
+	}
+	
+	static public function setLocale ( $Locale ) {
+		return Zend_Registry::set('Locale', $Locale);
+	}
+	static public function getLocale ( ) {
+		return Zend_Registry::get('Locale');
+	}
+	
+	static public function setLog ( $Log ) {
+		return Zend_Registry::set('Log', $Log);
+	}
+	static public function getLog ( ) {
+		return Zend_Registry::get('Log');
+	}
+	
+	static public function getView ( $clone = false ) {
+		# Prepare
+		$View = null;
+		$Bootstrap = $GLOBALS['Application']->getBootstrap();
+		
+		# Find
+		if ( $Bootstrap->hasResource('view') && is_object($View = $Bootstrap->getResource('view')) && method_exists($View,'getScriptPaths') && ($tmp = $View->getScriptPaths()) && !empty($tmp) ) {
+			// We can send mail
+			$View = $clone ? clone $View : $View;
+		}
+		
+		# Done
+		return $View;
+	}
+	
+	/**
+	 * Get the Front Controller
+	 */
+	static public function getFrontController ( ) {
+		return Zend_Controller_Front::getInstance();
+	}
+	
+	/**
+	 * Get the Front Controller's Router
+	 */
+	static public function getRouter ( ) {
+		return self::getFrontController()->getRouter();
+	}
+	
+	/**
+	 * Gets the Application Configuration (as array) or specific config variable
+	 * @param string $delve [optional]
+	 * @param mixed $default [optional]
+	 * @return mixed
+	 */
+	static public function getConfig ( $delve = null, $default = null ) {
+		# Prepare:
+		$applicationConfig = array();
+		
+		# Load
+		if ( Zend_Registry::isRegistered('applicationConfig') ) {
+			$applicationConfig = Zend_Registry::get('applicationConfig');
+		}
+		
+		# Check
+		if ( !$delve ) {
+			return $applicationConfig;
+		}
+		
+		# Delve
+		$value = delve($applicationConfig, $delve, $default);
+		
+		# Done
+		return $value;
+	}
+	
 }
