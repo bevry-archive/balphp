@@ -89,9 +89,6 @@ class Bal_App {
 		$applicationConfig = self::getConfig();
 		$siteName = delve($applicationConfig, 'bal.site.name', basename(APPLICATION_ROOT_PATH));
 		
-		# Intro
-		echo 'Welcome to ['.$siteName.']'."\n";
-		
 		# Prepare Arguments
 		$cli = false;
 		$args = array();
@@ -102,7 +99,21 @@ class Bal_App {
 			$args =& $_SERVER['argv'];
 		}
 		
-		# Prepare
+		# Prepare Non-Cli
+		if ( !$cli ) {
+			# Prepare Headers
+			header('Content-Type: text/plain');
+			
+			# Check Secret
+			if ( delve($args,'secret') !== delve($applicationConfig,'bal.setup.secret') ) {
+				throw new Zend_Exception('Trying to setup without the secret! Did we not tell you? Maybe it is for good reason!');
+			}
+		}
+			
+		# Intro
+		echo 'Welcome to ['.$siteName.']'."\n";
+		
+		# Prepare Cli
 		if ( $cli ) {
 			# Ensure Args
 			$argc = count($args);
@@ -117,15 +128,6 @@ class Bal_App {
 					$args[$mode] = true;
 				}
 				unset($modes);
-			}
-		}
-		else {
-			# Prepare Headers
-			header('Content-Type: text/plain');
-			
-			# Check Secret
-			if ( delve($args,'secret') !== delve($applicationConfig,'bal.setup.secret') ) {
-				throw new Zend_Exception('Trying to setup without the secret! Did we not tell you? Maybe it is for good reason!');
 			}
 		}
 		
