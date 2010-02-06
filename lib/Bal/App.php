@@ -86,7 +86,11 @@ class Bal_App {
 		$this->bootstrap();
 		
 		# Prepare Config
-		$applicationConfig = Zend_Registry::get('applicationConfig');
+		$applicationConfig = self::getConfig();
+		$siteName = delve($applicationConfig, 'bal.site.name', basename(APPLICATION_ROOT_PATH));
+		
+		# Intro
+		echo 'Welcome to ['.$siteName.']'."\n";
 		
 		# Prepare Arguments
 		$cli = false;
@@ -104,7 +108,7 @@ class Bal_App {
 			$argc = count($args);
 			if ( $argc == 1 ) {
 				# Read Mode
-				$args['mode'] = readstdin('What would you like to do?', array('install','update'));
+				$args['mode'] = readstdin('What would you like to do?', array('install','update','cancel'));
 			} else {
 				# Use Custom + Additional? Modes
 				$modes = $args; array_shift($modes);
@@ -145,6 +149,12 @@ class Bal_App {
 				$ensure = array('debug');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: debug ['.implode(array_keys($args),',').']'."\n";
+				break;
+			
+			case 'cancel':
+			case null:
+				echo 'Setup has been cancelled.'."\n\n";
+				return;
 				break;
 			
 			case 'custom':
@@ -297,7 +307,7 @@ class Bal_App {
 		
 		# Done
 		echo '-'."\n";
-		echo 'Completed Setup.'."\n".'-'."\n".'Output Log:'."\n".Bal_Log::getInstance()->render();
+		echo 'Completed Setup.'."\n".'-'."\n".'Output Log:'."\n".Bal_Log::getInstance()->render()."\n\n";
 		
 		# Chain
 		return $this;
