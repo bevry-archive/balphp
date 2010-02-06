@@ -904,7 +904,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$params['user'] = $user_id;
 		
 		# Handle
-		$url = $this->getRouter()->assemble($params, 'action', $reset);
+		$url = $this->getRouter()->assemble($params, 'default', $reset);
 		
 		# Done
 		return $url;

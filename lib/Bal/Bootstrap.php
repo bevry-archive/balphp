@@ -426,7 +426,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 * @return
 	 */
 	protected function _initBalphp ( ) {
+		# Prepare
 		$this->bootstrap('autoload');
+		global $Application;
 		
 		# balPHP
 		Bal_Framework::import();

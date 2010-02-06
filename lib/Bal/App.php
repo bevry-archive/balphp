@@ -16,11 +16,13 @@ class Bal_App {
 	public static function getInstance ( Zend_Application $Application = null ) {
 		# Prepare
 		$Registry = Zend_Registry::getInstance();
+		
 		# Apply
-		if ( !$Registry->isRegistered('App') && $Application ) {
+		if ( !$Registry->isRegistered('App') ) {
 			$App = new Bal_App($Application);
 			$Registry->set('App',$App);
 		}
+		
 		# Return
 		return $Registry->get('App');
 	}
@@ -34,7 +36,11 @@ class Bal_App {
 	}
 	
 	public function getApplication ( ) {
-		return $this->_Application;
+		$Application = $this->_Application;
+		if ( empty($Application) ) {
+			global $Application;
+		}
+		return $Application;
 	}
 	
 	protected function bootstrapCli ( ) {
