@@ -1,5 +1,4 @@
 <?php
-require_once 'Zend/Controller/Action/Helper/Abstract.php';
 class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abstract {
 
 	protected $_options = array(
@@ -7,16 +6,11 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		'logged_in_forward' => array('index')
 	);
 	
-	protected $_App = null;
-	
 	/**
 	 * Construct
 	 * @param array $options
 	 */
 	public function __construct ( array $options = array() ) {
-		# Apply
-		$this->_App = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
-		
 		# Options
 		$this->mergeOptions($options);
 		
@@ -131,7 +125,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	 * Returns @see Bal_Controller_Plugin_App
 	 */
 	public function getApp(){
-		return $this->_App;
+		return Bal_Controller_Plugin_App::getInstance();
 	}
 
 	/**
@@ -147,5 +141,5 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		}
 		return false;
 	}
-	
+		
 }

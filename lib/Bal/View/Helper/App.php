@@ -15,9 +15,6 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	 * @param Zend_View_Interface $view
 	 */
 	public function setView (Zend_View_Interface $view) {
-		# Apply
-		$this->_App = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
-		
 		# Set
 		$this->view = $view;
 		
@@ -37,18 +34,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	# PARENT
 	
 	/**
-	 * The App Plugin
-	 * @var Bal_Controller_Plugin_App
-	 */
-	protected $_App = null;
-	
-	
-	/**
 	 * Returns @see Bal_Controller_Plugin_App
 	 */
 	public function getApp(){
-		# Done
-		return $this->_App;
+		return Bal_Controller_Plugin_App::getInstance();
 	}
 	
 	/**

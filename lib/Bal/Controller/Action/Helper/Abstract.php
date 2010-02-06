@@ -1,6 +1,5 @@
 <?php
-require_once 'Zend/Controller/Action/Helper/Abstract.php';
-class Bal_Controller_Action_Helper_Abstract extends Zend_Controller_Action_Helper_Abstract {
+abstract class Bal_Controller_Action_Helper_Abstract extends Zend_Controller_Action_Helper_Abstract {
 	
 	# ========================
 	# OPTIONS

@@ -352,6 +352,10 @@ class Bal_App {
 		return self::getInstance()->getApplication()->getBootstrap();
 	}
 	
+	static public function getPlugin ( $plugin ) {
+		return self::getFrontController()->getPlugin($plugin);
+	}
+	
 	static public function getView ( $clone = false ) {
 		# Prepare
 		$View = null;

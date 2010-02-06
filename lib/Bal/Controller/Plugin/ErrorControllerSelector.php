@@ -1,5 +1,4 @@
 <?php
-require_once 'Zend/Controller/Plugin/Abstract.php';
 class Bal_Controller_Plugin_ErrorControllerSelector extends Zend_Controller_Plugin_Abstract {
 
 	public function dispatchLoopShutdown ( Zend_Controller_Request_Abstract $request ) {

@@ -1,5 +1,4 @@
 <?php
-require_once 'Zend/Cotnroller/Action/Helper/Abstract.php';
 /**
  * AJAXY Zend Plugin
  * Copyright (C) 2009 Benjamin Arthur Lupton
