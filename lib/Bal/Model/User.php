@@ -310,11 +310,11 @@ class Bal_Model_User extends Base_User {
 		# Prepare
 		$Invoker = $Event->getInvoker();
 		$result = true;
-	
+		
 		# Create Welcome Message
 		$Message = new Message();
 		$Message->Receiver = $Invoker;
-		$Message->code = 'user-insert';
+		$Message->template = 'user-insert';
 		$Message->save();
 		
 		# Done

@@ -18,16 +18,23 @@ class Bal_Model_Message extends Base_Message
 	 * @return
 	 */
 	public function setUp ( ) {
-		$this->hasMutator('code', 'setCode');
+		$this->hasMutator('template', 'setTemplate');
 		parent::setUp();
 	}
-
+	
+	
+	/**
+	 * Alias for Template
+	 */
+	public function setTemplate ( $code, $load = true ) {
+		return $this->useTemplate($code);
+	}
 	
 	/**
 	 * Shortcut Message Creation via Codes
 	 * @return string
 	 */
-	public function setCode ( $code, $load = true, array $data = array() ) {
+	public function useTemplate ( $code, array $data = array() ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
@@ -49,7 +56,7 @@ class Bal_Model_Message extends Base_Message
 		$params['messageUrl'] = $messageUrl;
 		
 		# Handle
-		$function = '_setCode'.magic_function($code);
+		$function = '_template'.magic_function($code);
 		if ( method_exists($this, $function) ) {
 			$this->$function($params,$data);
 		}
@@ -70,7 +77,7 @@ class Bal_Model_Message extends Base_Message
 	 * Set Message Code: user-insert
 	 * @return string
 	 */
-	protected function _setCodeUserInsert ( &$params, &$data ) {
+	protected function _templateUserInsert ( &$params, &$data ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
@@ -161,6 +168,7 @@ class Bal_Model_Message extends Base_Message
 		if ( $Message->id && empty($Message->sent_on) && strtotime($Message->send_on) <= time() ) {
 			# We want to send now or earlier
 			$Message->send();
+			$save = true;
 		} else {
 			# We want to send later
 			// do nothing

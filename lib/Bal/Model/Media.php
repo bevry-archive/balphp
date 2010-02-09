@@ -27,11 +27,17 @@ class Bal_Model_Media extends Base_Media {
 	 * @return string
 	 */
 	public function getUrl ( ) {
+		# Fetech Config
+		$uploads_url = Bal_App::getConfig('uploads_url');
+		
+		# Generate
 		$name = $this->name;
 		if ( empty($name) ) {
 			return null;
 		}
-		$url = UPLOADS_URL.'/'.rawurlencode($name);
+		$url = $uploads_url . '/' . rawurlencode($name);
+		
+		# Done
 		return $url;
 	}
 	
@@ -40,8 +46,8 @@ class Bal_Model_Media extends Base_Media {
 	 * @return
 	 */
 	public function setFile ( $file ) {
-		# Configuration
-		$applicationConfig = Zend_Registry::get('applicationConfig');
+		# Fetech Config
+		$uploads_path = Bal_App::getConfig('uploads_path');
 		
 		# Check the file
 		if ( !empty($file['error']) ) {
@@ -82,7 +88,7 @@ class Bal_Model_Media extends Base_Media {
 		if ( strpos($file_name, '.') === 0 ) $file_name = 'file'.$file_name; // prevent .htaccess uploads and other dogies
 		$file_title = $file_name;
 		$file_old_path = $file['tmp_name'];
-		$file_new_path = UPLOADS_PATH . DIRECTORY_SEPARATOR . $file_name;
+		$file_new_path = $uploads_path . DIRECTORY_SEPARATOR . $file_name;
 		$exist_attempt = 0;
 		$extension = get_extension($file_name); if ( !$extension ) $extension = 'file';
 		while ( file_exists($file_new_path) ) {
@@ -91,7 +97,7 @@ class Bal_Model_Media extends Base_Media {
 			++$exist_attempt;
 			// Add the attempt to the end of the file
 			$file_name = get_filename($file_title, false) . $exist_attempt . '.' . $extension;
-			$file_new_path = UPLOADS_PATH . DIRECTORY_SEPARATOR . $file_name;
+			$file_new_path = $uploads_path . DIRECTORY_SEPARATOR . $file_name;
 		}
 		
 		# Move file
@@ -128,7 +134,7 @@ class Bal_Model_Media extends Base_Media {
 					if ( $image_info ) {
 						$file_title = get_filename($file_title,false) . '.jpg';
 						$file_name = get_filename($file_name,false) . '.jpg';
-						$file_path = UPLOADS_PATH . DIRECTORY_SEPARATOR . $file_name;
+						$file_path = $uploads_path . DIRECTORY_SEPARATOR . $file_name; // immediate file path, so that 3rd party apis know where the file is - does risk curruption due to out of date value, but risk we are prepared to take
 						$image_contents = $image_info['image'];
 						file_put_contents($file_path, $image_contents, LOCK_EX);
 						$file_path = realpath($file_path);

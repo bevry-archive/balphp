@@ -141,6 +141,12 @@ class Bal_App {
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
+			case 'reload':
+				$ensure = array('createindex', 'usedump', 'makedump', 'reload', 'optimiseindex', 'permissions');
+				array_keys_ensure($args, $ensure, true);
+				echo 'Setup: mode: reload ['.implode(array_keys($args),',').']'."\n";
+				break;
+				
 			case 'update':
 				$ensure = array('optimiseindex');
 				array_keys_ensure($args, $ensure, true);
@@ -187,7 +193,8 @@ class Bal_App {
 					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
 				"sudo chmod -R 777 $cwd/application/data/dump ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
-					"$cwd/public/media/images $cwd/public/media/uploads"
+					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
+					"$cwd/scripts/paypal/logs "
 			);
 			$result = systems($commands);
 			# Output what we did
@@ -424,7 +431,18 @@ class Bal_App {
 		}
 		
 		# Delve
-		$value = delve($applicationConfig, $delve, $default);
+		$value = delve($applicationConfig, $delve, null);
+		
+		# Check
+		if ( !$value ) {
+			# Check Constant
+			$const = strtoupper(str_replace('.','_',$delve));
+			if ( defined($const) ) {
+				$value = constant($const);
+			} else {
+				$value = $default;
+			}
+		}
 		
 		# Done
 		return $value;
