@@ -141,6 +141,12 @@ class Bal_App {
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
+			case 'install-dump':
+				$ensure = array('createindex', 'usedump', 'reload', 'optimiseindex', 'media', 'permissions');
+				array_keys_ensure($args, $ensure, true);
+				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
+				break;
+			
 			case 'reload':
 				$ensure = array('createindex', 'usedump', 'makedump', 'reload', 'optimiseindex', 'permissions');
 				array_keys_ensure($args, $ensure, true);
@@ -166,8 +172,13 @@ class Bal_App {
 				break;
 			
 			case 'custom':
-			default:
 				echo 'Setup: mode: custom ['.implode(array_keys($args),',').']'."\n";
+				break;
+				
+			default:
+				$ensure = compact('mode');
+				array_keys_ensure($args, $ensure, true);
+				echo 'Setup: mode: default ['.implode(array_keys($args),',').']'."\n";
 				break;
 		}
 		
@@ -260,9 +271,15 @@ class Bal_App {
 		# Doctrine: makedump
 		if ( delve($args,'makedump') ) {
 			echo '- [makedump] -'."\n";
+			# Import Models
+			echo 'Doctrine: Load Models...'."\n";
+			Doctrine::loadModels(
+				$data_models_path
+			);
+			# Perform the Dump
 			echo 'Doctrine: Performing the Dump ['.$data_dump_path.']'."\n";
 			Doctrine::dumpData(
-				$data_dump_path.'/data.yml',
+				$data_dump_path,
 				false
 			);
 		}
