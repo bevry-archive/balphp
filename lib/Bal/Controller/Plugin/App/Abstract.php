@@ -863,6 +863,21 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	/**
+	 * Fetch the Media Url
+	 * @param mixed $media 
+	 * @param array $params [optional]
+	 * @param boolean $reset [optional]
+	 * @return string url of the page
+	 */
+	public function getMediaUrl($media, array $params = array(), $reset=true){
+		# Ensure
+		$media_url = delve($media,'url');
+		
+		# Done
+		return $media_url;
+	}
+	
+	/**
 	 * Fetch the Message Url
 	 * @param mixed $message 
 	 * @param array $params [optional]

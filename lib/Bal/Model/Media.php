@@ -17,37 +17,20 @@ class Bal_Model_Media extends Base_Media {
 	 * @return
 	 */
 	public function setUp ( ) {
-		$this->hasAccessor('url', 'getUrl');
-		$this->hasMutator('file', 'setFile');
+		//$this->hasAccessor('url',   'getUrl');
+		$this->hasMutator('upload', 'setUpload');
+		$this->hasMutator('file',   'setFile');
 		parent::setUp();
-	}
-	
-	/**
-	 * Get the url for the file
-	 * @return string
-	 */
-	public function getUrl ( ) {
-		# Fetech Config
-		$uploads_url = Bal_App::getConfig('uploads_url');
-		
-		# Generate
-		$name = $this->name;
-		if ( empty($name) ) {
-			return null;
-		}
-		$url = $uploads_url . '/' . rawurlencode($name);
-		
-		# Done
-		return $url;
 	}
 	
 	/**
 	 * Set the physical file using a $_FILE
 	 * @return
 	 */
-	public function setFile ( $file ) {
+	public function setUpload ( $file ) {
 		# Fetech Config
 		$uploads_path = Bal_App::getConfig('uploads_path');
+		$uploads_url = Bal_App::getConfig('uploads_url');
 		
 		# Check the file
 		if ( !empty($file['error']) ) {
@@ -107,10 +90,28 @@ class Bal_Model_Media extends Base_Media {
 			return false;
 		}
 		
+		# Prepare File Url
+		$this->url = $uploads_url . '/' . rawurlencode($file_name);
+		
+		# Continue to set the file
+		return $this->setFile($file_new_path);
+	}
+	
+	/**
+	 * Set the physical file using a $_FILE
+	 * @return
+	 */
+	public function setFile ( $file ) {
+		# Check
+		if ( is_array($file) ) {
+			return $this->setUpload($file);
+		}
+		
 		# Prepare
-		$file_path = realpath($file_new_path);
-		$file_type = get_filetype($file_path);
-		$file_size = filesize($file_path);
+		$file_path  = realpath($file);
+		$file_title = $file_name = basename($file_path);
+		$file_type  = get_filetype($file_path);
+		$file_size  = filesize($file_path);
 		
 		# Image
 		if ( $file_type === 'image' ) {
@@ -164,9 +165,9 @@ class Bal_Model_Media extends Base_Media {
 		$file_extension = get_extension($file_path);
 		
 		# Apply
+		if ( empty($this->title) ) $this->title = $file_title;
 		$this->code = $file_name;
 		$this->name = $file_name;
-		$this->title = $file_title;
 		$this->path = $file_path;
 		$this->size = $file_size;
 		$this->mimetype = $file_mimetype;
@@ -201,6 +202,7 @@ class Bal_Model_Media extends Base_Media {
 	public function ensureUrl(){
 		# Prepare
 		$save = false;
+		return $save;
 		
 		# Ensure URL
 		if ( $this->_get('url') !== $this->getUrl() ) {

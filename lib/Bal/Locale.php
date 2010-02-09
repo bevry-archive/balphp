@@ -560,13 +560,53 @@ class Bal_Locale {
 	# NUMERIC
 	
 	/**
-	 * Translates a number value
+	 * Translate a number value
 	 * @param number $number
 	 * @param array $options
 	 * @return string
 	 */
 	public function number ( $number, $options = array() ) {
+		if ( $number === null || $number === '' ) return $number;
 		return Zend_Locale_Format::getNumber($number, $options);
 	}
 	
+	/**
+	 * Translate a integer
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function integer ( $number, $options = array() ) {
+		return $this->number($number,$options);
+	}
+	
+	/**
+	 * Translate a decimal
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function decimal ( $number, $options = array() ) {
+		return $this->decimal($number,$options);
+	}
+	
+	/**
+	 * Translate a float
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function float ( $number, $options = array() ) {
+		return $this->float($number,$options);
+	}
+	
+	/**
+	 * Translate a string
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function string ( ) {
+		return call_user_func_array(array($this,'translate'), func_get_args());
+	}
 }
