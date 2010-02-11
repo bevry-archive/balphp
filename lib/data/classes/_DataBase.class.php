@@ -3506,7 +3506,7 @@ class DataBase
 			
 		} elseif ( gettype($limit) == 'string' )
 		{
-			$limit = split(',',$limit);
+			$limit = explode(',',$limit);
 			if ( empty($limit) )
 				$limit = '';
 			else
