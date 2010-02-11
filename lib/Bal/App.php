@@ -119,7 +119,7 @@ class Bal_App {
 			$argc = count($args);
 			if ( $argc == 1 ) {
 				# Read Mode
-				$args['mode'] = readstdin('What would you like to do?', array('install','update','cancel'));
+				$args['mode'] = readstdin('What would you like to do?', array('install','update','cancel','custom ...'), false);
 			} else {
 				# Use Custom + Additional? Modes
 				$modes = $args; array_shift($modes);
@@ -198,14 +198,22 @@ class Bal_App {
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
 				"mkdir -p $cwd/application/models/Base $cwd/application/data/dump",
-				'sudo chmod -R 755 '.$cwd,
-				"sudo chmod +X $cwd $cwd/index.php ".
-					"$cwd/public/media/*.php ".
-					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
-				"sudo chmod -R 777 $cwd/application/data/dump ".
+				// Standard Files
+				"sudo chmod -R 755 ".
+					"$cwd ",
+				// Writeable Files
+				"sudo chmod -R +w $cwd/application/data/dump ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
-					"$cwd/scripts/paypal/logs "
+					"$cwd/scripts/paypal/logs ",
+				// Executable Files
+				"sudo chmod +x ".
+					"$cwd ".
+					"$cwd/index.php ".
+					"$cwd/application/models/*.php ".
+					"$cwd/application/models/Base/*.php ".
+					"$cwd/public/media/*.php ".
+					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
 			);
 			$result = systems($commands);
 			# Output what we did

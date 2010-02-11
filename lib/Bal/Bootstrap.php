@@ -367,7 +367,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Apply Paths
 		Doctrine_Core::setPath(DOCTRINE_PATH);
-		Doctrine_Core::setModelsDirectory($applicationConfig['data']['models_path']);
 		Doctrine_Core::setExtensionsPath($extensions_path);
 		Doctrine_Core::setModelsDirectory($applicationConfig['data']['models_path']);
 		
