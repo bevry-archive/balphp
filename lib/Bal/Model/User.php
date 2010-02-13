@@ -23,26 +23,6 @@ class Bal_Model_User extends Base_BalUser {
 	}
 	
 	/**
-	 * Get the Subscription Tags as an Array
-	 * @return array
-	 */
-	public function getSubscriptionsArray ( $load = false ) {
-		# Prepare
-		$subscriptions = array();
-		
-		# Cycle
-		if ( isset($this->SubscriptionTags) ) {
-			foreach ( $this->SubscriptionTags as $Tag ) {
-				$subscriptions[] = $Tag->name;
-			}
-			sort($subscriptions);
-		}
-		
-		# Return
-		return $subscriptions;
-	}
-	
-	/**
 	 * Prepare a User's Password
 	 * @return
 	 */
@@ -306,15 +286,30 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function ensureSubscriptions ( $Event ) {
 		# Prepare
+		$Invoker = $Event->getInvoker();
+		$modified = $Invoker->getModified();
 		$save = false;
 		
 		# Fetch
-		$tags = $this->getSubscriptionsArray();
-		$value = implode($tags, ', ');
+		$tags = implode(', ', $this->SubscriptionTagsNames);
+		$subscriptions = $this->_get('subscriptions');
+		if ( is_array($subscriptions) ) $subscriptions = implode(', ', $subscriptions);
 		
 		# Has Changed?
-		if ( $this->_get('subscriptions') != $value ) {
-			$this->_set('subscriptions', $value, false); // false at end to prevent comparison
+		if ( $subscriptions != $tags ) {
+			if ( array_key_exists('subscriptions', $modified) ) {
+				# Update Subscriptions with Subscriptions String
+				$this->_set('subscriptions', $subscriptions, false); // false at end to prevent comparison
+				# Update SubscriptionTags with Subscriptions
+				if ( $this->id ) {
+					$tags = explode(', ', $subscriptions);
+					$this->SubscriptionTags = $tags;
+				}
+			}
+			else {
+				# Update Subscriptions with Tags
+				$this->_set('subscriptions', $tags, false); // false at end to prevent comparison
+			}
 			$save = true;
 		}
 		
