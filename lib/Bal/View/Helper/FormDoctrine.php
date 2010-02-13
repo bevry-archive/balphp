@@ -86,7 +86,8 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			$type = 'relation';
 			$Relation = $Table->getRelation($field);
 			$RelationTable = $Relation->getTable();
-		} else {
+		}
+		else {
 			# Column
 			$type = $Table->getTypeOf($field);
 			$properties = $Table->getDefinitionOf($field);
@@ -134,7 +135,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				$options = $Table->getEnumValues($field);
 				$options = array_flip($options);
 				foreach ( $options as $enum => &$text ) {
-					$text = $this->view->locale()->translate_default($table.'-'.$field.'-'.$enum, array(), $enum);
+					$text = $this->view->locale()->translate_default($table.'-'.$field.'-'.$enum, array(), ucfirst($enum));
 				}
 				$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				break;

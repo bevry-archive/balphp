@@ -132,7 +132,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Initialize view
 		$View = new Zend_View();
-		$View->doctype('XHTML1_STRICT');
+		$View->doctype('HTML5');
 		$View->headMeta()->setHttpEquiv('Content-Type', 'text/html; charset=utf-8');
 		
 		# Customise View
