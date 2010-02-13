@@ -9,6 +9,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	protected $_options = array(
 	);
 	
+	
 	# ========================
 	# CONSTRUCTORS
 	
@@ -28,10 +29,11 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	static public function getInstance ( ) {
-		return Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
+		return Bal_App::getPlugin('Bal_Controller_Plugin_App');
 	}
 	
-	# -----------
+	
+	# ========================
 	# Authentication
 	
 	/**
@@ -199,8 +201,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $this->_User;
 	}
 	
-	# -----------
-	# Authorisation
+	
+	# ========================
+	# AUTHORISATION
 	
 	/**
 	 * Return the Zend Registry
@@ -356,8 +359,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return false;
 	}
 	
-	# -----------
-	# VIEWS
+	# ========================
+	# SYSTEM URLS
 
 	/**
 	 * Get the root url for the site
@@ -461,8 +464,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $theme_layouts_path;
 	}
 	
-	# -----------
-	# AREAS
+	
+	# ========================
+	# LAYOUT AREAS
 	
 	protected $_area = false;
 	protected $_theme = false;
@@ -596,8 +600,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return Zend_Layout::getMvcInstance();
 	}
 	
-	# -----------
-	# Menu
+	# ========================
+	# FILE URLS
 	
 	public function getPublicFileUrl ( $file ) {
 		# Prepare
@@ -642,15 +646,17 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $result;
 	}
 	
-	# -----------
-	# Menu
+	
+
+	# ========================
+	# NAVIGATION
 	
 	
 	/**
 	 * Activate a Navigation Menu Item
 	 * @return
 	 */
-	public function activateNavigationItem ( Zend_Navigation $Menu, $id, $parents = true ) {
+	public function activateNavigationMenuItem ( Zend_Navigation $Menu, $id, $parents = true ) {
 		# Find Current
 		$Item = $Menu->findBy('id', $id);
 		
@@ -676,8 +682,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	
-	# -----------
-	# Doctrine
+	# ========================
+	# DOCTRINE
 	
 	
 	/**
@@ -832,7 +838,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		));
 	}
 	
-
+	
 	# ========================
 	# GETTERS: URLS
 	

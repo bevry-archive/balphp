@@ -129,19 +129,6 @@ if ( function_compare('array_prepare', 1, true, __FILE__, __LINE__) ) {
 	
 }
 
-
-if ( function_compare('array_set', 1, true, __FILE__, __LINE__) ) {
-
-	function array_set ( &$array ) {
-		$args = func_get_args();
-		unset($args[0]);
-		foreach ( $args as $arg ) {
-			if ( !isset($array[$arg]) )
-				$array[$arg] = null;
-		}
-	}
-}
-
 	
 if ( function_compare('array_first', 1, true, __FILE__, __LINE__) ) {
 
@@ -280,10 +267,14 @@ if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 			} else {
 				$arr =& $value;
 			}
-		} else {
+		} elseif ( is_array($arr) ) {
 			if ( !array_key_exists($key, $arr) || !is_array($arr[$key]) )
 				$arr[$key] = array();
 			return array_apply($arr[$key], $keys, $value, $copy);
+		} elseif ( is_object($arr) ) {
+			if ( !isset($arr->$key) || !is_array($arr->$key) )
+				$arr->$key = array();
+			return array_apply($arr->$key, $keys, $value, $copy);
 		}
 		return true;
 	}

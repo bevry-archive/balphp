@@ -1,27 +1,123 @@
 <?php
 class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abstract {
 
+	# ========================
+	# VARIABLES
+	
+	
 	protected $_options = array(
 		'logged_out_forward' => array('login'),
 		'logged_in_forward' => array('index')
 	);
+	
+	
+	# ========================
+	# CONSTRUCTORS
+	
 	
 	/**
 	 * Construct
 	 * @param array $options
 	 */
 	public function __construct ( array $options = array() ) {
-		# Options
-		$this->mergeOptions($options);
+		# Prepare
+		$result = true;
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($options) : $result;
+	}
+	
+	
+	# ========================
+	# NAVIGATION
+	
+	
+	/**
+	 * Make an Nagivation Item active
+	 * @param string $menu
+	 * @param string $id
+	 * @param boolean $prefix [optional] Whether or not to prefix the id with the menu name
+	 * @return bool
+	 */
+	public function applyNavigation ( ) {
+		# Prepare
+		$View = $this->getActionControllerView();
+		$Request = $this->getActionControllerRequest();
+		
+		# Module Config
+		$module = $Request->getModuleName();
+		$module_path = Bal_App::getFrontController()->getModuleDirectory($module);
+		$module_config_path = $module_path . '/config';
+		
+		# Navigation
+		$NavData = file_get_contents($module_config_path . '/nav.json');
+		$NavData = Zend_Json::decode($NavData, Zend_Json::TYPE_ARRAY);
+		
+		# Apply Navigation Menus
+		$View->Navigation = array();
+		foreach ( $NavData as $key => $value ) {
+			$code = $Menu = null;
+			if ( is_array($value) && !isset($value[0]) ) {
+				foreach ( $value as $_key => $_value ) {
+					$code = $key.'.'.$_key;
+					$Menu = new Zend_Navigation($_value);
+					$this->ApplyNavigationMenu($code, $Menu);
+				}
+			}
+			else {
+				$code = $key;
+				$Menu = new Zend_Navigation($value);
+				$this->ApplyNavigationMenu($code, $Menu);
+			}
+		}
+		
+		# Chain
+		return $this;
+	}
+	
+	public function applyNavigationMenu ( $code, Zend_Navigation $Navigation ) {
+		# Prepare
+		$View = $this->getActionControllerView();
+		
+		# Apply
+		array_apply($View, 'Navigation.'.$code, $Navigation);
 		
 		# Done
 		return true;
 	}
 	
+	/**
+	 * Make an Nagivation Item active
+	 * @param string $menu
+	 * @param string $id
+	 * @param boolean $prefix [optional] Whether or not to prefix the id with the menu name
+	 * @return bool
+	 */
+	public function activateNavigationItem ( $code, $id, $prefix = false, $error = true ) {
+		# Prepare
+		$View = $this->getActionControllerView();
+		
+		# Find
+		$NavigationMenu = delve($View, 'Navigation.'.$code);
+		if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+		
+		# Prefix
+		if ( $prefix ) {
+			$id = str_replace('.','-',$code).'-'.$id;
+		}
+		
+		# Activiate
+		$result = $this->activateNavigationMenuItem($NavigationMenu, $id);
+		if ( !$result && $error ) throw new Zend_Exception('Could not find Navigation Menu Item: '.$code.' -> '.$id);
+		
+		# Return Result
+		return $result;
+	}
 	
-	# -----------
-	# Authentication
-
+	
+	# ========================
+	# AUTHENTICATION
+	
 	/**
 	 * Logout the User
 	 * @param mixed $redirect

@@ -27,12 +27,11 @@
  * @copyright Copyright (c) 2009, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
-class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_Abstract
+class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Abstract
 {
-	// Reference Variables
-	protected $_actionController = null;
-	protected $_actionView = null;
-	protected $_actionRequest = null;
+	# ========================
+	# VARIABLES
+	
 	protected $_json = null;
 	protected $_session = null;
 	protected $_xhr = null;
@@ -41,32 +40,38 @@ class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_A
 		'redirected' => false
 	);
 	
+	protected $_options = array(
+	);
+	
+	
+	# ========================
+	# CONSTRUCTORS
+	
+	
 	/**
-	 * Initialise Ajaxy
-	 * @return
+	 * Construct
+	 * @param array $options
 	 */
-	public function init(){
-		$this->configure($this->getActionController(), $this->_actionController->view, $this->_actionController->getRequest());
-		$this->_json = Zend_Controller_Action_HelperBroker::getStaticHelper('json');
-		$this->_session = new Zend_Session_Namespace('Ajaxy');
-		// Store whether we are a ajax request
+	public function __construct ( array $options = array() ) {
+		# Prepare
+		$result = true;
+		
+		# Prepare
+		$Json = Zend_Controller_Action_HelperBroker::getStaticHelper('json');
+		$Session = new Zend_Session_Namespace('Ajaxy');
+		
+		# Apply
+		$this->_Json = $Json;
+		$this->_Session = $Session;
+		
+		# Store whether we are a ajax request
 		$this->_session->xhr = $this->isAjax();
 		$this->_session->served = false;
 		$this->_session->last_url = $this->getURL();
 		$this->_session->last_hit = time();
-	}
-	
-	/**
-	 * Configure Ajaxy
-	 * @param object $actionController
-	 * @param object $actionView
-	 * @param object $actionRequest
-	 * @return
-	 */
-	public function configure($actionController, $actionView, $actionRequest) {
-		$this->_actionController = $actionController;
-		$this->_actionView = $actionView;
-		$this->_actionRequest = $actionRequest;
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($options) : $result;
 	}
 	
 	/**
@@ -83,22 +88,24 @@ class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_A
 	 */
 	public function isAjax ( ) {
 		if ( $this->_xhr === null ) {
-			$xhr = $this->_actionRequest->isXmlHttpRequest();
+			$xhr = $this->getActionControllerRequest()->isXmlHttpRequest();
 			if ( !$xhr && !empty($_REQUEST['ajax']) ) $xhr = 'param';
 			if ( !$xhr ) {
-				// We are definitly not a AJAX request
-				// But perhaps we have come from a redirect of a AJAX request
-				// So check if the last request was an ajax request
-				// And check if the last request was not sent
-				// And that we have been accessed in an appropriate redirect timeframe
-				if ( $this->_session->xhr && !$this->_session->served && strtotime('-5 seconds', time()) < $this->_session->last_hit ) {
-					// We came from a redirect from a ajaxy request
+				/*
+				 * We are definitly not a AJAX request
+				 * But perhaps we have come from a redirect of a AJAX request
+				 * So check if the last request was an ajax request
+				 * And check if the last request was not sent
+				 * And that we have been accessed in an appropriate redirect timeframe
+				 */
+				if ( $this->_Session->xhr && !$this->_Session->served && strtotime('-5 seconds', time()) < $this->_Session->last_hit ) {
+					# We came from a redirect from a ajaxy request
 					$xhr = true;
-					// Save some data into data
+					# Save some data into data
 					$this->_data['redirected']['to'] = $this->getURL();
 				}
 			}
-			// Log the XHR into the Session
+			# Log the XHR into the Session
 			$this->_xhr = $xhr;
 		}
 		return $this->_xhr;
@@ -110,7 +117,7 @@ class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_A
 	 * @return
 	 */
 	public function send ( $data ) {
-		$this->_json->sendJson($data);
+		$this->_Json->sendJson($data);
 	}
 	
 	/**
@@ -120,103 +127,103 @@ class Bal_Controller_Action_Helper_Ajaxy extends Zend_Controller_Action_Helper_A
 	 * @return
 	 */
     public function render($html_view, $ajaxy_levels, $ajaxy_data = array()){
-		// Render
+		# Render
 		
-		// Cycle through levels independent arrays
+		# Cycle through levels independent arrays
 		$routes = $controllers = array();
 		foreach ( $ajaxy_levels as $route => $controller ) {
-			// Populate with view variables
-			$route = preg_replace('/:(\w+)/ie', '\$this->_actionView->${1}', $route);
-			$controller = preg_replace('/:(\w+)/ie', '\$this->_actionView->${1}', $controller);
-			// Update
+			# Populate with view variables
+			$route = preg_replace('/:(\w+)/ie', '\$this->getActionControllerView()->${1}', $route);
+			$controller = preg_replace('/:(\w+)/ie', '\$this->getActionControllerView()->${1}', $controller);
+			# Update
 			$routes[] = $route;
 			$controllers[] = $controller;
 		}
 		
-		// Fetch
+		# Fetch
 		$ajaxy_options = !empty($_REQUEST['Ajaxy']) ? $_REQUEST['Ajaxy'] : array();
 		
-    	// Save
-		$routes_old = $this->_session->ajaxy_routes;
-		$this->_session->ajaxy_routes = $routes;
-		$this->_session->served = true;
+    	# Save
+		$routes_old = $this->_Session->ajaxy_routes;
+		$this->_Session->ajaxy_routes = $routes;
+		$this->_Session->served = true;
 		
 		$xhr = $this->isAjax();
 		if ( $xhr ) {
-			// JSON
+			# JSON
 			
-			// Discover controller
+			# Discover controller
 			$controller = '';
 			foreach ( $routes as $i => $route ) {
-				// Check old part
+				# Check old part
 				if ( !isset($routes_old[$i]) ) {
 					break;
 				}
 				
-				// Save the current controller
+				# Save the current controller
 				$controller = $controllers[$i];
 				
-				// We have the old part
+				# We have the old part
 				$route_old = $routes_old[$i];
 				
-				// Compare old with new
+				# Compare old with new
 				if ( $route_old != $route ) {
-					// Mismatch
+					# Mismatch
 					break;
 				}
 			}
 			
-			// Data
+			# Data
 			if ( is_string($ajaxy_data) ) {
 				$ajaxy_data = explode(',', $ajaxy_data);
 				$ajaxy_data_new = array();
 				foreach ( $ajaxy_data as $item ) {
-					$ajaxy_data_new[$item] = $this->_actionView->$item;
+					$ajaxy_data_new[$item] = $this->getActionControllerView()->$item;
 				}
 				$ajaxy_data = $ajaxy_data_new;
 				unset($ajaxy_data_new);
 			}
 			$ajaxy_data['Ajaxy'] = $this->_data;
 			
-			// Dispatch
-            $zend_controller = $this->_actionRequest->getControllerName();
-            $viewScript = $zend_controller.DIRECTORY_SEPARATOR.$controller.'.'.$this->_actionController->viewSuffix;
+			# Dispatch
+            $zend_controller = $this->getActionControllerRequest()->getControllerName();
+            $viewScript = $zend_controller.DIRECTORY_SEPARATOR.$controller.'.'.$this->getActionController()->viewSuffix;
 			
-			// Perform
-			$zend_view = $this->_actionView->render($viewScript);
-			$zend_title = html_entity_decode(strip_tags($this->_actionView->headTitle()->toString()));
+			# Perform
+			$zend_view = $this->getActionControllerView()->render($viewScript);
+			$zend_title = html_entity_decode(strip_tags($this->getActionControllerView()->headTitle()->toString()));
 			$data = array_merge(array(
 				'controller' => $controller,
 				'title' => $zend_title,
 				'view' => $zend_view,
 			), $ajaxy_data);
 			
-			// Send
+			# Send
 			if ( !empty($ajaxy_options['form'])) {
-				// Form
+				# Form
 				$val = json_encode($data);
-      			$response = $this->_json->getResponse();
+      			$response = $this->_Json->getResponse();
 				$response->clearHeaders()->clearBody();
 				$response->setBody('<html><head></head><body><textarea class="response">'.$val.'</textarea></body></html>');
 				$response->sendResponse();
 				exit;
 			}  elseif ( $xhr === 'param' ) {
-				// Special
-				$this->_json->suppressExit = true;
-				$this->_json->sendJson($data);
-      			$response = $this->_json->getResponse();
+				# Special
+				$this->_Json->suppressExit = true;
+				$this->_Json->sendJson($data);
+      			$response = $this->_Json->getResponse();
 				$response->setHeader('Content-Type', 'text/plain; charset=utf-8');
             	$response->sendResponse();
             	exit;
 			} else {
-				// Normal
-				$this->_json->sendJson($data);
+				# Normal
+				$this->_Json->sendJson($data);
 			}
 			
 			
 		} else {
-			// HTML
-			$this->_actionController->render($html_view);
+			# HTML
+			$this->getActionController()->render($html_view);
 		}
     }
 }
