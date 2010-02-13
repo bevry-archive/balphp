@@ -908,15 +908,15 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	/**
-	 * Fetch the Profile Url
-	 * @param mixed $buyer 
+	 * Fetch the User Url
+	 * @param mixed $user 
 	 * @param array $params [optional]
 	 * @param boolean $reset [optional]
 	 * @return string url of the page
 	 */
-	public function getProfileUrl($user, array $params = array(), $reset=true){
+	public function getUserUrl($user, array $params = array(), $reset=true){
 		# Prepare
-		$params['action'] = 'profile';
+		$params['action'] = 'user';
 		
 		# Ensure Seller
 		$user_id = is_numeric($user) ? $user : delve($user, 'id');

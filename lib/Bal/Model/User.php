@@ -10,17 +10,36 @@
  * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 6508 2009-10-14 06:28:49Z jwage $
  */
-class Bal_Model_User extends Base_User {
+class Bal_Model_User extends Base_BalUser {
 
 	/**
 	 * Apply accessors and modifiers
 	 * @return
 	 */
 	public function setUp ( ) {
-		$this->hasAccessor('fullname', 'getFullname');
 		$this->hasMutator('avatar', 'setAvatar');
 		$this->hasMutator('password', 'setPassword');
 		return parent::setUp();
+	}
+	
+	/**
+	 * Get the Subscription Tags as an Array
+	 * @return array
+	 */
+	public function getSubscriptionsArray ( $load = false ) {
+		# Prepare
+		$subscriptions = array();
+		
+		# Cycle
+		if ( isset($this->SubscriptionTags) ) {
+			foreach ( $this->SubscriptionTags as $Tag ) {
+				$subscriptions[] = $Tag->name;
+			}
+			sort($subscriptions);
+		}
+		
+		# Return
+		return $subscriptions;
 	}
 	
 	/**
@@ -118,15 +137,6 @@ class Bal_Model_User extends Base_User {
 	}
 	
 	/**
-	 * Get the User's fullname
-	 * @return string
-	 */
-	public function getFullname ( ) {
-		$fullname = array($this->title, $this->firstname, $this->lastname);
-		return implode(' ', $fullname);
-	}
-	
-	/**
 	 * Set the Role(s) for a User (clear others)
 	 * @param mixed $role
 	 */
@@ -197,7 +207,7 @@ class Bal_Model_User extends Base_User {
 	 */
 	public function activate ( ) {
 		# Proceed
-		$this->enabled = true;
+		$this->status = 'published';
 		
 		# Done
 		return true;
@@ -208,7 +218,7 @@ class Bal_Model_User extends Base_User {
 	 * @return string
 	 */
 	public function isActive ( ) {
-		return $this->enabled === true;
+		return $this->status === 'published';
 	}
 	
 	/**
@@ -227,7 +237,7 @@ class Bal_Model_User extends Base_User {
 			$save = true;
 		}
 		
-		# Done
+		# Return
 		return $save;
 	}
 	
@@ -241,12 +251,74 @@ class Bal_Model_User extends Base_User {
 		$save = false;
 		
 		# Fullname
-		if ( $this->_get('fullname') !== $this->getFullname() ) {
-			$this->_set('fullname', $this->getFullname(), false); // false at end to prevent comparison
+		$fullname = implode(' ', array($this->title, $this->firstname, $this->lastname));
+		if ( $this->_get('fullname') !== $fullname ) {
+			$this->_set('fullname', $fullname, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
-		# Done
+		# Return
+		return $save;
+	}
+	
+	/**
+	 * Ensure Displayname
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensureDisplayname ( $Event ) {
+		# Prepare
+		$save = false;
+		
+		# Fullname
+		if ( !$this->_get('displayname') ) {
+			$this->_set('displayname', $this->email, false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Return
+		return $save;
+	}
+	
+	/**
+	 * Ensure Username
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensureUsername ( $Event ) {
+		# Prepare
+		$save = false;
+		
+		# Fullname
+		if ( !$this->_get('username') ) {
+			$this->_set('username', $this->email, false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Return
+		return $save;
+	}
+	
+	/**
+	 * Ensure Subscriptions
+	 * @param int $value [optional]
+	 * @return bool
+	 */
+	public function ensureSubscriptions ( $Event ) {
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$tags = $this->getSubscriptionsArray();
+		$value = implode($tags, ', ');
+		
+		# Has Changed?
+		if ( $this->_get('subscriptions') != $value ) {
+			$this->_set('subscriptions', $value, false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Return
 		return $save;
 	}
 	
@@ -258,7 +330,10 @@ class Bal_Model_User extends Base_User {
 	public function ensure ( $Event ) {
 		$ensure = array(
 			$this->ensureCode($Event),
-			$this->ensureFullname($Event)
+			$this->ensureFullname($Event),
+			$this->ensureDisplayname($Event),
+			$this->ensureUsername($Event),
+			$this->ensureSubscriptions($Event)
 		);
 		return in_array(true,$ensure);
 	}

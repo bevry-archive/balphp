@@ -136,13 +136,13 @@ class Bal_App {
 		switch ( $mode ) {
 			
 			case 'install':
-				$ensure = array('createindex', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'reload', 'optimiseindex', 'media', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'install-dump':
-				$ensure = array('createindex', 'usedump', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'usedump', 'reload', 'optimiseindex', 'media', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
@@ -268,6 +268,22 @@ class Bal_App {
 		$data_path_to_use = $data_fixtures_path;
 		$data_yaml_schema_path = delve($applicationConfig,'data.yaml_schema_path');
 		$data_models_path = delve($applicationConfig,'data.models_path');
+		
+		# Doctrine: cleanmodels
+		if ( delve($args,'cleanmodels') ) {
+			echo '- [cleanmodels] -'."\n";
+			echo 'Doctrine: Cleaning models from Base directory'."\n";
+			
+			# Scan directory
+			$scan = scan_dir($data_models_path.'/Base',null,null,$data_models_path.'/Base/');
+	
+			# Wipe files
+			foreach ( $scan as $file ) {
+				echo 'Doctrine: Deleted the Base Model ['.$file.']'."\n";
+				unlink($file);
+			}
+		}
+		
 		
 		# Doctrine: usedump
 		if ( delve($args,'usedump') ) {
