@@ -182,14 +182,14 @@ if ( function_compare('fetch_param', 1, true, __FILE__, __LINE__) ) {
 	 * Fetch a hydrated param
 	 * @version 1, January 06, 2010
 	 */
-	function fetch_param ( $name ) {
+	function fetch_param ( $name, $default = null ) {
 		# Prepare
 		hydrate_param_init();
 		global $_PARAMS_HYDRATED;
 		$value = null;
 		
 		# Handle
-		$value = array_delve($_PARAMS_HYDRATED, $name);
+		$value = delve($_PARAMS_HYDRATED, $name, $default);
 		
 		# Hydrate the Param
 		hydrate_param($value);
@@ -253,7 +253,6 @@ if ( function_compare('liberate_subfiles', 1, true, __FILE__, __LINE__) ) {
 			# We have reached the bottom
 			$name = $prefix.'.'.$suffix;
 			array_apply($where, $name, $subvalue, true); // when setting to false, PHP memory reference error occurs...
-			// baldump($name, array_delve($where, $name), $subvalue);
 		}
 		else {
 			# More sub files

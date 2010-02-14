@@ -68,16 +68,6 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 				'notnull'	=>	true
 			)
 		),
-		'enabled' => array(
-			'disabled'		=>	false,
-	        'name'          =>  'enabled',
-	        'type'          =>  'boolean',
-	        'length'        =>  1,
-	        'options'       =>  array(
-				'default'	=>	true,
-				'notnull'	=>	true
-			)
-		),
 		'author' => array(
 			'disabled'		=>	false,
 	        'relation'     	=>  'Author',
@@ -107,7 +97,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      */
     public function setTableDefinition() {
     	# Prepare
-    	$column_helpers = array('published_at','author','enabled','status');
+    	$column_helpers = array('published_at','author','status');
     	
     	# Handle
 		$this->hasColumnHelpers($this->_options, $column_helpers);

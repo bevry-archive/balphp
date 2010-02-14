@@ -840,95 +840,92 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	
 	# ========================
-	# GETTERS: URLS
-	
-	
+	# GETTERS: SEARCH
 	
 	/**
-	 * Fetch the Activate Url for a User
-	 * @param mixed $user 
-	 * @param array $params [optional]
-	 * @param boolean $reset [optional]
-	 * @return string
+	 * Prepares and Returns the Search Session Namespace
+	 * @return Zend_Session_Namespace
 	 */
-	public function getActivateUrl($code, array $params = array(), $reset=true){
+	public function fetchSearchSession ( ) {
+		# Session
+		$Session = new Zend_Session_Namespace('Search');
+		if ( !is_array($Session->searches) )	$Session->searches = array();
+		if ( !is_array($Session->last) )		$Session->last = null;
+		
+		# Return session
+		return $Session;
+	}
+	
+	/**
+	 * Generates an unused search code
+	 * @return string code
+	 */
+	public function generateSearchCode ( ) {
+		# Session
+		$Session = $this->fetchSearchSession();
+		
+		# Generate
+		while ( delve($Session, ($code = rand(1,1000)), null) !== null ) {
+			
+		}
+		
+		# Return code
+		return $code;
+	}
+	
+	public function fetchSearchQuery ( $code = null ) {
 		# Prepare
-		$params['action'] = 'activate';
+		$Request = $this->getRequest();
 		
-		# Ensure Seller
-		$code = (is_string($code)||is_numeric($code)) ? $code : delve($code, 'code');
+		# Fetch
+		if ( $code === null)
+			$code = fetch_param('search.code', $Request->getParam('code', null));
+		$create = fetch_param('search.create', false);
+		$search = false;
 		
-		# Apply Seller
-		$params['code'] = $code;
+		# Session
+		$Session = $this->fetchSearchSession();
 		
-		# Handle
-		$url = $this->getRouter()->assemble($params, 'default', $reset);
+		# Do we want to fetch the last code?
+		if ( $code === 'last' ) {
+			# Fetch last
+			$code = $Session->searches['last'];
+		}
+		
+		# Discover
+		if ( empty($code) || delve($Session->searches, $code) === null || $create ) {
+			# Create Search Query
+			
+			# Create
+			if ( !$code ) $code = $this->generateSearchCode();
+			
+			# Fetch
+			$search = fetch_param('search.query');
+			if ( !$search ) {
+				$search = $Request->getParam('query', null);
+				if ( is_array($search) ) {
+					array_hydrate($search);
+				}
+			}
+			
+			# Apply
+			$Session->searches['last'] = $code;
+			$Session->searches[$code]  = $search;
+		}
+		else {
+			# Use Cached Search Query
+			# We have a code, it exists in our searches, and we do not want to create a new one
+			
+			# Fetch
+			$search = $Session->searches[$code];
+			
+			# Apply
+			$Session->searches['last'] = $code;
+		}
 		
 		# Done
-		return $url;
+		return $search;
 	}
 	
-	/**
-	 * Fetch the Media Url
-	 * @param mixed $media 
-	 * @param array $params [optional]
-	 * @param boolean $reset [optional]
-	 * @return string url of the page
-	 */
-	public function getMediaUrl($media, array $params = array(), $reset=true){
-		# Ensure
-		$media_url = delve($media,'url');
-		
-		# Done
-		return $media_url;
-	}
-	
-	/**
-	 * Fetch the Message Url
-	 * @param mixed $message 
-	 * @param array $params [optional]
-	 * @param boolean $reset [optional]
-	 * @return string url of the page
-	 */
-	public function getMessageUrl($message, array $params = array(), $reset=true){
-		# Prepare
-		$params['action'] = 'message';
-		
-		# Ensure Seller
-		$message_id = is_numeric($message) ? $message : delve($message, 'id');
-		
-		# Apply Seller
-		$params['id'] = $message_id;
-		
-		# Handle
-		$url = $this->getRouter()->assemble($params, 'default', $reset);
-		
-		# Done
-		return $url;
-	}
-	
-	/**
-	 * Fetch the User Url
-	 * @param mixed $user 
-	 * @param array $params [optional]
-	 * @param boolean $reset [optional]
-	 * @return string url of the page
-	 */
-	public function getUserUrl($user, array $params = array(), $reset=true){
-		# Prepare
-		$params['action'] = 'user';
-		
-		# Ensure Seller
-		$user_id = is_numeric($user) ? $user : delve($user, 'id');
-		
-		# Apply Seller
-		$params['user'] = $user_id;
-		
-		# Handle
-		$url = $this->getRouter()->assemble($params, 'default', $reset);
-		
-		# Done
-		return $url;
-	}
 	
 }

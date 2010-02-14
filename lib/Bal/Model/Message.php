@@ -50,7 +50,7 @@ class Bal_Model_Message extends Base_BalMessage
 		$params['sender'] = delve($Message,'Sender.fullname','System');
 		
 		# Apply URLs
-		$messageUrl = $rootUrl.$View->app()->getMessageUrl($Message);
+		$messageUrl = $rootUrl.$View->url()->message($Message)->toString();
 		$params['rootUrl'] = $rootUrl;
 		$params['baseUrl'] = $baseUrl;
 		$params['messageUrl'] = $messageUrl;
@@ -68,6 +68,7 @@ class Bal_Model_Message extends Base_BalMessage
 		# Apply
 		$this->title = $title;
 		$this->description = $description;
+		$this->code = $code;
 		
 		# Chain
 		return $this;
@@ -93,7 +94,7 @@ class Bal_Model_Message extends Base_BalMessage
 		$Receiver = $this->Receiver;
 		
 		# Prepare URL
-		$activateUrl = $rootUrl.$View->app()->getActivateUrl($Receiver);
+		$activateUrl = $rootUrl.$View->url()->userActivate($Receiver)->toString();
 		$params['activateUrl'] = $activateUrl;
 
 		# --------------------------
@@ -136,6 +137,7 @@ class Bal_Model_Message extends Base_BalMessage
 		
 		# Done
 		$this->sent_on = doctrine_timestamp();
+		$this->status = 'published';
 		
 		# Chain
 		return $this;
