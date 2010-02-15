@@ -386,7 +386,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 						/* Is Doctrine Record */
 						||	(	($holder instanceOf Doctrine_Record)
 								&&	($holder->hasAccessor($key)
-										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) || isset($holder->$key)))
+										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) || isset($holder->$key)) && $holder->$key->exists())
 										||	$holder->getTable()->hasField($key)
 									)
 							)

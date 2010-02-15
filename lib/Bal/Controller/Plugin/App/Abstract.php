@@ -171,15 +171,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	/**
-	 * Do we have a User
-	 * @return bool
-	 */
-	public function hasUser ( ) {
-		# Check
-		return !empty($this->_User);
-	}
-	
-	/**
 	 * Return the logged in User
 	 * @return Doctrine_Record
 	 */
@@ -189,6 +180,15 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			$User = $this->setUser();
 		}
 		return $this->_User;
+	}
+	
+	/**
+	 * Do we have a User
+	 * @return bool
+	 */
+	public function hasUser ( ) {
+		# Check
+		return !empty($this->_User);
 	}
 	
 	/**
@@ -873,7 +873,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $code;
 	}
 	
-	public function fetchSearchQuery ( $code = null ) {
+	public function fetchSearch ( $code = null ) {
 		# Prepare
 		$Request = $this->getRequest();
 		
@@ -881,7 +881,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		if ( $code === null)
 			$code = fetch_param('search.code', $Request->getParam('code', null));
 		$create = fetch_param('search.create', false);
-		$search = false;
 		
 		# Session
 		$Session = $this->fetchSearchSession();
@@ -900,30 +899,33 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			if ( !$code ) $code = $this->generateSearchCode();
 			
 			# Fetch
-			$search = fetch_param('search.query');
-			if ( !$search ) {
-				$search = $Request->getParam('query', null);
-				if ( is_array($search) ) {
-					array_hydrate($search);
+			$query = fetch_param('search.query');
+			if ( !$query ) {
+				$query = $Request->getParam('query', null);
+				if ( is_array($query) ) {
+					array_hydrate($query);
 				}
 			}
 			
 			# Apply
 			$Session->searches['last'] = $code;
-			$Session->searches[$code]  = $search;
+			$Session->searches[$code]  = $query;
 		}
 		else {
 			# Use Cached Search Query
 			# We have a code, it exists in our searches, and we do not want to create a new one
 			
 			# Fetch
-			$search = $Session->searches[$code];
+			$query = $Session->searches[$code];
 			
 			# Apply
 			$Session->searches['last'] = $code;
 		}
 		
 		# Done
+		$search = array();
+		if ( !empty($code) ) $search['code'] = $code;
+		if ( !empty($query) ) $search['query'] = $query;
 		return $search;
 	}
 	

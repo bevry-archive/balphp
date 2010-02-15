@@ -17,9 +17,37 @@ class Bal_Model_User extends Base_BalUser {
 	 * @return
 	 */
 	public function setUp ( ) {
-		$this->hasMutator('avatar', 'setAvatar');
+		$this->hasMutator('Avatar', 'setAvatar');
 		$this->hasMutator('password', 'setPassword');
 		return parent::setUp();
+	}
+	
+	/**
+	 * Set the User's Avatar
+	 * @return string
+	 */
+	protected function setMediaAttachment ( $what, $media ) {
+		# Prepare
+		$Media = Media::fromAttachment($media);
+		
+		# Apply Media
+		if ( $Media !== false ) {
+			if ( isset($this->$what) ) {
+				$this->$what->delete();
+			}
+			$this->_set($what, $Media, false);
+		}
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Set the User's Avatar
+	 * @return string
+	 */
+	public function setAvatar ( $value ) {
+		return $this->setMediaAttachment('Avatar', $value);
 	}
 	
 	/**
@@ -65,55 +93,6 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function compareCredentials ( $username, $password ) {
 		return $this->username === $username && ($this->password === $password || $this->password === $this->preparePassword($password));
-	}
-	
-	
-	/**
-	 * Set the User's Avatar
-	 * @return string
-	 */
-	protected function setMediaAttachment ( $what, $value ) {
-		# Prepare
-		$Media = false;
-		
-		# Create Media
-		if ( is_array($value) ) {
-			if ( array_key_exists('delete', $value) && $value['delete'] ) {
-				$this->_set($what, null);
-			} elseif ( array_key_exists('id', $value) ) {
-				$Media = Doctrine::getTable('Media')->find($value);
-			} elseif ( array_key_exists('tmpname', $value) ) {
-				if ( empty($value['error']) ) {
-					$Media = new Media();
-					$Media->file = $value;
-				}
-			} elseif ( array_key_exists('file', $value) ) {
-				if ( empty($value['file']['error']) ) {
-					$Media = new Media();
-					$Media->file = $value['file'];
-				}
-			}
-		}
-		
-		# Apply Media
-		if ( $Media ) {
-			if ( isset($this->$what) ) {
-				$this->$what->delete();
-			}
-			$this->_set($what, $Media);
-		}
-		
-		# Done
-		return true;
-	}
-	
-	
-	/**
-	 * Set the User's Avatar
-	 * @return string
-	 */
-	public function setAvatar ( $value ) {
-		return $this->setMediaAttachment('Avatar', $value);
 	}
 	
 	/**

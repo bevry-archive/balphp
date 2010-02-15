@@ -138,3 +138,11 @@ if ( function_compare('baldump', 1, true, __FILE__, __LINE__) ) {
 	 	echo '</pre><br/>';
 	}
 }
+
+if ( function_compare('baltrace', 1, true, __FILE__, __LINE__) ) {
+	function baltrace ( ) {
+		echo '<pre>';
+		debug_print_backtrace();
+	 	echo '</pre><br/>';
+	}
+}

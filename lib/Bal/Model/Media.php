@@ -33,9 +33,9 @@ class Bal_Model_Media extends Base_BalMedia {
 		$uploads_url = Bal_App::getConfig('uploads_url');
 		
 		# Check the file
-		if ( !empty($file['error']) ) {
-			$error = $file['error'];
-			switch ( $file['error'] ) {
+		$error = delve($file,'error');
+		if ( $error ) {
+			switch ( $error ) {
 				case UPLOAD_ERR_INI_SIZE :
 					$error = 'ini_size';
 					break;
@@ -61,7 +61,8 @@ class Bal_Model_Media extends Base_BalMedia {
 			throw new Doctrine_Exception('error-application-file-' . $error);
 			return false;
 		}
-		if ( empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name']) ) {
+		$tmp_name = delve($file,'tmp_name');
+		if ( !$tmp_name || !is_uploaded_file($tmp_name) ) {
 			throw new Doctrine_Exception('error-application-file-invalid');
 			return false;
 		}
@@ -135,7 +136,7 @@ class Bal_Model_Media extends Base_BalMedia {
 					if ( $image_info ) {
 						$file_title = get_filename($file_title,false) . '.jpg';
 						$file_name = get_filename($file_name,false) . '.jpg';
-						$file_path = $uploads_path . DIRECTORY_SEPARATOR . $file_name; // immediate file path, so that 3rd party apis know where the file is - does risk curruption due to out of date value, but risk we are prepared to take
+						$file_path = dirname($file_path) . DIRECTORY_SEPARATOR . $file_name; // immediate file path, so that 3rd party apis know where the file is - does risk curruption due to out of date value, but risk we are prepared to take
 						$image_contents = $image_info['image'];
 						file_put_contents($file_path, $image_contents, LOCK_EX);
 						$file_path = realpath($file_path);
@@ -279,6 +280,48 @@ class Bal_Model_Media extends Base_BalMedia {
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
+	
+	/**
+	 * Fetch the Media from an Attachment
+	 * @param mixed $media
+	 */
+	public static function fromAttachment ( $media ) {
+		# Prepare
+		$Media = null;
+		
+		# Create Media
+		if ( is_array($media) ) {
+			if ( delve($media,'delete') ) {
+				# Delete Media
+				$Media = false;
+			}
+			elseif ( delve($media,'id') ) {
+				# Database Media
+				$Media = Doctrine::getTable('Media')->find(delve($media,'id'));
+			}
+			elseif ( delve($media,'tmpname') ) {
+				# File Upload
+				if ( !delve($media,'error') ) {
+					#  File Upload
+					$Media = new Media();
+					$Media->file = $media;
+				}
+			}
+			elseif ( delve($media,'file') ) {
+				if ( !delve($media,'error') && !delve($media,'file.error') ) {
+					# File Upload or Actual File
+					$Media = new Media();
+					$Media->file = delve($media,'file');
+				}
+			}
+		}
+		elseif ( is_object($media) && $media instanceOf Media ) {
+			$Media = $media;
+		}
+		
+		# Return Media
+		return $Media;
 	}
 	
 }

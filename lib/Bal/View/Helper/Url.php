@@ -151,6 +151,11 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		return $this;
 	}
 	
+	public function hard ( $value ) {
+		$this->_url = $value;
+		return $this;
+	}
+	
 	public function map ( $map ) {
 		$Route = delve($map,'Route');
 		if ( !$Route )
@@ -241,7 +246,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function media ( $Item ) {
-		return $this->url(delve($Item,'url'));
+		return $this->hard(delve($Item,'url'));
 	}
 	
 	public function user ( $Item ) {

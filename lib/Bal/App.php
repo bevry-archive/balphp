@@ -202,7 +202,7 @@ class Bal_App {
 				"sudo chmod -R 755 ".
 					"$cwd ",
 				// Writeable Files
-				"sudo chmod -R +w $cwd/application/data/dump ".
+				"sudo chmod -R 777 $cwd/application/data/dump ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
 					"$cwd/scripts/paypal/logs ",
@@ -420,6 +420,18 @@ class Bal_App {
 	
 	static public function getPlugin ( $plugin ) {
 		return self::getFrontController()->getPlugin($plugin);
+	}
+	
+	static public function getViewHelper ( $name ) {
+    	return self::getView()->getHelper($name);
+	}
+	
+	static public function getExistingActionHelper ( $name ) {
+    	return Zend_Controller_Action_HelperBroker::hasHelper($name) ? Zend_Controller_Action_HelperBroker::getExistingHelper($name) : null;
+	}
+	
+	static public function getStaticActionHelper ( $name ) {
+    	return Zend_Controller_Action_HelperBroker::getStaticHelper($name);
 	}
 	
 	static public function getView ( $clone = false ) {
