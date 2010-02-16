@@ -1,0 +1,70 @@
+
+# ==============================================
+# BAL MESSAGE
+
+BalMessage:
+    columns:
+        id:
+            type: integer(3)
+            unsigned: true
+            primary: true
+            autoincrement: true
+        send_on:
+            type: timestamp
+            notblank: true
+        sent_on:
+            type: timestamp
+            extra:
+                auto: true
+        title:
+            type: string(50)
+            notblank: true
+        description:
+            type: string
+            notblank: true
+            extra:
+                html: true
+        unread:
+            type: boolean
+            default: true
+            notnull: true
+            extra:
+                auto: true
+        hash:
+            type: string(33)
+            unique: true
+            notblank: true
+            extra:
+                auto: true
+        
+        status:
+            type: enum
+            notblank: true
+            values: [pending,published]
+            default: pending
+            extra:
+                auto: true
+        template:
+            type: string(30)
+            notblank: true
+            default: "user-message"
+            extra:
+                auto: true
+        sender_id:
+            type: integer(2)
+            unsigned: true
+        receiver_id:
+            type: integer(2)
+            unsigned: true
+            notblank: true
+    relations:
+        Sender:
+            class: User
+            local: sender_id
+            foreign: id
+            foreignAlias: SentMessages
+        Receiver:
+            class: User
+            local: receiver_id
+            foreign: id
+            foreignAlias: ReceivedMessages

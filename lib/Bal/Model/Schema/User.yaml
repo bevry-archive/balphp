@@ -1,0 +1,238 @@
+
+# ==============================================
+# BAL USER
+
+BalUser:
+    actAs:
+        Taggable:
+            tagAlias: "SubscriptionTags"
+        SoftDelete:
+        Timestampable:
+        Bal_Doctrine_Template_Loggable:
+        Bal_Doctrine_Template_Addressable:
+            # This can only be listed once due to bug in doctrine
+    columns:
+        id:
+            type: integer(2)
+            unsigned: true
+            primary: true
+            autoincrement: true
+        username:
+            type: string(16)
+            notblank: true
+            unique: true
+            extra:
+                auto: true
+        password:
+            # md5 hash
+            type: string(33)
+            notblank: true
+        displayname:
+            # The Name to Display the User As
+            type: string(85)
+            notblank: true
+            
+        title:
+            type: string(15)
+        firstname:
+            type: string(35)
+        lastname:
+            type: string(35)
+        fullname:
+            type: string(85)
+            extra:
+                auto: true
+            
+        email:
+            type: string(255)
+            notblank: true
+            #email: true
+        phone:
+            type: string(255)
+            extra:
+                formOrder: 320
+                formGroup: "other"
+            
+        description:
+            type: string
+            
+        subscriptions:
+            # - CSV generated from SubscriptionTags. Used for searchable.
+            type: string(255)
+            notnull: true
+            default: ""
+        code:
+            # Alias for Username
+            type: string(33)
+            notblank: true
+            unique: true
+            extra:
+                auto: true
+        uid:
+            # Unique Identifier for the User
+            type: string(33)
+            notblank: true
+            unique: true
+            extra:
+                auto: true
+        type:
+            type: enum
+            values: [user]
+            notblank: true
+        status:
+            type: enum
+            values: [pending,published,disabled]
+                # pending - Awaiting activation
+                # published - Activated
+                # disabled - Disabled for whatever reason
+            notnull: true
+            default: pending
+            
+        avatar_id:
+            type: integer(2)
+            unsigned: true
+    relations:
+        Avatar:
+            class: Media
+            local: avatar_id
+            foreign: id
+            foreignAlias: UserList
+            onDelete: "SET NULL"
+        Permissions:
+            class: Permission
+            local: user_id
+            foreign: permission_id
+            foreignAlias: Users
+            refClass: PermissionAndUser
+        Roles:
+            class: Role
+            local: user_id
+            foreign: role_id
+            foreignAlias: Users
+            refClass: RoleAndUser
+
+# ==============================================
+# BAL PERMISSIONS
+
+Role:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            autoincrement: true
+            unsigned: true
+            autoincrement: true
+        code:
+            type: string(15)
+            notblank: true
+            unique: true
+    relations:
+        Permissions:
+            class: Permission
+            local: role_id
+            foreign: permission_id
+            foreignAlias: Roles
+            refClass: PermissionAndRole
+
+PermissionAndRole:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        role_id:
+            type: integer(2)
+            unsigned: true
+            notnull: true
+        permission_id:
+            type: integer(2)
+            unsigned: true
+            notnull: true
+    relations:
+        Role:
+            local: role_id
+            foreign: id
+        Permission:
+            local: permission_id
+            foreign: id
+        
+Permission:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        code:
+            type: string(50)
+            notblank: true
+            unique: true
+
+RoleAndUser:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        assigned_date:
+            type: timestamp
+            notnull: false
+        assignee_user_id:
+            type: integer(2)
+            notnull: false
+            unsigned: true
+        user_id:
+            type: integer(2)
+            notnull: true
+            unsigned: true
+        role_id:
+            type: integer(2)
+            notnull: true
+            unsigned: true
+    relations:
+        Assignee:
+            class: User
+            local: assignee_user_id
+            foreign: id
+        User:
+            local: user_id
+            foreign: id
+        Role:
+            local: role_id
+            foreign: id
+
+PermissionAndUser:
+    columns:
+        id:
+            type: integer(3)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        assigned_date:
+            type: timestamp
+            notnull: false
+        assignee_user_id:
+            type: integer(2)
+            notnull: false
+            unsigned: true
+        user_id:
+            type: integer(2)
+            notnull: true
+            unsigned: true
+        permission_id:
+            type: integer(2)
+            notnull: true
+            unsigned: true
+    relations:
+        Assignee:
+            class: User
+            local: assignee_user_id
+            foreign: id
+        User:
+            local: user_id
+            foreign: id
+        Permission:
+            local: permission_id
+            foreign: id

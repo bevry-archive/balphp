@@ -136,19 +136,19 @@ class Bal_App {
 		switch ( $mode ) {
 			
 			case 'install':
-				$ensure = array('createindex', 'cleanmodels', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'install-dump':
-				$ensure = array('createindex', 'cleanmodels', 'usedump', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'usedump', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'reload':
-				$ensure = array('createindex', 'usedump', 'makedump', 'reload', 'optimiseindex', 'permissions');
+				$ensure = array('createindex', 'usedump', 'makedump', 'regenschema', 'reload', 'optimiseindex', 'permissions');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: reload ['.implode(array_keys($args),',').']'."\n";
 				break;
@@ -190,7 +190,7 @@ class Bal_App {
 		}
 		
 		
-		# Media: media
+		# Permissions: permissions
 		if ( delve($args,'permissions') ) {
 			echo '- [permissions] -'."\n";
 			echo 'Permissions: Setting up Permissions'."\n";
@@ -202,7 +202,8 @@ class Bal_App {
 				"sudo chmod -R 755 ".
 					"$cwd ",
 				// Writeable Files
-				"sudo chmod -R 777 $cwd/application/data/dump ".
+				"sudo chmod -R 777 ".
+					"$cwd/application/data/dump $cwd/application/data/schema ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
 					"$cwd/scripts/paypal/logs ",
@@ -216,8 +217,6 @@ class Bal_App {
 					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
 			);
 			$result = systems($commands);
-			# Output what we did
-			//echo 'Permissions: Adjusted permissions across the site successfully'."\n";
 		}
 		
 		
@@ -267,6 +266,8 @@ class Bal_App {
 		$data_dump_path = delve($applicationConfig,'data.dump_path');
 		$data_path_to_use = $data_fixtures_path;
 		$data_yaml_schema_path = delve($applicationConfig,'data.yaml_schema_path');
+		$data_yaml_schema_file_path = delve($applicationConfig,'data.yaml_schema_file_path');
+		$data_yaml_schema_includes = delve($applicationConfig,'data.yaml_schema_includes');
 		$data_models_path = delve($applicationConfig,'data.models_path');
 		
 		# Doctrine: cleanmodels
@@ -306,6 +307,18 @@ class Bal_App {
 				$data_dump_path,
 				false
 			);
+		}
+		
+		# Doctrine: regenschema
+		if ( delve($args,'regenschema') ) {
+			echo '- [regenschema] -'."\n";
+			echo 'Doctrine: Regenerating YAML Schema ['.$data_yaml_schema_file_path.']'."\n";
+			echo "\t".implode("\n\t",$data_yaml_schema_includes)."\n";
+			$yaml_schema = '';
+			foreach ( $data_yaml_schema_includes as $yaml_include ) {
+				$yaml_schema .= file_get_contents($yaml_include)."\n\n# ^ $yaml_include\n\n";
+			}
+			file_put_contents($data_yaml_schema_file_path, $yaml_schema);
 		}
 		
 		# Doctrine: reload
@@ -353,6 +366,23 @@ class Bal_App {
 			echo 'Lucene: Optimising the Lucence Index ['.$data_index_path.']'."\n";
 			$Index = Zend_Registry::get('Index');
 			$Index->optimize();
+		}
+		
+		
+		# Permissions: permissions
+		if ( delve($args,'permissions') ) {
+			echo '- [permissions] -'."\n";
+			echo 'Permissions: Re-Securing Permissions'."\n";
+			# Run a Bunch of Command Line Stuff
+			$cwd = APPLICATION_ROOT_PATH;
+			$commands = array(
+				// Writeable Files
+				"sudo chmod -R 755 ".
+					"$cwd/application/data/dump $cwd/application/data/schema ".
+					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php "
+					,
+			);
+			$result = systems($commands);
 		}
 		
 		# Done

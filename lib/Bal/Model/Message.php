@@ -26,15 +26,15 @@ class Bal_Model_Message extends Base_BalMessage
 	/**
 	 * Alias for Template
 	 */
-	public function setTemplate ( $code, $load = true ) {
-		return $this->useTemplate($code);
+	public function setTemplate ( $template, $load = true ) {
+		return $this->useTemplate($template);
 	}
 	
 	/**
 	 * Shortcut Message Creation via Codes
 	 * @return string
 	 */
-	public function useTemplate ( $code, array $data = array() ) {
+	public function useTemplate ( $template, array $data = array() ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
@@ -56,19 +56,19 @@ class Bal_Model_Message extends Base_BalMessage
 		$params['messageUrl'] = $messageUrl;
 		
 		# Handle
-		$function = '_template'.magic_function($code);
+		$function = '_template'.magic_function($template);
 		if ( method_exists($this, $function) ) {
 			$this->$function($params,$data);
 		}
 		
 		# Render
-		$title = $Locale->translate('message-'.$code.'-title', $params);
-		$description = $Locale->translate('message-'.$code.'-description', $params);
+		$title = $Locale->translate('message-'.$template.'-title', $params);
+		$description = $Locale->translate('message-'.$template.'-description', $params);
 		
 		# Apply
 		$this->title = $title;
 		$this->description = $description;
-		$this->code = $code;
+		$this->template = $template;
 		
 		# Chain
 		return $this;

@@ -37,7 +37,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	# ========================
 	# VARIABLES
 	
-	protected $_default_route = 'default';
+	protected $_default_route = null;
 	
 	protected $_params = array();
 	protected $_route  = null;
@@ -82,11 +82,9 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		# Prepare
 		$result = false;
 		
-		# Clear
-		$this->clear();
-		
 		# Handle Request
 		if ( empty($urlOptions) && empty($name) ) {
+			$this->clear();
 			$result = $this;
 		}
 		else {
@@ -107,6 +105,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function apply ( $params, $route, $reset, $encode ) {
+		$this->clear();
 		return $this->params($params)->route($route)->reset($reset)->encode($encode);
 	}
 	
@@ -235,11 +234,13 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function toString ( ) {
-		return $this->__toString();
+		$url = $this->assemble();
+		$this->clear();
+		return $url;
 	}
 	
 	public function __toString ( ) {
-		return $this->assemble();
+		return $this->toString();
 	}
 	
 	
