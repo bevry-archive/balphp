@@ -181,18 +181,18 @@ class Bal_Model_User extends Base_BalUser {
 	}
 	
 	/**
-	 * Ensure Code
+	 * Ensure Uid
 	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureCode ( $Event ) {
+	public function ensureUid ( $Event ) {
 		# Prepare
-		$code = md5($this->username.$this->email);
+		$uid = md5($this->username.$this->email);
 		$save = false;
 		
 		# Is it different?
-		if ( $this->_get('code') != $code ) {
-			$this->_set('code', $code, false);
+		if ( $this->_get('uid') != $uid ) {
+			$this->_set('uid', $uid, false);
 			$save = true;
 		}
 		
@@ -213,6 +213,25 @@ class Bal_Model_User extends Base_BalUser {
 		$fullname = implode(' ', array($this->title, $this->firstname, $this->lastname));
 		if ( $this->_get('fullname') !== $fullname ) {
 			$this->_set('fullname', $fullname, false); // false at end to prevent comparison
+			$save = true;
+		}
+		
+		# Return
+		return $save;
+	}
+	
+	/**
+	 * Ensure Code
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensureCode ( $Event ) {
+		# Prepare
+		$save = false;
+		
+		# Fullname
+		if ( !$this->_get('code') ) {
+			$this->_set('code', $this->username, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -265,8 +284,8 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function ensureSubscriptions ( $Event ) {
 		# Prepare
-		$Invoker = $Event->getInvoker();
-		$modified = $Invoker->getModified();
+		$User = $Event->getInvoker();
+		$modified = $User->getModified();
 		$save = false;
 		
 		# Fetch
@@ -302,13 +321,20 @@ class Bal_Model_User extends Base_BalUser {
 	 * @return boolean	wheter or not to save
 	 */
 	public function ensure ( $Event ) {
+		# Prepare
+		$User = $Event->getInvoker();
+		
+		# Handle
 		$ensure = array(
-			$this->ensureCode($Event),
-			$this->ensureFullname($Event),
-			$this->ensureDisplayname($Event),
-			$this->ensureUsername($Event),
-			$this->ensureSubscriptions($Event)
+			$User->ensureCode($Event),
+			$User->ensureUid($Event),
+			$User->ensureFullname($Event),
+			$User->ensureDisplayname($Event),
+			$User->ensureUsername($Event),
+			$User->ensureSubscriptions($Event)
 		);
+		
+		# Return save
 		return in_array(true,$ensure);
 	}
 	
@@ -319,7 +345,7 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
-		$Invoker = $Event->getInvoker();
+		$User = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
@@ -338,12 +364,12 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
-		$Invoker = $Event->getInvoker();
+		$User = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
 		if ( self::ensure($Event) ) {
-			$this->save();
+			$User->save();
 		}
 		
 		# Done
@@ -357,12 +383,12 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function postInsert ( $Event ) {
 		# Prepare
-		$Invoker = $Event->getInvoker();
+		$User = $Event->getInvoker();
 		$result = true;
 		
 		# Create Welcome Message
 		$Message = new Message();
-		$Message->Receiver = $Invoker;
+		$Message->Receiver = $User;
 		$Message->template = 'user-insert';
 		$Message->save();
 		

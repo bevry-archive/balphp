@@ -179,29 +179,31 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		return $this;
 	}
 	
-	public function item ( $item ) {
+	public function item ( $Item, $param = null, $error = true ) {
 		# Ensure Item
-		$id = $code = null;
-		if ( is_numeric($item) ) {
-			$id = $item;
+		$code = $id = null;
+		if ( is_numeric($Item) ) {
+			$id = $itItemem;
 		}
-		elseif ( is_string($item) ) {
-			$code = $item;
+		elseif ( is_string($Item) ) {
+			$code = $Item;
 		}
-		elseif ( is_object($item) || is_array($item) ) {
-			$code = delve($item,'code');
-			$id = delve($item,'id');
+		elseif ( is_object($Item) || is_array($Item) ) {
+			$code = delve($Item,'code');
+			$id = delve($Item,'id');
 		}
 		
 		# Apply Item
 		if ( $code ) {
-			$this->param('code',$code);
+			if ( !$param ) $param = 'code';
+			$this->param($param,$code);
 		}
 		elseif ( $id ) {
-			$this->param('id',$id);
+			if ( !$param ) $param = 'id';
+			$this->param($param,$id);
 		}
-		else {
-			$result = false;
+		elseif ( $error) {
+			// throw new Zend_Exception('Empty item was passed to url::item()');
 		}
 		
 		# Chain
@@ -254,7 +256,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function userActivate ( $Item ) {
-		return $this->route('default')->action('user-activate')->item($Item);
+		return $this->route('default')->action('user-activate')->item($Item)->param('uid',delve($Item,'uid'));
 	}
 	
 	public function message ( $Item ) {

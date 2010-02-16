@@ -386,7 +386,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 						/* Is Doctrine Record */
 						||	(	($holder instanceOf Doctrine_Record)
 								&&	($holder->hasAccessor($key)
-										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) || isset($holder->$key)) && $holder->$key->exists())
+										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) || isset($holder->$key)) ) // && $holder->$key->exists())
 										||	$holder->getTable()->hasField($key)
 									)
 							)
@@ -973,5 +973,60 @@ if ( function_compare('check_flow', 1, true, __FILE__, __LINE__) ) {
 	
 		# Return
 		return $result;
+	}
+}
+
+
+if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Generates an array from CSV values
+	 * @version 1, February 16, 2010
+	 * @param mixed $item
+	 * @return array
+	 */
+	function prepare_csv_array ( $value ) {
+		# Prepare
+		$csv = array();
+	
+		# Handle
+		if ( is_string($value) ) {
+			# Explore String to get CSV Values
+			$explode = explode(',', $value);
+			foreach ( $explode as $item ) {
+				# Add value to CSV
+				$csv[] = trim($item);
+			}
+		}
+		elseif ( is_array($value) ) {
+			# Cycle Through Array
+			foreach ( $value as $item ) {
+				# Add values to CSV
+				$csv = array_merge($csv, prepare_csv_array($item));
+			}
+		}
+	
+		# Return csv
+		return $csv;
+	}
+}
+
+
+if ( function_compare('prepare_csv_str', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Generates an string from CSV values
+	 * @version 1, February 16, 2010
+	 * @param mixed $item
+	 * @param string $glue [optional]
+	 * @return string
+	 */
+	function prepare_csv_str ( $value, $glue = ', ' ) {
+		# Prepare
+		$csv = prepare_csv_array($value);
+		
+		# Imploe
+		$csv = implode($glue, $csv);
+	
+		# Return csv
+		return $csv;
 	}
 }

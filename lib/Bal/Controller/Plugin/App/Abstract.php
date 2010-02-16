@@ -840,6 +840,61 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	
 	# ========================
+	# GETTERS: ITEMS
+	
+	public function fetchParam ( $param = null, $default = false ) {
+		return $this->getRequest()->getParam($param, $default);
+	}
+	
+	public function fetchItemParam ( $param = null, $only = false ) {
+		# Prepare
+		$item = false;
+		
+		# Fetch item
+		if ( $param )
+			$item = $this->fetchParam($param, false);
+		if ( !$item && !$only ) {
+			// we want to try generic params
+			$item = $this->fetchParam('code', false);
+			if ( !$item ) $item = $this->fetchParam('id', false);
+		}
+		
+		# Return item
+		return $item;
+	}
+	
+	public function fetchItem ( $table, $Query = null, $create = true ) {
+		# Fetch
+		$item = $this->fetchItemParam(strtolower($table));
+		$Item = false;
+		
+		# Load
+		if ( $item ) {
+			# Prepare Query
+			if ( !$Query ) {
+				$Query = Doctrine_Query::create()->select('i.*')->from($table.' i');
+			}
+			# Search Query
+			if ( is_numeric($item) ) {
+				$Query->andWhere('i.id = ?', $item);
+			}
+			elseif ( is_string($item) ) {
+				$Query->andWhere('i.code = ?', $item);
+			}
+			# Fetch
+			$Item = $Query->fetchOne();
+		}
+		
+		# Create if empty?
+		if ( $create && empty($Item) ) {
+			$Item = new $table();
+		}
+		
+		# Return Media
+		return $Item;
+	}
+	
+	# ========================
 	# GETTERS: SEARCH
 	
 	/**
