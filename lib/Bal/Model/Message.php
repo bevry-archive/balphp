@@ -68,7 +68,7 @@ class Bal_Model_Message extends Base_BalMessage
 		# Apply
 		$this->title = $title;
 		$this->description = $description;
-		$this->template = $template;
+		$this->_set('template', $template, false);
 		
 		# Chain
 		return $this;
