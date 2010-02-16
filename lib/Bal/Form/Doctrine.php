@@ -89,7 +89,7 @@ class Bal_Form_Doctrine
 			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
 			
 			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), $field);
+			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), ucwords(str_replace('_', ' ',$field)));
 			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
 			
 			# Apply Attributes
@@ -129,7 +129,7 @@ class Bal_Form_Doctrine
 			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
 			
 			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), $field);
+			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), ucwords(str_replace('_', ' ',$field)));
 			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
 			
 			# Apply Attributes
