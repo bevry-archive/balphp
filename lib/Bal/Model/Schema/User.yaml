@@ -21,12 +21,12 @@ BalUser:
             type: string(16)
             notblank: true
             unique: true
-            extra:
-                auto: true
         password:
             # md5 hash
             type: string(33)
             notblank: true
+            extra:
+                password: true
         displayname:
             # The Name to Display the User As
             type: string(85)

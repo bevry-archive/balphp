@@ -72,30 +72,40 @@ class Bal_Form_Doctrine
 	
 	public static function generateForm ( $from, $Record = null ) {
 		# Prepare
+		$Locale = Bal_App::getLocale();
 		$tableName = self::getTableName($from);
+		$tableNameLower = strtolower($tableName);
 		$Table = self::getTable($from);
-		$Form = new Zend_Form();
+		$Form = new Zend_Form_SubForm();
+		$Form->setElementsBelongTo($tableNameLower);
 		
 		# Generate New Form
 		$columns = $Table->getColumns();
 		foreach ( $columns as $column => $properties ) {
 			# Create Element
-			$name = $tableName.'['.$column.']';
-			$Element = new Bal_Form_Element_Doctrine($name);//$Form->createElement('doctrine', $name);
+			$field = $column;
+			$name = $field;
+			$Element = new Bal_Form_Element_Doctrine($name); //$Form->createElement('doctrine', $name);
+			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
+			
+			# Prepare Attributes
+			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), $field);
+			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
 			
 			# Apply Attributes
 			$Element->setName($name);
-			$Element->setLabel($tableName.'-form-element-'.$column.'-title');
-			$Element->setDescription($tableName.'-form-element-'.$column.'-description');
+			$Element->setLabel($label);
+			$Element->setDescription($description);
 			if ( $Record ) {
-				$value = delve($Record,'get');
+				$value = delve($Record,$field);
 				$Element->setValue($value);
 			}
 			
-			# Check to see if this is an auto field, if so make it read only
+			# Auto
 			$auto = real_value(delve($properties,'extra.auto')) || real_value(delve($properties,'autoincrement'));
 			$Element->setIgnore($auto);
-			$Element->setAttrib('readonly', $auto);
+			$Element->setAttrib('readonly', $auto ? true : null);
+			$Element->setAttrib('disabled', $auto ? true : null);
 			
 			# Required
 			$notnull = real_value(delve($properties,'notnull'));
@@ -105,7 +115,37 @@ class Bal_Form_Doctrine
 			$Element->setAllowEmpty(!$notblank);
 			$Element->setAutoInsertNotEmptyValidator(false);
 			
-			# Add to Form
+			# Add Element
+			$Form->addElement($Element);
+		}
+		
+		# Relations
+		$Relations = $Table->getRelations();
+		foreach ( $Relations as $relationName => $Relation ) {
+			# Create Element
+			$field = $relationName;
+			$name = $field;
+			$Element = new Bal_Form_Element_Doctrine($name); //$Form->createElement('doctrine', $name);
+			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
+			
+			# Prepare Attributes
+			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), $field);
+			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
+			
+			# Apply Attributes
+			$Element->setName($name);
+			$Element->setLabel($label);
+			$Element->setDescription($description);
+			if ( $Record ) {
+				$relations = delve($Record,$field);
+				$value = array();
+				if ( $relations ) foreach ( $relations as $relation ) {
+					$value[] = $relation['id'];
+				}
+				$Element->setValue($value);
+			}
+			
+			# Add Element
 			$Form->addElement($Element);
 		}
 		
@@ -119,7 +159,7 @@ class Bal_Form_Doctrine
 		$Form = null;
 		
 		# Check to see if table has form
-		if ( method_exists($table, 'fetchForm') )
+		if ( method_exists($tableName, 'fetchForm') )
 			$Form = $tableName::fetchForm($Record);
 		else
 			$Form = self::generateForm($from, $Record);

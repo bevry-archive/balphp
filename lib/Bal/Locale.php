@@ -323,7 +323,7 @@ class Bal_Locale {
 	 */
 	public function translate_default ( $text, array $info = array(), $default = null ) {
 		$translation = $this->translate($text, $info);
-		if ( $translation === $text && $default ) {
+		if ( $translation === $text && $default !== null ) {
 			$translation = $default;
 		}
 		return $translation;

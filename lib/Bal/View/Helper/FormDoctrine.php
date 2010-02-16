@@ -71,16 +71,23 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
      *
      * @return string The element XHTML.
      */
-    public function formDoctrine($name, $value = null, $attribs = null, $table, $field) {
+    public function formDoctrine($name, $value = null, $attribs = null, $table = null, $field = null) {
 		# Prepare
+		$Locale = Bal_App::getLocale();
 		$result = '';
 		
+		# Fetch Info
+        $info = $this->_getInfo($name, $value, $attribs);
+        extract($info); // name, id, value, attribs, options, listsep, disable
+		
 		# Prepare Attributes
-		if ( !is_array($attribs) ) $attribs = empty($attribs) ? array() : array($attribs);
-		array_keys_ensure($attribs, array('class'), '');
+		array_keys_ensure($attribs, array('table','field'));
+		if ( !$table ) $table = $attribs['table'];
+		if ( !$field ) $field = $attribs['field'];
 		
 		# Fetch Table Information
 		$Table = Doctrine::getTable($table);
+		$properties = array();
 		if ( $Table->hasRelation($field) ) {
 			# Relation
 			$type = 'relation';
@@ -93,11 +100,18 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			$properties = $Table->getDefinitionOf($field);
 			array_keys_ensure($properties, array('length'), null);
 			$length = $properties['length'];
+		
+			# Checks
+			if ( real_value(delve($properties,'extra.password')) ) {
+				$type = 'password';
+				$value = null;
+			}
+		
 		}
 		
 		# Formify
-		$table = strtolower($table);
-		$field = strtolower($field);
+		$tableLower = strtolower($table);
+		$fieldLower = strtolower($field);
 		
 		# Discover
 		switch ( $type ) {
@@ -114,6 +128,9 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 					case $RelationTable->hasField('code'):
 						$text_column = 'code';
 						break;
+					case $RelationTable->hasField('displayname'):
+						$text_column = 'displayname';
+						break;
 					case $RelationTable->hasField('fullname'):
 						$text_column = 'fullname';
 						break;
@@ -121,21 +138,48 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 						$text_column = 'id';
 						
 				}
+				
 				# Fetch
-				$relations = $RelationTable->createQuery()->select('id, '.$text_column.' as text')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
+				try {
+					$relations = $RelationTable->createQuery()->select('id, '.$text_column.' as text')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
+				}
+				catch ( Exception $Exception ) {
+					$relations = array();
+					$Relations = delve($Table,$field);
+					if ( $Relations ) foreach ( $Relations as $relation ) {
+						$relations[] = array('id'=>$relation['id'],'text'=>$relation[$text_column]);
+					}
+				}
+				
+				# Options
 				$options = array();
 				foreach ( $relations as $relation ) {
 					$options[$relation['id']] = $relation['text'];
 				}
+				
 				# Display
-				$this->formSelect($name, $value, $attribs, $options);
+				if ( empty($options) ) {
+					$result .= '<span class="form-empty">'.$Locale->translate('none').'</span>';
+				}
+				else {
+					if ( count($options) === 1 ) {
+						$attribs['disabled'] = $attribs['readonly'] = true;
+					}
+					elseif ( $Relation->getType() === Doctrine_Relation::MANY ) {
+						$attribs['multiple'] = true;
+					}
+					$result .= $this->view->formSelect($name, $value, $attribs, $options);
+				}
 				break;
 				
 			case 'enum':
 				$options = $Table->getEnumValues($field);
 				$options = array_flip($options);
 				foreach ( $options as $enum => &$text ) {
-					$text = $this->view->locale()->translate_default($table.'-'.$field.'-'.$enum, array(), ucfirst($enum));
+					$text = $Locale->translate_default($tableLower.'-'.$fieldLower.'-'.$enum, array(), ucfirst($enum));
+				}
+				if ( count($options) === 1 ) {
+					$attribs['disabled'] = $attribs['readonly'] = true;
 				}
 				$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				break;
@@ -145,6 +189,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				$result .= $this->view->formBoolean($name, $value, $attribs);
 				break;
 			
+			case 'timestamp':
 			case 'datetime':
 				$result .= $this->view->formDatetime($name, $value, $attribs);
 				break;
@@ -166,20 +211,27 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			case 'float':
 				$result .= $this->view->formNumber($name, $value, $attribs);
 				break;
+				
+			case 'password':
+				if ( $length <= 255 ) {
+					$attribs['maxlength'] = $length;
+				}
+				$result .= $this->view->formPassword($name, $value, $attribs);
+				break;
 			
 			case 'text':
 			case 'string':
-				if ( $length <= 255 ):
-					$_attribs = $attribs; $_attribs['maxlength'] = $length;
-					$result .= $this->view->formText($name, $value, $_attribs);
+				if ( $length <= 255 ) {
+					$attribs['maxlength'] = $length;
+					$result .= $this->view->formText($name, $value, $attribs);
 					break;
-				endif;
+				}
 			case 'textarea':
 				$result .= $this->view->formTextarea($name, $value, $attribs);
 				break;
 			
 			default:
-				throw new Zend_Exception('error-unkown_input_type');
+				throw new Zend_Exception('error-unkown_input_type-'.$type);
 				break;
 		}
 		
