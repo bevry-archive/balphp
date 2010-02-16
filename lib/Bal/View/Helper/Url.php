@@ -82,7 +82,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		# Prepare
 		$result = false;
 		
-		# Clear Information
+		# Clear
 		$this->clear();
 		
 		# Handle Request
