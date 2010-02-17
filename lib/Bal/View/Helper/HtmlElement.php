@@ -53,22 +53,24 @@ class Bal_View_Helper_HtmlElement extends Zend_View_Helper_HtmlElement
      */
     public function HtmlElement($name, $content = null, $attribs = null, $open = true, $close = true)
     {
-		// prepare
+		# prepare
         $xhtml = '';
-		if ( is_array($attribs) ) array_clean($attribs);
-
-		// open
+		
+		# Prepare Attributes
+		array_keys_ensure($attribs, array('class'), '');
+		
+		# open
 		if ( $open )
 			$xhtml .=
 				'<'.$name.
 				$this->_htmlAttribs($attribs);
 
-        // add content and end tag
+       	# add content and end tag
 		if ( $close )
 			$xhtml .=
 				is_null($content) ? ' />' : $content.'</'.$name.'>';
 		
-		// return
+		# return
         return $xhtml;
     }
 

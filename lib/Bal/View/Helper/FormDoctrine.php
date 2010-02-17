@@ -81,32 +81,55 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
         extract($info); // name, id, value, attribs, options, listsep, disable
 		
 		# Prepare Attributes
-		array_keys_ensure($attribs, array('table','field'));
+		array_keys_ensure($attribs, array('table','field','class'));
 		if ( !$table ) $table = $attribs['table'];
 		if ( !$field ) $field = $attribs['field'];
 		
 		# Fetch Table Information
-		$Table = Doctrine::getTable($table);
+		$Table = Bal_Form_Doctrine::getTable($table);
 		$properties = array();
 		if ( $Table->hasRelation($field) ) {
-			# Relation
-			$type = 'relation';
 			$Relation = $Table->getRelation($field);
 			$RelationTable = $Relation->getTable();
 		}
-		else {
-			# Column
-			$type = $Table->getTypeOf($field);
+		elseif ( $Table->hasField($field) ) {
 			$properties = $Table->getDefinitionOf($field);
 			array_keys_ensure($properties, array('length'), null);
 			$length = $properties['length'];
+		}
 		
-			# Checks
-			if ( real_value(delve($properties,'extra.password')) ) {
-				$type = 'password';
-				$value = null;
+		# Determine Type
+		if ( delve($attribs,'type') ) {
+			# Overide type
+			$type = delve($attribs,'type');
+		}
+		elseif ( $Table->hasRelation($field) ) {
+			# Relation
+			$type = 'relation';
+		}
+		elseif ( $Table->hasField($field) ) {
+			# Column
+			$type = $Table->getTypeOf($field);
+		
+			# Custom Types
+			switch ( true ) {
+				case real_value(delve($properties,'extra.password')):
+					$type = 'password';
+					$value = null;
+					break;
+				
+				
+				case real_value(delve($properties,'extra.csv')):
+					$type = 'csv';
+					$value = null;
+					break;
+				
+				default:
+					break;
 			}
-		
+		}
+		else {
+			# Unkown
 		}
 		
 		# Formify
@@ -213,23 +236,34 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				break;
 				
 			case 'password':
-				if ( $length <= 255 ) {
+				if ( $length && $length <= 255 ) {
 					$attribs['maxlength'] = $length;
 				}
+				$attribs['autocomplete'] = 'off';
+				$attribs['class'] .= ' sparkle-password';
 				$result .= $this->view->formPassword($name, $value, $attribs);
 				break;
 			
 			case 'text':
 			case 'string':
-				if ( $length <= 255 ) {
+				if ( $length && $length <= 255 ) {
 					$attribs['maxlength'] = $length;
 					$result .= $this->view->formText($name, $value, $attribs);
 					break;
 				}
 			case 'textarea':
+				$attribs['class'] .= ' autogrow';
 				$result .= $this->view->formTextarea($name, $value, $attribs);
 				break;
 			
+			case 'csv':
+				$result .= $this->view->formCsv($name, $value, $attribs);
+				break;
+				
+			case 'hidden':
+				$result .= $this->view->formHidden($name, $value, $attribs);
+				break;
+				
 			default:
 				throw new Zend_Exception('error-unkown_input_type-'.$type);
 				break;

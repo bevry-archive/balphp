@@ -57,6 +57,16 @@ class Zend_View_Helper_FormBoolean extends Zend_View_Helper_FormElement
     public function formBoolean($name, $value = null, $attribs = null) {
 		# Prepare
 		$result = '';
+		
+		# Fetch Info
+        $info = $this->_getInfo($name, $value, $attribs);
+        extract($info); // name, id, value, attribs, options, listsep, disable
+		
+		# Prepare Attributes
+		array_keys_ensure($attribs, array('class'), '');
+		
+		# Ensure Correct Options
+		if ( empty($options) )
 		$options = array(
 	        'checkedValue'   => '1',
 	        'uncheckedValue' => '0'

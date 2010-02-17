@@ -58,6 +58,13 @@ class Zend_View_Helper_FormCurrency extends Zend_View_Helper_FormElement
 		# Prepare
 		$result = '';
 		
+		# Fetch Info
+        $info = $this->_getInfo($name, $value, $attribs);
+        extract($info); // name, id, value, attribs, options, listsep, disable
+		
+		# Prepare Attributes
+		array_keys_ensure($attribs, array('class'), '');
+		
 		# Handle
 		$result .=
 			$this->view->locale()->currencySymbol().

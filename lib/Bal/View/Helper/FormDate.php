@@ -57,9 +57,12 @@ class Zend_View_Helper_FormDate extends Zend_View_Helper_FormElement
     public function formDate($name, $value = null, $attribs = null) {
 		# Prepare
 		$result = '';
+
+		# Fetch Info
+        $info = $this->_getInfo($name, $value, $attribs);
+        extract($info); // name, id, value, attribs, options, listsep, disable
 		
 		# Prepare Attributes
-		if ( !is_array($attribs) ) $attribs = empty($attribs) ? array() : array($attribs);
 		array_keys_ensure($attribs, array('class'), '');
 		
 		# Handle

@@ -39,7 +39,7 @@ class Bal_Form_Doctrine
 		
 		# Fetch
 		if ( is_object($table) && $table instanceOf Doctrine_Table ) 
-			$Table = $Table;
+			$Table = $table;
 		else {
 			$tableName = self::getTableName($table);
 			$Table = Doctrine::getTable($table);
@@ -70,82 +70,201 @@ class Bal_Form_Doctrine
 		return $tableName;
 	}
 	
-	public static function generateForm ( $from, $Record = null ) {
+	public static function getFormName ( $table ) {
 		# Prepare
-		$Locale = Bal_App::getLocale();
-		$tableName = self::getTableName($from);
-		$tableNameLower = strtolower($tableName);
-		$Table = self::getTable($from);
-		$Form = new Zend_Form_SubForm();
-		$Form->setElementsBelongTo($tableNameLower);
+		$tableName = self::getTableName($table);
 		
-		# Generate New Form
-		$columns = $Table->getColumns();
-		foreach ( $columns as $column => $properties ) {
-			# Create Element
-			$field = $column;
-			$name = $field;
-			$Element = new Bal_Form_Element_Doctrine($name); //$Form->createElement('doctrine', $name);
-			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
-			
-			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), ucwords(str_replace('_', ' ',$field)));
-			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
-			
-			# Apply Attributes
-			$Element->setName($name);
-			$Element->setLabel($label);
-			$Element->setDescription($description);
-			if ( $Record ) {
-				$value = delve($Record,$field);
-				$Element->setValue($value);
+		# Handle
+		$formName = $tableName;
+		
+		# Return
+		return $tableName;
+	}
+	
+	public static function getElementName ( $table, $fieldName ) {
+		# Prepare
+		
+		# Handle
+		$elementName = $fieldName;
+		
+		# Return
+		return $elementName;
+	}
+	
+	public static function getGroupName ( $table, $group ) {
+		# Prepare
+		
+		# Handle
+		$groupName = $group;
+		
+		# Return
+		return $groupName;
+	}
+	
+	public static function applyElementRelationProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+		# Prepare
+		$Table = Bal_Form_Doctrine::getTable($table);
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		
+		# Apply Value
+		if ( $Record ) {
+			$relations = delve($Record,$fieldName);
+			$value = array();
+			if ( $relations ) foreach ( $relations as $_relation ) {
+				$value[] = $_relation['id'];
 			}
-			
-			# Auto
-			$auto = real_value(delve($properties,'extra.auto')) || real_value(delve($properties,'autoincrement'));
-			$Element->setIgnore($auto);
-			$Element->setAttrib('readonly', $auto ? true : null);
-			$Element->setAttrib('disabled', $auto ? true : null);
-			
-			# Required
-			$notnull = real_value(delve($properties,'notnull'));
-			$notblank = real_value(delve($properties,'notblank'));
-			$required = $notnull || $notblank;
-			$Element->setRequired($required);
-			$Element->setAllowEmpty(!$notblank);
-			$Element->setAutoInsertNotEmptyValidator(false);
-			
-			# Add Element
-			$Form->addElement($Element);
+			$Element->setValue($value);
 		}
 		
-		# Relations
-		$Relations = $Table->getRelations();
-		foreach ( $Relations as $relationName => $Relation ) {
-			# Create Element
-			$field = $relationName;
-			$name = $field;
-			$Element = new Bal_Form_Element_Doctrine($name); //$Form->createElement('doctrine', $name);
-			$Element->setOptions(array('table'=>$tableName,'field'=>$field));
+		# Prepare
+		$Relation = $Table->getRelation($fieldName);
+		$relation = $Relation->toArray();
+		
+		# Handle
+		$relationFieldName = $Relation->getLocalFieldName();
+		if ( $Relation->offsetGet('owningSide') ) {
+			# Editable, With Restraints
+			$Element->_applyFieldProperties($table, $relationFieldName);
+		}
+		else {
+			if ( $Relation->offsetGet('refTable') ) {
+				# Linkable, No Restraints
+			}
+			else {
+				# Disabled, Not Owning Side
+				$Element->setAttrib('readonly', true);
+				$Element->setAttrib('disabled', true);
+			}
+		}
+		
+		# Retuen Element
+		return $Element;
+	}
+	
+	public static function applyElementFieldProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+		# Prepare
+		$Table = Bal_Form_Doctrine::getTable($table);
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		
+		# Prepare
+		$properties = $Table->getDefinitionOf($fieldName);
+		
+		# Apply Value
+		if ( $Record ) {
+			$value = delve($Record,$fieldName);
+			$Element->setValue($value);
+		}
+		
+		# Auto
+		$auto = real_value(delve($properties,'extra.auto')) || real_value(delve($properties,'autoincrement'));
+		$Element->setIgnore($auto);
+		$Element->setAttrib('readonly', $auto ? true : null);
+		$Element->setAttrib('disabled', $auto ? true : null);
+		
+		# Required
+		$notnull = real_value(delve($properties,'notnull'));
+		$notblank = real_value(delve($properties,'notblank'));
+		$required = $notnull || $notblank;
+		$Element->setRequired($required);
+		$Element->setAllowEmpty(!$notblank);
+		$Element->setAutoInsertNotEmptyValidator(false);
+		
+		# Return Element
+		return $Element;
+	}
+	
+	public static function applyElementProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+		# Prepare
+		$Locale = Bal_App::getLocale();
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$tableNameLower = strtolower($tableName);
+		$Table = Bal_Form_Doctrine::getTable($table);
+	
+		# Handle
+		$hasRelation = $Table->hasRelation($fieldName);
+		$hasField = $Table->hasField($fieldName);
+		if ( $hasRelation || $hasField ) {
+			# Prepare Names
+			$fieldNameLower = strtolower($fieldName);
+			$name = $fieldName;
 			
 			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-title', array(), ucwords(str_replace('_', ' ',$field)));
-			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$field.'-description', array(), '');
+			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
+			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$fieldNameLower.'-description', array(), '');
 			
 			# Apply Attributes
 			$Element->setName($name);
 			$Element->setLabel($label);
 			$Element->setDescription($description);
-			if ( $Record ) {
-				$relations = delve($Record,$field);
-				$value = array();
-				if ( $relations ) foreach ( $relations as $relation ) {
-					$value[] = $relation['id'];
-				}
-				$Element->setValue($value);
+			
+			# Handle
+			if ( $hasRelation ) {
+				self::applyElementRelationProperties($Element, $table, $fieldName, $Record);
+			}
+			elseif ( $hasField ) {
+				self::applyElementFieldProperties($Element, $table, $fieldName, $Record);
 			}
 			
-			# Add Element
+		}
+		
+		# Return Element
+		return $Element;
+	}
+	
+	public static function generateElement ( Zend_Form $Form, $table, $fieldName, $Record = null, array $options = array() ) {
+		# Prepare Element
+		$elementName = self::getElementName($table, $fieldName);
+		$elementType = delve($options,'type','doctrine');
+		
+		# Create Element
+		$Element = $Form->createElement($elementType, $elementName, $options);
+		if ( $elementType === 'doctrine' ) {
+			$Element->setTableAndField($table,$fieldName,$Record);
+		} else {
+			self::applyElementProperties($Element,$table,$fieldName,$Record);
+		}
+		
+		# Options
+		$Element->setOptions($options);
+		
+		# Done
+		return $Element;
+	}
+	
+	public static function createForm ( $table ) {
+		# Prepare
+		$Locale = Bal_App::getLocale();
+		$tableName = self::getTableName($table);
+		$tableNameLower = strtolower($tableName);
+		$Form = new Zend_Form();
+		$Form->setElementsBelongTo($tableNameLower);
+		$formName = self::getFormName($table);
+		
+		# Path
+		$Form->addPrefixPath('Bal_Form', 'Bal/Form');
+		
+		# Apply Labels
+		$formLabel = $Locale->translate_default($tableNameLower.'-form-title', array(), ucwords($formName));
+		$formDescription = $Locale->translate_default($tableNameLower.'-form-description', array(), false);
+		if ( $formLabel ) $Form->setLegend($formLabel);
+		if ( is_string($formDescription) ) $Form->setDescription($formDescription);
+		
+		# Return Form
+		return $Form;
+	}
+	
+	public static function generateForm ( $table, $Record = null ) {
+		# Prepare
+		$Form = self::createForm($table);
+		$Table = self::getTable($table);
+		
+		# Add Elements
+		$columns = $Table->getColumns();
+		$Relations = $Table->getRelations();
+		$fields = array_merge($columns,$Relations);
+		foreach ( $fields as $fieldName => $properties ) {
+			# Create Element
+			$Element = self::generateElement($Form,$table,$fieldName,$Record);
 			$Form->addElement($Element);
 		}
 		
@@ -153,16 +272,73 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
-	public static function fetchForm ( $from, $Record = null ) {
+	public static function addElements ( Zend_Form &$Form, $table, $elements, $Record = null ) {
 		# Prepare
-		$tableName = self::getTableName($from);
+		$Locale = Bal_App::getLocale();
+		$tableName = self::getTableName($table);
+		
+		# Cycle through Elements
+		if ( is_simple_array($elements) ) {
+			# No Grouping
+			foreach ( $elements as $fieldName ) {
+				$Element = self::generateElement($Form,$table, $fieldName, $Record);
+				$Elements[] = $Element;
+			}
+		}
+		else {
+			# Display Grouping
+			foreach ( $elements as $groupName => $groupElements ) {
+				# Elements
+				$groupFields = array();
+				$Elements = array();
+				foreach ( $groupElements as $value ) {
+					# Prepare
+					$options = array();
+					if ( is_array($value) ) {
+						$fieldName = delve($value,'name');
+						$options = $value;
+					}
+					else {
+						$fieldName = $value;
+					}
+					
+					# Create
+					$Element = self::generateElement($Form, $table, $fieldName, $Record, $options);
+					
+					# Add
+					$Elements[] = $Element;
+					$groupFields[] = self::getElementName($table, $fieldName);
+				}
+				
+				# Add Elements to Form
+				$Form->addElements($Elements);
+				
+				# Prepare Labels
+				$groupAttribs = array();
+				$groupLabel = $Locale->translate_default($tableName.'-form-group-'.$groupName.'-title', array(), ucwords($groupName));
+				$groupDescription = $Locale->translate_default($tableName.'-form-group-'.$groupName.'-description', array(), '');
+				if ( $groupLabel ) $groupAttribs['legend'] = $groupLabel;
+				if ( $groupDescription ) $groupAttribs['description'] = $groupDescription;
+				
+				# Create Group, Add to Form
+				$Form->addDisplayGroup($groupFields,$groupName,$groupAttribs);
+			}
+		}
+		
+		# Return Form
+		return $Form;
+	}
+	
+	public static function fetchForm ( $table, $Record = null ) {
+		# Prepare
+		$tableName = self::getTableName($table);
 		$Form = null;
 		
 		# Check to see if table has form
 		if ( method_exists($tableName, 'fetchForm') )
 			$Form = $tableName::fetchForm($Record);
 		else
-			$Form = self::generateForm($from, $Record);
+			$Form = self::generateForm($table, $Record);
 		
 		# Return Form
 		return $Form;

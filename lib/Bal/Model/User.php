@@ -396,4 +396,38 @@ class Bal_Model_User extends Base_BalUser {
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	
+	
+	/**
+	 * Fetch a form for a User
+	 * @param Bal_Model_User $User
+	 * @return Zend_Form
+	 */
+	public static function fetchForm ( Bal_Model_User $User ) {
+		# Prepare
+		$Form = Bal_Form_Doctrine::createForm('User');
+		
+		# Group Elements
+		$elements = array(
+			'essential' => array(
+				array('name'=>'id','type'=>'hidden','label'=>'','disableLoadDefaultDecorators'=>true), 'username','password','email','type','status'
+			),
+			'names' => array(
+				'title','firstname','lastname','displayname','description'
+			),
+			'contact' => array(
+				'phone','address1','address2','suburb','state','country'
+			),
+			'other' => array(
+				'subscriptions', 'Avatar', 'Permissions', 'Roles'
+			)
+		);
+		
+		# Generate Elements
+		$Elements = Bal_Form_Doctrine::addElements($Form, 'User', $elements, $User);
+		
+		# Return Form
+		return $Form;
+	}
+	
 }

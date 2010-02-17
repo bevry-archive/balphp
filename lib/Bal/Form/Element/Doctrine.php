@@ -39,4 +39,21 @@ class Bal_Form_Element_Doctrine extends Zend_Form_Element_Xhtml
      * @var string
      */
     public $helper = 'formDoctrine';
+	
+	public function setTableAndField ( $table, $fieldName, $Record = null ) {
+		# Prepare
+		$Element = $this;
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		
+		# Apply Options
+		$options = array('table'=>$tableName,'field'=>$fieldName);
+		$Element->setOptions($options);
+		
+		# Apply Doctrine Options
+		Bal_Form_Doctrine::applyElementProperties($Element, $table, $fieldName, $Record );
+		
+		# Chain
+		return $this;
+	}
+	
 }
