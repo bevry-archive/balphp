@@ -607,6 +607,7 @@ class Bal_Locale {
 	 * @return string
 	 */
 	public function string ( ) {
-		return call_user_func_array(array($this,'translate'), func_get_args());
+		$args = func_get_args();
+		return call_user_func_array(array($this,'translate'), $args);
 	}
 }
