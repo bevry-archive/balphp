@@ -51,10 +51,10 @@ BalMedia:
             default: unknown
             notblank: true
         mimetype:
-            type: string(20)
+            type: string(40)
             notnull: true
         humantype:
-            type: string(20)
+            type: string(50)
             notnull: true
         width:
             type: integer(2)
