@@ -136,19 +136,19 @@ class Bal_App {
 		switch ( $mode ) {
 			
 			case 'install':
-				$ensure = array('createindex', 'cleanmodels', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'resecure');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'install-dump':
-				$ensure = array('createindex', 'cleanmodels', 'usedump', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions');
+				$ensure = array('createindex', 'cleanmodels', 'usedump', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'rescure');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'reload':
-				$ensure = array('createindex', 'usedump', 'makedump', 'regenschema', 'reload', 'optimiseindex', 'permissions');
+				$ensure = array('createindex', 'usedump', 'makedump', 'regenschema', 'reload', 'optimiseindex', 'permissions', 'rescure');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: reload ['.implode(array_keys($args),',').']'."\n";
 				break;
@@ -370,8 +370,8 @@ class Bal_App {
 		
 		
 		# Permissions: permissions
-		if ( delve($args,'permissions') ) {
-			echo '- [permissions] -'."\n";
+		if ( delve($args,'resecure') ) {
+			echo '- [resecure] -'."\n";
 			echo 'Permissions: Re-Securing Permissions'."\n";
 			# Run a Bunch of Command Line Stuff
 			$cwd = APPLICATION_ROOT_PATH;
