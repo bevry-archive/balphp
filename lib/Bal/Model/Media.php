@@ -283,10 +283,10 @@ class Bal_Model_Media extends Base_BalMedia {
 	}
 	
 	/**
-	 * Fetch the Media from an Attachment
+	 * Fetch the Media
 	 * @param mixed $media
 	 */
-	public static function fromAttachment ( $media ) {
+	public static function fetch ( $media ) {
 		# Prepare
 		$Media = null;
 		
@@ -299,6 +299,9 @@ class Bal_Model_Media extends Base_BalMedia {
 			elseif ( delve($media,'id') ) {
 				# Database Media
 				$Media = Doctrine::getTable('Media')->find(delve($media,'id'));
+				if ( !delve($Media,'id') ) {
+					$Media = false;
+				}
 			}
 			elseif ( delve($media,'tmpname') ) {
 				# File Upload
@@ -318,6 +321,13 @@ class Bal_Model_Media extends Base_BalMedia {
 		}
 		elseif ( is_object($media) && $media instanceOf Media ) {
 			$Media = $media;
+		}
+		elseif ( is_string($media) || is_numeric($media) ) {
+			# Database Media
+			$Media = Doctrine::getTable('Media')->findOneByIdOrCode($media,$media);
+			if ( !delve($Media,'id') ) {
+				$Media = false;
+			}
 		}
 		
 		# Return Media

@@ -81,9 +81,15 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
         extract($info); // name, id, value, attribs, options, listsep, disable
 		
 		# Prepare Attributes
-		array_keys_ensure($attribs, array('table','field','class'));
+		array_keys_ensure($attribs, array('table','field','class','notnull','notblank','auto','relationStatus'));
 		if ( !$table ) $table = $attribs['table'];
 		if ( !$field ) $field = $attribs['field'];
+		
+		# Extract Attributes
+		$notnull = delve($attribs,'notnull');				unset($attribs['notnull']);
+		$notblank = delve($attribs,'notblank');				unset($attribs['notblank']);
+		$auto = delve($attribs,'auto');						unset($attribs['auto']);
+		$relationStatus = delve($attribs,'relationStatus');	unset($attribs['relationStatus']);
 		
 		# Fetch Table Information
 		$Table = Bal_Form_Doctrine::getTable($table);
@@ -176,6 +182,13 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				# Options
 				$options = array();
+				
+				# Options: Empty Value
+				if ( !$notnull ) {
+					$options[''] = $Locale->translate('Empty');
+				}
+				
+				# Options: Relations
 				foreach ( $relations as $relation ) {
 					$options[$relation['id']] = $relation['text'];
 				}
@@ -190,20 +203,39 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 					}
 					elseif ( $Relation->getType() === Doctrine_Relation::MANY ) {
 						$attribs['multiple'] = true;
+						unset($options['']);
 					}
 					$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				}
 				break;
 				
 			case 'enum':
-				$options = $Table->getEnumValues($field);
-				$options = array_flip($options);
-				foreach ( $options as $enum => &$text ) {
+				# Enum Values
+				$enumValues = $Table->getEnumValues($field);
+				$enumValues = array_flip($enumValues);
+				
+				# Translate Enum VAlues
+				foreach ( $enumValues as $enum => &$text ) {
 					$text = $Locale->translate_default($tableLower.'-'.$fieldLower.'-'.$enum, array(), ucfirst($enum));
 				}
+				
+				# Options
+				$options = array();
+				
+				# Options: Empty Value
+				if ( !$notnull && empty($attribs['multiple']) ) {
+					$options[''] = $Locale->translate('Empty');
+				}
+				
+				# options: Enum Values
+				$options = array_merge($options, $enumValues);
+				
+				# Adjust Options
 				if ( count($options) === 1 ) {
 					$attribs['disabled'] = $attribs['readonly'] = true;
 				}
+				
+				# Display
 				$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				break;
 			

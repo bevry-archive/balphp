@@ -28,14 +28,14 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	protected function setMediaAttachment ( $what, $media ) {
 		# Prepare
-		$Media = Media::fromAttachment($media);
+		$Media = Media::fetch($media);
 		
 		# Apply Media
-		if ( $Media !== false ) {
+		if ( $Media === false || $Media ) {
 			if ( isset($this->$what) ) {
 				$this->$what->delete();
 			}
-			$this->_set($what, $Media, false);
+			$this->_set($what, $Media ? $Media : null, false);
 		}
 		
 		# Done
@@ -410,7 +410,7 @@ class Bal_Model_User extends Base_BalUser {
 		# Group Elements
 		$elements = array(
 			'essential' => array(
-				array('name'=>'id','type'=>'hidden','label'=>'','disableLoadDefaultDecorators'=>true), 'username','password','email','displayname','type','status'
+				'username','password','email','displayname','type','status'
 			),
 			'names' => array(
 				'title','firstname','lastname','description'
@@ -422,6 +422,9 @@ class Bal_Model_User extends Base_BalUser {
 				'subscriptions', 'Avatar', 'Permissions', 'Roles'
 			)
 		);
+		
+		# Add Id
+		Bal_Form_Doctrine::addIdElement($Form,'User',$User);
 		
 		# Generate Elements
 		$Elements = Bal_Form_Doctrine::addElements($Form, 'User', $elements, $User);

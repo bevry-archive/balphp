@@ -853,6 +853,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Fetch item
 		if ( $param )
 			$item = $this->fetchParam($param, false);
+		if ( is_array($item) ) {
+			$item = delve($item,'id');
+		}
 		if ( !$item && !$only ) {
 			// we want to try generic params
 			$item = $this->fetchParam('code', false);
@@ -875,14 +878,18 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 				$Query = Doctrine_Query::create()->select('i.*')->from($table.' i');
 			}
 			# Search Query
+			$fetch = false;
 			if ( is_numeric($item) ) {
 				$Query->andWhere('i.id = ?', $item);
+				$fetch = true;
 			}
 			elseif ( is_string($item) ) {
 				$Query->andWhere('i.code = ?', $item);
+				$fetch = true;
 			}
 			# Fetch
-			$Item = $Query->fetchOne();
+			if ( $fetch ) 
+				$Item = $Query->fetchOne();
 		}
 		
 		# Create if empty?

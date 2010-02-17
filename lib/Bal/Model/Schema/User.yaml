@@ -85,7 +85,7 @@ BalUser:
                 # pending - Awaiting activation
                 # published - Activated
                 # disabled - Disabled for whatever reason
-            notnull: true
+            notblank: true
             default: pending
             
         avatar_id:

@@ -106,9 +106,16 @@ class Bal_Form_Doctrine
 		$Table = Bal_Form_Doctrine::getTable($table);
 		$tableName = Bal_Form_Doctrine::getTableName($table);
 		
+		# Prepare
+		$Relation = $Table->getRelation($fieldName);
+		$relation = $Relation->toArray();
+		
 		# Apply Value
 		if ( $Record ) {
 			$relations = delve($Record,$fieldName);
+			if ( $Relation->getType() === Doctrine_Relation::ONE ) {
+				$relations = array($relations);
+			}
 			$value = array();
 			if ( $relations ) foreach ( $relations as $_relation ) {
 				$value[] = $_relation['id'];
@@ -116,24 +123,24 @@ class Bal_Form_Doctrine
 			$Element->setValue($value);
 		}
 		
-		# Prepare
-		$Relation = $Table->getRelation($fieldName);
-		$relation = $Relation->toArray();
-		
 		# Handle
 		$relationFieldName = $Relation->getLocalFieldName();
-		if ( $Relation->offsetGet('owningSide') ) {
+		$relationOwner = $Table->hasField($relationFieldName); // $Relation->offsetGet('owningSide');
+		if ( $relationOwner ) {
 			# Editable, With Restraints
-			$Element->_applyFieldProperties($table, $relationFieldName);
+			self::applyElementFieldProperties($Element, $table, $relationFieldName, $Record);
+			$Element->setAttrib('relationStatus', 'editable');
 		}
 		else {
 			if ( $Relation->offsetGet('refTable') ) {
 				# Linkable, No Restraints
+				$Element->setAttrib('relationStatus', 'linkable');
 			}
 			else {
 				# Disabled, Not Owning Side
 				$Element->setAttrib('readonly', true);
 				$Element->setAttrib('disabled', true);
+				$Element->setAttrib('relationStatus', 'disabled');
 			}
 		}
 		
@@ -162,11 +169,16 @@ class Bal_Form_Doctrine
 		$Element->setAttrib('disabled', $auto ? true : null);
 		
 		# Required
-		$notnull = real_value(delve($properties,'notnull'));
-		$notblank = real_value(delve($properties,'notblank'));
+		$notblank = real_value(delve($properties,'notblank',false));
+		$notnull = real_value(delve($properties,'notnull',$notblank));
 		$Element->setRequired($notblank);
 		$Element->setAllowEmpty(!$notnull && !$notblank);
 		$Element->setAutoInsertNotEmptyValidator(false);
+		
+		# Attribs
+		$Element->setAttrib('auto', $auto);
+		$Element->setAttrib('notnull', $notnull);
+		$Element->setAttrib('notblank', $notblank);
 		
 		# Return Element
 		return $Element;
@@ -188,8 +200,8 @@ class Bal_Form_Doctrine
 			$name = $fieldName;
 			
 			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-form-element-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
-			$description = $Locale->translate_default($tableNameLower.'-form-element-'.$fieldNameLower.'-description', array(), '');
+			$label = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
+			$description = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-description', array(), '');
 			
 			# Apply Attributes
 			$Element->setName($name);
@@ -213,7 +225,7 @@ class Bal_Form_Doctrine
 	public static function generateElement ( Zend_Form $Form, $table, $fieldName, $Record = null, array $options = array() ) {
 		# Prepare Element
 		$elementName = self::getElementName($table, $fieldName);
-		$elementType = delve($options,'type','doctrine');
+		$elementType = 'doctrine'; //delve($options,'type','doctrine');
 		
 		# Create Element
 		$Element = $Form->createElement($elementType, $elementName, $options);
@@ -271,10 +283,34 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
+	public static function addIdElement ( Zend_Form &$Form, $table, $Record = null ) {
+		# Id Value
+		$idValue = delve($Record,'id');
+		if ( !$idValue ) {
+			# Having this as an empty causing problems on save
+			return false;
+		}
+		
+		# Create
+		$Element = $Form->createElement('hidden', 'id',
+			array('label'=>'','disableLoadDefaultDecorators'=>true,'decorators'=>array('ViewHelper'))
+		);
+		
+		# Value
+		$Element->setValue($idValue);
+		
+		# Add
+		$Form->addElement($Element);
+		
+		# Return Element
+		return $Element;
+	}
+	
 	public static function addElements ( Zend_Form &$Form, $table, $elements, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$tableName = self::getTableName($table);
+		$Table = self::getTable($table);
 		
 		# Cycle through Elements
 		if ( is_simple_array($elements) ) {

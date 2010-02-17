@@ -49,7 +49,7 @@ BalMedia:
             type: enum
             values: [file,document,image,video,audio,web,application,archive]
             default: unknown
-            notnull: true
+            notblank: true
         mimetype:
             type: string(20)
             notnull: true
