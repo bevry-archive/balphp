@@ -410,10 +410,10 @@ class Bal_Model_User extends Base_BalUser {
 		# Group Elements
 		$elements = array(
 			'essential' => array(
-				array('name'=>'id','type'=>'hidden','label'=>'','disableLoadDefaultDecorators'=>true), 'username','password','email','type','status'
+				array('name'=>'id','type'=>'hidden','label'=>'','disableLoadDefaultDecorators'=>true), 'username','password','email','displayname','type','status'
 			),
 			'names' => array(
-				'title','firstname','lastname','displayname','description'
+				'title','firstname','lastname','description'
 			),
 			'contact' => array(
 				'phone','address1','address2','suburb','state','country'

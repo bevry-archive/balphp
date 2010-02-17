@@ -164,9 +164,8 @@ class Bal_Form_Doctrine
 		# Required
 		$notnull = real_value(delve($properties,'notnull'));
 		$notblank = real_value(delve($properties,'notblank'));
-		$required = $notnull || $notblank;
-		$Element->setRequired($required);
-		$Element->setAllowEmpty(!$notblank);
+		$Element->setRequired($notblank);
+		$Element->setAllowEmpty(!$notnull && !$notblank);
 		$Element->setAutoInsertNotEmptyValidator(false);
 		
 		# Return Element
