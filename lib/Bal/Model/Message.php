@@ -62,8 +62,8 @@ class Bal_Model_Message extends Base_BalMessage
 		}
 		
 		# Render
-		$title = $Locale->translate('message-'.$template.'-title', $params);
-		$description = $Locale->translate('message-'.$template.'-description', $params);
+		$title = empty($this->title) ? $Locale->translate('message-'.$template.'-title', $params) : $Locale->translate_default('message-'.$template.'-title', $params, $this->title);
+		$description = empty($this->description) ? $Locale->translate('message-'.$template.'-description', $params) : $Locale->translate_default('message-'.$template.'-description', $params, $this->description);
 		
 		# Apply
 		$this->title = $title;
