@@ -367,11 +367,12 @@ class Bal_Form_Doctrine
 	public static function fetchForm ( $table, $Record = null ) {
 		# Prepare
 		$tableName = self::getTableName($table);
+		$Table = self::getTable($table);
 		$Form = null;
 		
 		# Check to see if table has form
 		if ( method_exists($tableName, 'fetchForm') )
-			$Form = $tableName::fetchForm($Record);
+			$Form = $Table->fetchForm($Record);
 		else
 			$Form = self::generateForm($table, $Record);
 		
