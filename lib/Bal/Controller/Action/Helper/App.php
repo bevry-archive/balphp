@@ -71,6 +71,10 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			}
 		}
 		
+		# ACL
+		Zend_View_Helper_Navigation::setDefaultAcl($this->getAcl());
+		Zend_View_Helper_Navigation::setDefaultRole($this->getRole());
+		
 		# Chain
 		return $this;
 	}

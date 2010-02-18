@@ -300,7 +300,7 @@ class Bal_Model_User extends Base_BalUser {
 				$this->_set('subscriptions', $subscriptions, false); // false at end to prevent comparison
 				# Update SubscriptionTags with Subscriptions
 				if ( $this->id ) {
-					$tags = explode(', ', $subscriptions);
+					$tags = prepare_csv_str($subscriptions);
 					$this->SubscriptionTags = $tags;
 				}
 			}

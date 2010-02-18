@@ -228,6 +228,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		if ( !Zend_Registry::isRegistered('acl') ) {
 			# Create
 			$Acl = new Zend_Acl();
+			$this->setAcl($Acl); // Temp assign to ensure we don't repeat
 			$this->loadAcl($Acl);
 			$this->setAcl($Acl);
 		}
@@ -252,6 +253,22 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $this;
 	}
 	
+	protected $_Role = null;
+	
+	public function getRole ( ) {
+		$Role = $this->_Role;
+		return $Role;
+	}
+	
+	public function setRole ( Zend_Acl_Role $Role ) {
+		$this->_Role = $Role;
+		return $this;
+	}
+	
+	public function getDefaultResource ( ) {
+		return null;
+	}
+	
 	/**
 	 * Load the User into the Acl
 	 * @param Doctrine_Record $User [optional]
@@ -265,8 +282,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Fetch ACL
 		$Acl = $this->getAcl($Acl);
 		
-		# Create User Acl
+		# Get User Acl
 		$AclUser = new Zend_Acl_Role('user-'.$User->id);
+		$this->setRole($AclUser);
 		
 		# Add User Roles to Acl
 		/* What we do here is add the user role to the ACL.
@@ -276,14 +294,16 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		foreach ( $Roles as $Role ) {
 			$roles[] = 'role-'.$Role->code;
 		}
-		$Acl->addRole($AclUser, $roles);
+		if ( !empty($roles) ) 
+			$Acl->addRole($AclUser, $roles);
 		
 		# Add User Permissions to Acl
 		$Permissions = $User->Permissions; $permissions = array();
 		foreach ( $Permissions as $Permission ) {
 			$permissions[] = 'permission-'.$Permission->code;
 		}
-		$Acl->allow($AclUser, null, $permissions);
+		if ( !empty($permissions) ) 
+			$Acl->allow($AclUser, $this->getDefaultResource(), $permissions);
 		
 		# Done
 		return true;
@@ -292,6 +312,11 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	public function loadAcl ( Zend_Acl $Acl = null ) {
 		# Fetch ACL
 		$Acl = $this->getAcl($Acl);
+		
+		# Add Default Resource
+		$defaultResource = $this->getDefaultResource();
+		if ( $defaultResource )
+			$Acl->add(new Zend_Acl_Resource($defaultResource));
 		
 		# Add Permissions to Acl
 		$Permissions = Doctrine::getTable('Permission')->findAll(Doctrine::HYDRATE_ARRAY);
@@ -304,15 +329,18 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$Roles = Doctrine::getTable('Role')->createQuery()->select('r.code, rp.code')->from('Role r, r.Permissions rp')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
 		foreach ( $Roles as $Role ) {
 			$role = 'role-'.$Role['code'];
-			var_dump($role);
 			$AclRole = new Zend_Acl_Role($role);
 			$Acl->addRole($AclRole);
 			$permissions = array();
 			foreach ( $Role['Permissions'] as $Permission ) {
 				$permissions[] = 'permission-'.$Permission['code'];
 			}
-			$Acl->allow($AclRole, null, $permissions);
+			$Acl->allow($AclRole, $this->getDefaultResource(), $permissions);
+			//baldump($role,$permissions);
 		}
+		
+		# Load the User Acl
+		$this->loadUserAcl();
 		
 		# Done
 		return true;
@@ -330,6 +358,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$Acl = $this->getAcl($Acl);
 		
 		# Check
+		baldump($role,$action,$resource);
 		return $Acl->isAllowed($role, $action, $resource);
 	}
 	
@@ -344,14 +373,14 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		if ( $permissions === null ) {
 			// Shortcut simplified
 			$permissions = $action;
-			$action = null;
+			$action = $this->getDefaultResource();
 		}
 		
 		# Fetch
-		$User = $this->getUser();
+		$Role = $this->getRole();
 		
 		# Check
-		if ( $User && $User->id && ($result = $this->hasAclEntry('user-'.$User->id, $action, $permissions)) ) {
+		if ( $Role && ($result = $this->hasAclEntry($Role, $action, $permissions)) ) {
 			return $result;
 		}
 		
@@ -841,6 +870,10 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	# ========================
 	# GETTERS: ITEMS
+	
+	public function getItemLabel ( $Object ) {
+		return Bal_Form_Doctrine::getRecordLabel($Object);
+	}
 	
 	public function fetchParam ( $param = null, $default = false ) {
 		return $this->getRequest()->getParam($param, $default);

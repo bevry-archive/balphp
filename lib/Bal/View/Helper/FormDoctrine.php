@@ -146,27 +146,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		switch ( $type ) {
 			case 'relation':
 				# Determine
-				$text_column = null;
-				switch ( true ) {
-					case $RelationTable->hasField('title'):
-						$text_column = 'title';
-						break;
-					case $RelationTable->hasField('name'):
-						$text_column = 'name';
-						break;
-					case $RelationTable->hasField('code'):
-						$text_column = 'code';
-						break;
-					case $RelationTable->hasField('displayname'):
-						$text_column = 'displayname';
-						break;
-					case $RelationTable->hasField('fullname'):
-						$text_column = 'fullname';
-						break;
-					default:
-						$text_column = 'id';
-						
-				}
+				$text_column = Bal_Form_Doctrine::getTableLabelColumnName($RelationTable);
 				
 				# Fetch
 				try {

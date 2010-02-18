@@ -379,4 +379,44 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
+	public static function getLabelColumnNames ( ) {
+		return array('label','displayname','fullname','username','name','title','code','id');
+	}
+	
+	public static function getRecordLabel ( $Record ) {
+		# Prepare
+		$label = null;
+		$labelColumnNames = self::getLabelColumnNames();
+		
+		# Handle
+		foreach ( $labelColumnNames as $labelColumnName ) {
+			$value = delve($Record,$labelColumnName);
+			if ( $value ) {
+				$label = $value;
+				break;
+			}
+		}
+		
+		# Return label
+		return $label;
+	}
+	
+	public static function getTableLabelColumnName ( $table ) {
+		# Prepare
+		$Table = self::getTable($table);
+		$titleColumnName = null;
+		$labelColumnNames = self::getLabelColumnNames();
+		
+		# Handle
+		foreach ( $labelColumnNames as $labelColumnName ) {
+			if ( $Table->hasField($labelColumnName) ) {
+				$titleColumnName = $labelColumnName;
+				break;
+			}
+		}
+		
+		# Return titleColumn
+		return $titleColumnName;
+	}
+	
 }
