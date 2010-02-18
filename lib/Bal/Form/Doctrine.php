@@ -371,7 +371,8 @@ class Bal_Form_Doctrine
 		
 		# Check to see if table has form
 		if ( method_exists($tableName, 'fetchForm') )
-			$Form = $tableName::fetchForm($Record);
+			$Form = call_user_func_array($tableName.'::fetchForm', array($Record));
+			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
 		else
 			$Form = self::generateForm($table, $Record);
 		
