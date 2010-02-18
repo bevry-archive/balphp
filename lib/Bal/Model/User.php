@@ -71,7 +71,7 @@ class Bal_Model_User extends Base_BalUser {
 		# Create Welcome Message
 		$Message = new Message();
 		$Message->Receiver = $this;
-		$Message->setCode('user-password-reset',false,compact('password'));
+		$Message->useTemplate('user-password-reset',compact('password'));
 		$Message->save();
 		
 		# Chain
@@ -389,7 +389,7 @@ class Bal_Model_User extends Base_BalUser {
 		# Create Welcome Message
 		$Message = new Message();
 		$Message->Receiver = $User;
-		$Message->template = 'user-insert';
+		$Message->useTemplate('user-insert');
 		$Message->save();
 		
 		# Done

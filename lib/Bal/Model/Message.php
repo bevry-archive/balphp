@@ -14,24 +14,6 @@ class Bal_Model_Message extends Base_BalMessage
 {
 	
 	/**
-	 * Apply accessors and modifiers
-	 * @return
-	 */
-	public function setUp ( ) {
-		$this->hasMutator('template', 'setTemplate');
-		parent::setUp();
-	}
-	
-	
-	/**
-	 * Alias for Template
-	 */
-	public function setTemplate ( $template, $load = true ) {
-		return $this->useTemplate($template);
-	}
-	
-	
-	/**
 	 * Shortcut Message Creation via Codes
 	 * @return string
 	 */

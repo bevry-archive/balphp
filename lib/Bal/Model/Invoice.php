@@ -18,16 +18,7 @@ class Bal_Model_Invoice extends Base_BalInvoice
 	 * @return
 	 */
 	public function setUp ( ) {
-		$this->hasMutator('template', 'setTemplate');
 		parent::setUp();
-	}
-	
-	
-	/**
-	 * Alias for Template
-	 */
-	public function setTemplate ( $template, $load = true ) {
-		return $this->useTemplate($template);
 	}
 	
 	/**
