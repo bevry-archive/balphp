@@ -279,20 +279,14 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Ensure User
 		if ( !$User && !($User = $this->getUser()) ) return false;
 		
-		# Check Applied
-		if ( $this->getRole() ) {
-			return null; // already called before
-		}
-		
-		# Get User Acl
-		$AclUser = new Zend_Acl_Role('user-'.$User->id);
-		$this->setRole($AclUser);
-		
 		# Fetch ACL
 		$Acl = $this->getAcl($Acl);
+		$AclUser = new Zend_Acl_Role('user-'.$User->id);
 		
-		# Add Role to Acl
-		$Acl->addRole($AclUser);
+		# Check Applied
+		if ( $Acl->hasRole($AclUser) ) {
+			return null; // already called before
+		}
 		
 		# Add User Roles to Acl
 		/* What we do here is add the user role to the ACL.
@@ -312,6 +306,12 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		}
 		if ( !empty($permissions) ) 
 			$Acl->allow($AclUser, $this->getDefaultResource(), $permissions);
+		
+		# Add Role to Acl / Set Role
+		if ( !$Acl->hasRole($AclUser) ) {
+			$Acl->addRole($AclUser);
+		}
+		$this->setRole($AclUser);
 		
 		# Done
 		return true;
