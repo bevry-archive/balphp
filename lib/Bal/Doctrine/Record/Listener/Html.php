@@ -21,15 +21,18 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 	 * @param object $event
 	 * @return
 	 */
-    public function preSave (Doctrine_Event $event) {
-    	$Record = $event->getInvoker();
+    public function preSave (Doctrine_Event $Event) {
+    	$Record = $Event->getInvoker();
     	$Table = $Record->getTable();
 		$columns = $Table->getColumns();
 		foreach ( $columns as $column => $properties ) {
-			$value = $Record->get($column);
+			$orig = $value = $Record->get($column);
 			if ( empty($value) || $properties['type'] !== 'string' ) continue;
 			$html = isset($properties['extra']['html']) ? $properties['extra']['html'] : $this->_default;
-			if ( !$html ) $html = 'none'; elseif ( $html === true ) $html = 'normal';
+			if ( !$html )
+				$html = 'none';
+			elseif ( $html === true )
+				$html = 'normal';
 			switch ( $html ) {
 				case 'raw':
 					// Allow for raw html
@@ -48,10 +51,14 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 					$value = strip_tags($value);
 					break;
 			}
-			$Record->set($column, $value);
+			//baldump($column,$html,$value);
+			if ( $value !== $orig ) // only call the setter if the value has actually changed, prevents special setters form overloading
+				$Record->set($column, $value);
 		}
+			//baldump($Event->getCode(),$Table->getTableName(),get_class($Record));
 		
 		// Done
 		return true;
     }
+	
 }

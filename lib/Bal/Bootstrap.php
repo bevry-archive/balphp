@@ -356,6 +356,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		$extensions_path = $applicationConfig['data']['extensions_path'];
+		$models_path = $applicationConfig['data']['models_path'];
 		
 		# Autoload
 		require_once (DOCTRINE_PATH . '/Doctrine.php');
@@ -368,7 +369,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Apply Paths
 		Doctrine_Core::setPath(DOCTRINE_PATH);
 		Doctrine_Core::setExtensionsPath($extensions_path);
-		Doctrine_Core::setModelsDirectory($applicationConfig['data']['models_path']);
+		Doctrine_Core::setModelsDirectory($models_path);
 		
 		# Get Manager
 		$Manager = Doctrine_Manager::getInstance();
@@ -406,9 +407,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			Zend_Registry::set('Profiler', $Profiler);
 		}
 		
-		# Apply Listener
-		$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
-		
 		# Transaction
 		//$Connection->beginTransaction();
 		
@@ -418,6 +416,32 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Return Manager
 		return $Manager;
+	}
+	
+	/**
+	 * Initialise our Doctrine Listeners.
+	 * @return
+	 */
+	protected function _initDoctrineListeners ( ) {
+		# Prepare
+		$this->bootstrap('autoload');
+		$this->bootstrap('config');
+		$this->bootstrap('doctrine');
+		
+		# Config
+		$applicationConfig = Zend_Registry::get('applicationConfig');
+		$models_path = $applicationConfig['data']['models_path'];
+		
+		# Apply Listener To Tables - Ensure it will run
+		Doctrine::loadModels($models_path);
+		$Models = Doctrine::getLoadedModelFiles();
+		foreach ( $Models as $tableName => $modelPath ) {
+			Doctrine::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		}
+		//$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		
+		# Done
+		return true;
 	}
 
 	/**
