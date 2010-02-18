@@ -1,0 +1,86 @@
+
+# ==============================================
+# BAL INVOICE
+
+BalInvoiceItem:
+    actAs:
+        SoftDelete:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        title:
+            type: string(50)
+            notblank: true
+        cost:
+            type: decimal(8)
+            notblank: true
+            scale: 2
+            extra:
+                currency: true
+        template:
+            type: string(50)
+            notblank: true
+            default: "user_invoiceitem"
+            extra:
+                auto: true
+                
+        invoice_id:
+            type: integer(2)
+            unsigned: true
+            notblank: true
+    relations:
+        Invoice:
+            class: Invoice
+            local: invoice_id
+            foreign: id
+            foreignAlias: InvoiceItems
+            foreignType: many
+            onDelete: "CASCADE"
+
+BalInvoice:
+    actAs:
+        SoftDelete:
+        Timestampable:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        title:
+            type: string(50)
+            notblank: true
+        template:
+            type: string(50)
+            notblank: true
+            default: "user_invoice"
+            extra:
+                auto: true
+        cost:
+            type: decimal(8)
+            notnull: true
+            scale: 2
+            extra:
+                currency: true
+        subtotal:
+            type: decimal(8)
+            notnull: true
+            scale: 2
+            extra:
+                currency: true
+        tax:
+            type: decimal(8)
+            notnull: true
+            scale: 2
+            extra:
+                currency: true
+        config:
+            type: array
+            notnull: true
+        cache:
+            # Cache of any information that may change externally
+            type: array
+            notnull: true

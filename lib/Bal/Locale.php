@@ -275,6 +275,7 @@ class Bal_Locale {
 	/**
 	 * Get the translation list
 	 * Refer to the Zend_Locale documentation for more
+	 * http://files.zend.com/help/Zend-Framework/zend.locale.functions.html
 	 * @return mixed
 	 */
 	public function translationList ( $type ) {
@@ -284,10 +285,11 @@ class Bal_Locale {
 	/**
 	 * Get a translation of a particular type
 	 * Refer to the Zend_Locale documentation for more
+	 * http://files.zend.com/help/Zend-Framework/zend.locale.functions.html
 	 * @return mixed
 	 */
-	public function translation ( $text, $type ) {
-		return $this->Zend_Locale->getTranslation($text, $type);
+	public function translation ( $text, $type, $locale = null ) {
+		return $this->Zend_Locale->getTranslation($text, $type, $locale);
 	}
 	
 	/**
@@ -557,7 +559,8 @@ class Bal_Locale {
 	}
 	
 	# ========================
-	# NUMERIC
+	# TYPES
+	# http://files.zend.com/help/Zend-Framework/zend.locale.functions.html
 	
 	/**
 	 * Translate a number value
@@ -577,6 +580,8 @@ class Bal_Locale {
 	 * @return string
 	 */
 	public function integer ( $number, $options = array() ) {
+		if ( $number === null || $number === '' ) return $number;
+		$number = intval($number);
 		return $this->number($number,$options);
 	}
 	
@@ -586,8 +591,38 @@ class Bal_Locale {
 	 * @param array $options
 	 * @return string
 	 */
-	public function decimal ( $number, $options = array() ) {
-		return $this->decimal($number,$options);
+	public function decimal ( $number ) {
+		$result = Zend_Locale_Format::toNumber($number, array(
+			'precision' => 2,
+			'number_format' => $this->translation(null, 'DecimalNumber', $this->getLocale()),
+			'locale' => $this->getLocale()
+		));
+		return $result;
+	}
+	
+	/**
+	 * Translate a percent
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function percent ( $number ) {
+		$result = Zend_Locale_Format::toNumber($number, array(
+			'precision' => 2,
+			'number_format' => $this->translation(null, 'PercentNumber', $this->getLocale()),
+			'locale' => $this->getLocale()
+		));
+		return $result;
+	}
+	
+	/**
+	 * Translate a decimal percent
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function decimalpercent ( $number) {
+		return $this->percent($number*100);
 	}
 	
 	/**
@@ -596,8 +631,8 @@ class Bal_Locale {
 	 * @param array $options
 	 * @return string
 	 */
-	public function float ( $number, $options = array() ) {
-		return $this->float($number,$options);
+	public function float ( $number, $options = array()  ) {
+		return $this->number($number,$options);
 	}
 	
 	/**

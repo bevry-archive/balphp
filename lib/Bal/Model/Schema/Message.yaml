@@ -47,7 +47,7 @@ BalMessage:
         template:
             type: string(30)
             notblank: true
-            default: "user-message"
+            default: "user_message"
             extra:
                 auto: true
         sender_id:

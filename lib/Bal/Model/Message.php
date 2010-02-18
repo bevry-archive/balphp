@@ -30,6 +30,7 @@ class Bal_Model_Message extends Base_BalMessage
 		return $this->useTemplate($template);
 	}
 	
+	
 	/**
 	 * Shortcut Message Creation via Codes
 	 * @return string
