@@ -269,9 +269,24 @@ class Bal_Form_Doctrine
 		$Form = self::createForm($table);
 		$Table = self::getTable($table);
 		
-		# Add Elements
+		# Fetch Field
 		$columns = $Table->getColumns();
 		$Relations = $Table->getRelations();
+		
+		# Cycle through Relations to Remove Local Fields
+		foreach ( $Relations as $Relation ) {
+			# Prepare
+			$relationFieldName = $Relation->getLocalFieldName();
+			$relationOwner = $Table->hasField($relationFieldName);
+			
+			# Check
+			if ( $relationOwner ) {
+				# Remove Local Column in favour of Relation Field
+				unset($columns[$relationFieldName]);
+			}
+		}
+		
+		# Add Fields as Elements
 		$fields = array_merge($columns,$Relations);
 		foreach ( $fields as $fieldName => $properties ) {
 			# Create Element
