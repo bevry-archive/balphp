@@ -464,6 +464,10 @@ class Bal_App {
     	return Zend_Controller_Action_HelperBroker::getStaticHelper($name);
 	}
 	
+	static public function getSessionNamespace ( $name ) {
+		return new Zend_Session_Namespace($name);
+	}
+	
 	static public function getView ( $clone = false ) {
 		# Prepare
 		$View = null;

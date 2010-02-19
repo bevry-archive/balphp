@@ -25,13 +25,128 @@ class Bal_Log extends Zend_Log {
     const DELETE	= 10;
     const SUCCESS	= 11;*/
 
-	protected $Writer = null;
+	protected $_Writer = null;
+	protected $_Session;
 	
+    /**
+     * Class constructor.  Startup log writers
+     * @return void
+     */
 	public function __construct ( ) {
 		# Parent Construct
-		return parent::__construct(); // will handle priorities for us
+		$result = parent::__construct(); // will handle priorities for us
+		
+		# Return result
+		return $result;
 	}
 	
+	/**
+	 * Load Stored Events
+	 * @return
+	 */
+	public function loadEvents ( ) {
+		# Check Session Status
+		$Session = $this->getSession();
+		if ( !empty($Session->events) ) {
+			# Load cached events
+			$events = $Session->events;
+			$this->addEvents($events);
+		}
+		
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * Store an Event
+	 * @param array $event
+	 * @return
+	 */
+	public function storeEvent ( $event ) {
+		# Prepare
+		$Session = $this->getSession();
+		
+		# Store
+		$Session->events[] = $event;
+		
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * Clear Stored Events
+	 * @return
+	 */
+	public function clearEvents ( ) {
+		# Prepare
+		$Session = $this->getSession();
+		
+		# Store
+		$Session->events = array();
+		
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * Fetch the Log Session
+	 * @return Zend_Session_Namespace
+	 */
+	public function getSession ( ) {
+		# Prepare
+		$Session = null;
+		
+		# Handle
+		if ( !$this->_Session ) {
+			$Session = new Zend_Session_Namespace('Log');
+			if ( empty($Session->events) )
+				$Session->events = array();
+			$this->_Session = $Session;
+		}
+		else {
+			$Session = $this->_Session;
+		}
+		
+		# Return Session
+		return $Session;
+	}
+	
+	/**
+	 * Add Events
+	 * @param array $event
+	 * @return
+	 */
+	public function addEvents ( array $events ) {
+		# Add events
+		foreach ( $events as $event ) {
+			$this->addEvent($event);
+		}
+
+		# chain
+		return $this;
+	}
+	
+	/**
+	 * Add Event
+	 * @param array $event
+	 * @return
+	 */
+	public function addEvent ( $event ) {
+		# abort if rejected by the global filters
+        foreach ($this->_filters as $filter) {
+            if (! $filter->accept($event)) {
+                return;
+            }
+        }
+		
+		# send to each writer
+        foreach ($this->_writers as $writer) {
+            $writer->write($event);
+        }
+
+		# chain
+		return $this;
+	}
 	
     /**
      * Get the Log Instance
@@ -56,7 +171,7 @@ class Bal_Log extends Zend_Log {
 	}
 	
 	/**
-	 * GEt the Render Writer
+	 * Get the Render Writer
 	 * @return Zend_Log_Writer_Abstract
 	 */
 	public function getRenderWriter ( ) {
@@ -76,6 +191,7 @@ class Bal_Log extends Zend_Log {
      * @return array
      */
 	public function render ( ) {
+		# Render
 		$cli = empty($_SERVER['HTTP_HOST']);
 		$render = $this->getRenderWriter()->render();
 		return $cli ? strip_tags($render) : $render;

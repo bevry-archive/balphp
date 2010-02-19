@@ -64,8 +64,12 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
      * @return void
      */
     public function render ( ) {
+		# Clear Remote Events
+		$Log = Bal_App::getLog();
+		$Log->clearEvents();
+		
 		# Prepare
-		$Locale = Bal_Locale::getInstance();
+		$Locale = Bal_App::getLocale();
 		$events = $this->events;
 		$result = '';
 		
@@ -136,8 +140,12 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
      * @param  array  $event  event data
      * @return void
      */
-    public function _write($event)
-    {
+    public function _write($event) {
+		# Store Event Remotely
+		$Log = Bal_App::getLog();
+		$Log->storeEvent($event);
+		
+		# Store Event Locally
         $this->events[] = $event;
     }
 
