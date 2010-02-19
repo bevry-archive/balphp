@@ -344,7 +344,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 				$permissions[] = 'permission-'.$Permission['code'];
 			}
 			$Acl->allow($AclRole, $this->getDefaultResource(), $permissions);
-			//baldump($role,$permissions);
 		}
 		
 		# Load the User Acl
@@ -361,34 +360,38 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @param mixed $resource
 	 * @param bool
 	 */
-	public function hasAclEntry ( $role, $action, $resource, Zend_Acl $Acl = null ) {
+	public function hasAclEntry ( $role, $resource, $privilege, Zend_Acl $Acl = null ) {
 		# Prepare
-		$Acl = $this->getAcl($Acl);
+		if ( empty($Acl) ) 
+			$Acl = $this->getAcl($Acl);
 		
 		# Check
-		baldump($role,$action,$resource);
-		return $Acl->isAllowed($role, $action, $resource);
+		$result = $Acl->isAllowed($role, $resource, $privilege);
+		
+		# Return result
+		return $result;
 	}
 	
 	/**
 	 * Does the loaded User have that Permission?
-	 * @param string $action
-	 * @param mixed $permissions [optional]
+	 * @param string $resource
+	 * @param mixed $privileges [optional]
 	 * @return bool
 	 */
-	public function hasPermission ( $action, $permissions = null ) {
+	public function hasPermission ( $resource, $privileges = null ) {
 		# Prepare
-		if ( $permissions === null ) {
+		if ( $privileges === null ) {
 			// Shortcut simplified
-			$permissions = $action;
-			$action = $this->getDefaultResource();
+			$privileges = $resource;
+			$resource = $this->getDefaultResource();
 		}
 		
 		# Fetch
+		$Acl = $this->getAcl(); // Load roles etc
 		$Role = $this->getRole();
 		
 		# Check
-		if ( $Role && ($result = $this->hasAclEntry($Role, $action, $permissions)) ) {
+		if ( $Role && ($result = $this->hasAclEntry($Role, $resource, $privileges)) ) {
 			return $result;
 		}
 		
@@ -681,41 +684,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# Done
 		return $result;
-	}
-	
-	
-
-	# ========================
-	# NAVIGATION
-	
-	
-	/**
-	 * Activate a Navigation Menu Item
-	 * @return
-	 */
-	public function activateNavigationMenuItem ( Zend_Navigation $Menu, $id, $parents = true ) {
-		# Find Current
-		$Item = $Menu->findBy('id', $id);
-		
-		# Check
-		if ( !$Item ) {
-			return false;
-		}
-		
-		# Active Current
-		$Item->active = true;
-		
-		# Activate Parents
-		if ( $parents ) {
-			$tmpItem = $Item;
-			while ( !empty($tmpItem->parent) ) {
-				$tmpItem = $tmpItem->parent;
-				$tmpItem->active = true;
-			}
-		}
-		
-		# Done
-		return true;
 	}
 	
 	

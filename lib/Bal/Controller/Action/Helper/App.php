@@ -6,8 +6,12 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	
 	
 	protected $_options = array(
-		'logged_out_forward' => array('login'),
-		'logged_in_forward' => array('index')
+		'logged_out_forward' => array(
+			array('action'=>'login')
+		),
+		'logged_in_forward' => array(
+			array('action'=>'login')
+		)
 	);
 	
 	
@@ -118,6 +122,39 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $result;
 	}
 	
+	/**
+	 * Activate a Navigation Menu Item
+	 * @return
+	 */
+	public function activateNavigationMenuItem ( Zend_Navigation $Menu, $id, $parents = true ) {
+		# Find Current
+		$Item = $Menu->findBy('id', $id);
+		
+		# Check Permission
+		if ( !Bal_App::getView()->navigation()->accept($Item) ) {
+			throw new Zend_Exception('Identity does not have permission to activate that menu item: '.$id);
+		}
+		
+		# Check
+		if ( !$Item ) {
+			return false;
+		}
+		
+		# Active Current
+		$Item->active = true;
+		
+		# Activate Parents
+		if ( $parents ) {
+			$tmpItem = $Item;
+			while ( !empty($tmpItem->parent) ) {
+				$tmpItem = $tmpItem->parent;
+				$tmpItem->active = true;
+			}
+		}
+		
+		# Done
+		return true;
+	}
 	
 	# ========================
 	# AUTHENTICATION
@@ -160,7 +197,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	 */
 	public function forward ($redirect) {
 		$Redirector = $this->getActionController()->getHelper('Redirector');
-		call_user_func_array(array($Redirector,'gotoSimple'), $redirect);
+		call_user_func_array(array($Redirector,'gotoRoute'), $redirect);
 		return $this;
 	}
 	
