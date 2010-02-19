@@ -234,8 +234,17 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function toString ( ) {
-		$url = $this->assemble();
-		$this->clear();
+		$url = '';
+		try {
+			$url = $this->assemble();
+			$this->clear();
+		}
+		catch ( Exception $Exception ) {
+			$blah = $this;
+			echo '<h1><pre>'.$Exception->getMessage().'</pre></h1>';
+			//$Exceptor = new Bal_Exceptor($Exception);
+			//$Exceptor->log();
+		}
 		return $url;
 	}
 	

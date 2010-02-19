@@ -444,3 +444,38 @@ if ( function_compare('magic_function', 1, true, __FILE__, __LINE__) ) {
 		return $value;
 	}
 }
+
+if ( function_compare('sanitize', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Sanitize passed input
+	 * @version 1, February 10, 2010
+	 * @param mixed		&$value
+	 * @param string	$mode [optional]
+	 * @return string
+	 */
+	function sanitize ( &$value, $mode = 'strip' ) {
+		# Handle
+		if ( is_array($value) ) {
+			# Array
+			foreach ( $value as &$_value ) {
+				sanitize($_value,$mode);
+			}
+		}
+		elseif ( is_string($value)) {
+			# String
+			if ( $mode === 'clean' && class_exists('HTMLPurifier') )
+				$value = HTMLPurifier::getInstance()->purify($value);
+			else
+				$value = strip_tags($value);
+		}
+		elseif ( is_object($value) ) {
+			# Error
+			throw new Exception('Cannot sanitize passed input');
+		}
+	
+		# Return value
+		return $value;
+	}
+
+}

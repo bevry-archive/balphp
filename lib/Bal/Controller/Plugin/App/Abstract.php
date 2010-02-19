@@ -1010,6 +1010,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 				}
 			}
 			
+			# Secure
+			sanitize($query);
+			
 			# Apply
 			$Session->searches['last'] = $code;
 			$Session->searches[$code]  = $query;
@@ -1020,6 +1023,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			
 			# Fetch
 			$query = $Session->searches[$code];
+			
+			# Secure
+			sanitize($query);
 			
 			# Apply
 			$Session->searches['last'] = $code;
