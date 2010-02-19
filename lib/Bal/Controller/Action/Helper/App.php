@@ -47,6 +47,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		# Prepare
 		$View = $this->getActionControllerView();
 		$Request = $this->getActionControllerRequest();
+		$NavData = array();
 		
 		# Module Config
 		$module = $Request->getModuleName();
@@ -55,15 +56,21 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$config_path = Bal_App::getConfig('config_path');
 		
 		# Navigation
-		$NavData = file_get_contents($module_config_path . '/nav.json');
-		$NavData = Zend_Json::decode($NavData, Zend_Json::TYPE_ARRAY);
+		$nav_path = $module_config_path . '/nav.json';
+		if ( is_readable($nav_path) ) {
+			$NavData = file_get_contents($nav_path);
+			$NavData = Zend_Json::decode($NavData, Zend_Json::TYPE_ARRAY);
+		}
 		
 		# Navigation Override
-		$NavDataOver = file_get_contents($config_path . '/nav.json');
-		$NavDataOver = Zend_Json::decode($NavDataOver, Zend_Json::TYPE_ARRAY);
-		$NavDataOver = delve($NavDataOver,$module);
-		if ( !empty($NavDataOver) ) {
-			$NavData = array_merge_recursive_keys($NavData, $NavDataOver);
+		$nav_override_path = $config_path . '/nav.json';
+		if ( is_readable($nav_override_path) ) {
+			$NavDataOver = file_get_contents($nav_override_path);
+			$NavDataOver = Zend_Json::decode($NavDataOver, Zend_Json::TYPE_ARRAY);
+			$NavDataOver = delve($NavDataOver,$module);
+			if ( !empty($NavDataOver) ) {
+				$NavData = array_merge_recursive_keys($NavData, $NavDataOver);
+			}
 		}
 		
 		# Apply Navigation Menus
