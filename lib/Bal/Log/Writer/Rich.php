@@ -74,9 +74,6 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
 		$result = '';
 		
 		# Cycle
-		$class = array('log');  if ( $this->isFriendly() ) $class[] = 'friendly';
-		$class = implode(' ',$class);
-		$result .= '<ul class="'.$class.'">';
 		foreach ( $events as $event ) {
 			# Prepare
 			array_keys_ensure($event,array('class','friendly','timestamp','message','details'));
@@ -128,7 +125,13 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
 			# Finish event
 			$result .= '</li>';
 		}
-		$result .= '</ul>';
+		
+		# Check
+		if ( !empty($result) ) {
+			$class = array('log');  if ( $this->isFriendly() ) $class[] = 'friendly';
+			$class = implode(' ',$class);
+			$result = '<ul class="'.$class.'">'.$result.'</ul>';
+		}
 		
 		# Done
 		return $result;

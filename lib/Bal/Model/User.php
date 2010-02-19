@@ -250,7 +250,7 @@ class Bal_Model_User extends Base_BalUser {
 		
 		# Fullname
 		if ( !$this->_get('displayname') ) {
-			$this->_set('displayname', $this->email, false); // false at end to prevent comparison
+			$this->_set('displayname', $this->username, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -329,8 +329,8 @@ class Bal_Model_User extends Base_BalUser {
 			$User->ensureCode($Event),
 			$User->ensureUid($Event),
 			$User->ensureFullname($Event),
-			$User->ensureDisplayname($Event),
 			$User->ensureUsername($Event),
+			$User->ensureDisplayname($Event),
 			$User->ensureSubscriptions($Event)
 		);
 		
