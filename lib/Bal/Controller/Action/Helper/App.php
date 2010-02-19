@@ -52,10 +52,19 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$module = $Request->getModuleName();
 		$module_path = Bal_App::getFrontController()->getModuleDirectory($module);
 		$module_config_path = $module_path . '/config';
+		$config_path = Bal_App::getConfig('config_path');
 		
 		# Navigation
 		$NavData = file_get_contents($module_config_path . '/nav.json');
 		$NavData = Zend_Json::decode($NavData, Zend_Json::TYPE_ARRAY);
+		
+		# Navigation Override
+		$NavDataOver = file_get_contents($config_path . '/nav.json');
+		$NavDataOver = Zend_Json::decode($NavDataOver, Zend_Json::TYPE_ARRAY);
+		$NavDataOver = delve($NavDataOver,$module);
+		if ( !empty($NavDataOver) ) {
+			$NavData = array_merge_recursive_keys($NavData, $NavDataOver);
+		}
 		
 		# Apply Navigation Menus
 		$View->Navigation = array();

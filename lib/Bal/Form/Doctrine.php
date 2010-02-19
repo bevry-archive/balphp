@@ -278,11 +278,16 @@ class Bal_Form_Doctrine
 			# Prepare
 			$relationFieldName = $Relation->getLocalFieldName();
 			$relationOwner = $Table->hasField($relationFieldName);
+			$relationRefTable = $Relation->offsetGet('refTable');
 			
 			# Check
 			if ( $relationOwner ) {
 				# Remove Local Column in favour of Relation Field
 				unset($columns[$relationFieldName]);
+			}
+			if ( $relationRefTable ) {
+				# Remove Ref Table in favour of Relation Field
+				unset($Relations[$relationRefTable->getComponentName()]);
 			}
 		}
 		
