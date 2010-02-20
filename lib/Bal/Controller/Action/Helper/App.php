@@ -299,19 +299,19 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	# ========================
 	# ITEMS
 	
-	public function saveItem ( $input, $keep = null, $remove = null, $empty = null ) {
+	public function saveItem ( $table, $record = null, $keep = null, $remove = null, $empty = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Request = $this->getRequest();
 		$Log = Bal_App::getLog();
 		$item = $Item = null;
+		$Table = Bal_Form_Doctrine::getTable($table);
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$tableNameLower = strtolower($tableName);
 		
 		# Fetch
-		$Item = $this->fetchItem($input);
-		$item = $this->fetchItemParams($input);
-		$itemTable = $Item->getTable();
-		$itemType = $itemTable->getComponentName();
-		$itemTypeLower = strtolower($itemType);
+		$Item = $this->fetchItem($table,$record);
+		$item = $this->fetchItemParams($tableName);
 		
 		# Handle
 		try {
@@ -335,8 +335,32 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			# Clean any that start with a .
 			array_clean_pattern($item, '/^__[^_]+__$/');
 			
-			# Apply
+			# Cycle through values applying each one
 			foreach ( $item as $key => $value ) {
+				# Check Relation
+				if ( $Table->hasRelation($key) ) {
+					# Is Relation
+					$Relation = $Table->getRelation($key);
+					if ( $value && !is_object($value) ) {
+						if ( $Relation->getType() === Doctrine_Relation::MANY ) {
+							# Many Type, Needs Doctrine_Collection
+							if ( empty($value) ) {
+								# Empty
+								$value = new Doctrine_Collection();
+							}
+							else {
+								# Discover
+								if ( !is_array($value) ) $value = array($value);
+								$value = $Table->getRelation($key)->getTable()->createQuery()->select('*')->whereIn('id', $value)->execute();
+							}
+						} else {
+							# One Type, Needs Record
+							$value = $Table->getRelation($key)->getTable()->find($value);
+						}
+					}
+				}
+				
+				# Apply
 				$Item->set($key, $value);
 			}
 			// $Item->merge($item);
@@ -346,17 +370,17 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			$Item->save();
 			
 			# Stop Duplicates
-			$Request->setPost($itemTypeLower, $Item->id);
+			$Request->setPost($tableName, $Item->id);
 			
 			# Finish
 			$Connection->commit();
 			
 			# Log
 			$log_details = array(
-				$itemType			=> $Item->toArray(),
-				$itemType.'_url'	=> $this->getActionControllerView()->url()->item($Item)->toString()
+				$tableName			=> $Item->toArray(),
+				$tableName.'_url'	=> $this->getActionControllerView()->url()->item($Item)->toString()
 			);
-			$Log->log(array('log-'.$itemTypeLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+			$Log->log(array('log-'.$tableNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		}
 		catch ( Exception $Exception ) {
 			# Rollback
@@ -371,17 +395,18 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $Item;
 	}
 	
-	public function deleteItem ( $input ) {
+	public function deleteItem ( $table, $record = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Log = Bal_App::getLog();
 		$result = true;
+		$Table = Bal_Form_Doctrine::getTable($table);
+		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$tableNameLower = strtolower($tableName);
 		
 		# Fetch
-		$Item = $this->fetchItem($input);
-		$itemTable = $Item->getTable();
-		$itemType = $itemTable->getComponentName();
-		$itemTypeLower = strtolower($itemType);
+		$Item = $this->fetchItem($table, $record);
+		$item = $this->fetchItemParams($tableName);
 		
 		# Handle
 		try {
@@ -401,12 +426,12 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		
 				# Log
 				$log_details = array(
-					$itemType	=> $ItemArray
+					$tableName	=> $ItemArray
 				);
-				$Log->log(array('log-'.$itemTypeLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+				$Log->log(array('log-'.$tableNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 			}
 			else {
-				throw new Zend_Exception('error-'.$itemTypeLower.'-missing');
+				throw new Zend_Exception('error-'.$tableNameLower.'-missing');
 			}
 		}
 		catch ( Exception $Exception ) {

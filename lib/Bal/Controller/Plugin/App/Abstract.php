@@ -855,48 +855,31 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return fetch_param($param, $this->getRequest()->getParam($param, $default));
 	}
 	
-	public function fetchItemParams ( $input = null, $only = false ) {
+	public function fetchItemParams ( $param ) {
 		# Prepare
 		$item = false;
 		
-		# Prepare Input Param
-		if ( is_object($input) ) {
-			if ( $input instanceOf Doctrine_Record ) {
-				$param = $input->getTable()->getComponentName();
-			} elseif ( $table instanceOf Doctrine_Table ) {
-				$param = $input->getComponentName();
-			} else {
-				throw new Zend_Exception('fetchItem: Invalid object type for input');
-			}
-		}
-		elseif ( is_string($input) ) {
-			$param = $input;
-		}
-		else {
-			$param = null;
-		}
-		
-		# Prepare Param
-		$param = strtolower($param);
+		# Check
+		if ( !$param ) return $item;
 		
 		# Fetch item
-		if ( $param )
-			$item = $this->fetchParam($param, false);
-		if ( !$item && !$only ) {
-			# Try Generic Params
-			$item = $this->fetchParam('item', false);
-		}
+		$item = $this->fetchParam($param, false);
 		
 		# Return item
 		return $item;
 	}
 	
-	public function fetchItemParam ( $input = null, $only = false ) {
+	public function fetchItemParam ( $param, $only = false ) {
 		# Fetch item
-		$item = $this->fetchItemParams($input, $only);
+		$item = $this->fetchItemParams($param);
+		
+		# Handle Array
 		if ( is_array($item) ) {
+			# Fetch Id from Array
 			$item = delve($item,'id');
 		}
+		
+		# Handle Empty
 		if ( !$item && !$only ) {
 			# Try Generic Params
 			$item = $this->fetchParam('code', false);
@@ -907,39 +890,26 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		return $item;
 	}
 	
-	public function fetchItem ( $input, $Query = null, $create = true ) {
+	public function fetchItem ( $table, $record = null, $Query = null, $create = true ) {
 		# Prepare
 		$item = $Item = false;
+		$tableName = Bal_Form_Doctrine::getTableName($table);
 		
-		# Prepare Input Param
-		$param = null;
-		if ( is_object($input) ) {
-			if ( $input instanceOf Doctrine_Record ) {
-				# Already an Item
-				return $input;
-			} elseif ( $table instanceOf Doctrine_Table ) {
-				# Fetch the Table Name
-				$param = $input->getComponentName();
-			} else {
-				throw new Zend_Exception('fetchItem: Invalid object type for input');
-			}
-		}
-		elseif ( is_string($input) ) {
-			$param = $input;
-		}
-		else {
-			$param = null;
+		# Check
+		if ( is_object($record) && $record instanceOf $tableName ) {
+			return $record;
 		}
 		
-		# Fetch
-		$item = $this->fetchItemParam($param);
+		# Fetch Param
+		$item = $this->fetchItemParam($tableName);
 		
 		# Load
 		if ( $item ) {
 			# Prepare Query
 			if ( !$Query ) {
-				$Query = Doctrine_Query::create()->select('i.*')->from($param.' i');
+				$Query = Doctrine_Query::create()->select('i.*')->from($tableName.' i');
 			}
+			
 			# Search Query
 			$fetch = false;
 			if ( is_numeric($item) ) {
@@ -950,14 +920,15 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 				$Query->andWhere('i.code = ?', $item);
 				$fetch = true;
 			}
+			
 			# Fetch
 			if ( $fetch ) 
 				$Item = $Query->fetchOne();
 		}
 		
 		# Create if empty?
-		if ( $create && empty($Item) && $itemType ) {
-			$Item = new $itemType();
+		if ( $create && empty($Item) && $tableName ) {
+			$Item = new $tableName();
 		}
 		
 		# Return Media

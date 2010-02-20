@@ -187,9 +187,9 @@ class Bal_Form_Doctrine
 	public static function applyElementProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
+		$Table = Bal_Form_Doctrine::getTable($table);
 		$tableName = Bal_Form_Doctrine::getTableName($table);
 		$tableNameLower = strtolower($tableName);
-		$Table = Bal_Form_Doctrine::getTable($table);
 	
 		# Handle
 		$hasRelation = $Table->hasRelation($fieldName);
@@ -197,14 +197,13 @@ class Bal_Form_Doctrine
 		if ( $hasRelation || $hasField ) {
 			# Prepare Names
 			$fieldNameLower = strtolower($fieldName);
-			$name = $fieldName;
 			
 			# Prepare Attributes
 			$label = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
 			$description = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-description', array(), '');
 			
 			# Apply Attributes
-			$Element->setName($name);
+			$Element->setName($fieldName);
 			$Element->setLabel($label);
 			$Element->setDescription($description);
 			
@@ -248,7 +247,7 @@ class Bal_Form_Doctrine
 		$tableName = self::getTableName($table);
 		$tableNameLower = strtolower($tableName);
 		$Form = new Zend_Form();
-		$Form->setElementsBelongTo($tableNameLower);
+		$Form->setElementsBelongTo($tableName);
 		$formName = self::getFormName($table);
 		
 		# Path
@@ -439,5 +438,7 @@ class Bal_Form_Doctrine
 		# Return titleColumn
 		return $titleColumnName;
 	}
+	
+	
 	
 }
