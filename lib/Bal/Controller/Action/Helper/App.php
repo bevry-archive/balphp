@@ -299,7 +299,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	# ========================
 	# ITEMS
 	
-	public function saveItem ( $table, $record = null, $keep = null, $remove = null, $empty = null ) {
+	public function saveItem ( $table, $record = null, $Query = null, $keep = null, $remove = null, $empty = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Request = $this->getRequest();
@@ -310,7 +310,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$tableNameLower = strtolower($tableName);
 		
 		# Fetch
-		$Item = $this->fetchItem($table,$record);
+		$Item = $this->fetchItem($table,$record,$Query);
 		$item = $this->fetchItemParams($tableName);
 		
 		# Handle

@@ -906,7 +906,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Load
 		if ( $item ) {
 			# Prepare Query
-			if ( !$Query ) {
+			if ( $Query === null ) {
 				$Query = Doctrine_Query::create()->select('i.*')->from($tableName.' i');
 			}
 			
