@@ -146,14 +146,14 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		# Find Current
 		$Item = $Menu->findBy('id', $id);
 		
-		# Check Permission
-		if ( !Bal_App::getView()->navigation()->accept($Item) ) {
-			throw new Zend_Exception('Identity does not have permission to activate that menu item: '.$id);
-		}
-		
 		# Check
 		if ( !$Item ) {
 			return false;
+		}
+		
+		# Check Permission
+		if ( !Bal_App::getView()->navigation()->accept($Item) ) {
+			throw new Zend_Exception('Identity does not have permission to activate that menu item: '.$id);
 		}
 		
 		# Active Current
