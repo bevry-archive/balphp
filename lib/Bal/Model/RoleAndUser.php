@@ -27,8 +27,9 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 		if ( $Event_type === 'postSave' ) {
 			# Update the User's level with the latest highest role level
 			$User = $Item->User;
-			if ( $Item->level > $User->level ) {
-				$User->level = $Item->level;
+			$Role = $Item->Role;
+			if ( $Role->level > $User->level ) {
+				$User->level = $Role->level;
 				$User->save();
 			}
 		}

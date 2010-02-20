@@ -537,6 +537,32 @@ if ( function_compare('array_from_attributes', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('array_unset_empty', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unset the keys from the array if they are empty
+	 * @version 1, February 20, 2009
+	 * @param array $array
+	 * @param mixed ... what to remove
+	 * @return mixed
+	 */
+	function array_unset_empty ( &$array ) {
+		# Prepare
+		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
+		$args = func_get_args(); array_shift($args);
+		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
+		# Apply
+		foreach ( $args as $key ) {
+			if ( array_key_exists($key, $array) && !$array[$key] ) {
+				unset($array[$key]);
+			}
+		}
+		# Done
+		return $array;
+	}
+}
+
+
 if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -571,6 +597,21 @@ if ( function_compare('array_keys_unset', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_unset ( &$array, array $unset ) {
 		return array_unset($array, $unset);
+	}
+}
+
+
+if ( function_compare('array_keys_unset_empty', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unset the keys from the array if they are empty
+	 * @version 1, February 20, 2010
+	 * @param array $array
+	 * @param array $unset
+	 * @return mixed
+	 */
+	function array_keys_unset_empty ( &$array, array $unset ) {
+		return array_unset_empty($array, $unset);
 	}
 }
 

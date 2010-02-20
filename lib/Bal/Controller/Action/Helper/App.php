@@ -299,7 +299,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	# ========================
 	# ITEMS
 	
-	public function saveItem ( $input, $keep = null, $remove = null ) {
+	public function saveItem ( $input, $keep = null, $remove = null, $empty = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Request = $this->getRequest();
@@ -329,6 +329,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 				array_keys_keep($iem, $keep);
 			if ( !empty($remove) )
 				array_keys_unset($item, $remove);
+			if ( !empty($empty) )
+				array_keys_unset_empty($item, $empty);
 			
 			# Clean any that start with a .
 			array_clean_pattern($item, '/^__[^_]+__$/');
