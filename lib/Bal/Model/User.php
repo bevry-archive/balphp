@@ -316,22 +316,55 @@ class Bal_Model_User extends Base_BalUser {
 	}
 	
 	/**
+	 * Ensure Level
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensureLevel ( $Event, $Event_type ) {
+		# Prepare
+		$User = $Event->getInvoker();
+		$modified = $User->getModified();
+		$save = false;
+		
+		# Level
+		if ( $Event_type === 'preSave' && empty($modified['level']) ) {
+			# Update the User's level with the latest highest role level
+			$level_highest = 0;
+			$User_Roles = $User->Roles;
+			foreach ( $User_Roles as $User_Role ) {
+				$level = $User_Role->level;
+				if ( $level && $level > $level_highest ) {
+					$level_highest = $level;
+				}
+			}
+			if ( $User->level !== $level_highest ) {
+				$User->_set('level', $level_highest, false); // false at end to prevent comparison
+				$save = true;
+			}
+		}
+		
+		# Return
+		return $save;
+	}
+	
+	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure ( $Event ) {
+	public function ensure ( $Event, $Event_type ) {
 		# Prepare
 		$User = $Event->getInvoker();
 		
 		# Handle
 		$ensure = array(
-			$User->ensureCode($Event),
-			$User->ensureUid($Event),
-			$User->ensureFullname($Event),
-			$User->ensureUsername($Event),
-			$User->ensureDisplayname($Event),
-			$User->ensureSubscriptions($Event)
+			$User->ensureCode($Event,$Event_type),
+			$User->ensureUid($Event,$Event_type),
+			$User->ensureFullname($Event,$Event_type),
+			$User->ensureUsername($Event,$Event_type),
+			$User->ensureDisplayname($Event,$Event_type),
+			$User->ensureSubscriptions($Event,$Event_type),
+			$User->ensureLevel($Event,$Event_type)
 		);
 		
 		# Return save
@@ -349,7 +382,7 @@ class Bal_Model_User extends Base_BalUser {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
+		if ( self::ensure($Event,'preSave') ) {
 			// will save naturally
 		}
 		
@@ -368,7 +401,7 @@ class Bal_Model_User extends Base_BalUser {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
+		if ( self::ensure($Event,'postSave') ) {
 			$User->save();
 		}
 		

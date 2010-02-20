@@ -20,27 +20,23 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function ensureLevel ( $Event, $Event_type ) {
 		# Prepare
+		$Item = $Event->getInvoker();
 		$save = false;
 		
 		# Level
 		if ( $Event_type === 'postSave' ) {
 			# Update the User's level with the latest highest role level
-			$level_highest = 0;
-			$User = $this->User;
-			$User_Roles = $User->Roles;
-			foreach ( $User_Roles as $User_Role ) {
-				$level = $User_Role->level;
-				if ( $level && $level > $level_highest ) {
-					$level_highest = $level;
-				}
+			$User = $Item->User;
+			if ( $Item->level > $User->level ) {
+				$User->level = $Item->level;
+				$User->save();
 			}
-			$User->level = $level_highest;
-			$User->save();
 		}
 		
 		# Return
 		return $save;
 	}
+	
 	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
@@ -49,11 +45,11 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function ensure ( $Event, $Event_type ) {
 		# Prepare
-		$User = $Event->getInvoker();
+		$Item = $Event->getInvoker();
 		
 		# Handle
 		$ensure = array(
-			$User->ensureLevel($Event,$Event_type)
+			$Item->ensureLevel($Event,$Event_type)
 		);
 		
 		# Return save
@@ -67,7 +63,7 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
+		$Item = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
@@ -86,12 +82,12 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
+		$Item = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
 		if ( self::ensure($Event, 'postSave') ) {
-			$User->save();
+			$Item->save();
 		}
 		
 		# Done
