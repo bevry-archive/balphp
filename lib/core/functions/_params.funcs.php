@@ -162,10 +162,10 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 		$_FILES_HYDRATED = array();
 		
 		# Apply
-		array_hydrate($_POST_HYDRATED);
-		array_hydrate($_GET_HYDRATED);
-		array_hydrate($_REQUEST_HYDRATED);
-		array_hydrate($_FILES_HYDRATED);
+		array_hydrate($_POST_HYDRATED,true);
+		array_hydrate($_GET_HYDRATED,true);
+		array_hydrate($_REQUEST_HYDRATED,true);
+		array_hydrate($_FILES_HYDRATED,true);
 		liberate_files($_FILES_HYDRATED);
 		
 		# Merge

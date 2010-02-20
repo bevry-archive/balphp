@@ -863,7 +863,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		if ( !$param ) return $item;
 		
 		# Fetch item
-		$item = $this->fetchParam($param, false);
+		$item = $this->fetchParam($param, $this->fetchParam(strtolower($param), false));
 		
 		# Return item
 		return $item;

@@ -332,8 +332,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			if ( !empty($empty) )
 				array_keys_unset_empty($item, $empty);
 			
-			# Clean any that start with a .
-			array_clean_pattern($item, '/^__[^_]+__$/');
+			# Clean special values
+			array_clean_form($item);
 			
 			# Cycle through values applying each one
 			foreach ( $item as $key => $value ) {

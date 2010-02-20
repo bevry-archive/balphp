@@ -107,24 +107,27 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 
 if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
 
-	function array_hydrate ( &$array ) {
+	function array_hydrate ( &$array, $clean = false ) {
 		if ( !is_array($array) ) $array = array();
 		foreach ( $array as $key => $value ) {
 			if ( is_array($value) ) {
-				array_hydrate($array[$key]);
+				array_hydrate($array[$key],$clean);
 			} else {
 				$array[$key] = real_value($value);
 			}
 		}
+		if ( $clean ) array_clean_form($array);
+		return $array;
 	}
 }
 
 
 if ( function_compare('array_prepare', 1, true, __FILE__, __LINE__) ) {
 
-	function array_prepare ( &$array ) {
+	function array_prepare ( &$array, $clean = true ) {
 		array_clean($array);
-		array_hydrate($array);
+		array_hydrate($array,$clean);
+		return $array;
 	}
 	
 }
@@ -776,8 +779,8 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 if ( function_compare('array_clean_pattern', 1, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Clean empty values from an array
-	 * @version 1, July 22, 2008
+	 * Clean matched keys from the array
+	 * @version 1, February 21, 2010
 	 * @param array &$array
 	 * @param mixed $pattern [optional]
 	 * @return mixed
@@ -801,6 +804,21 @@ if ( function_compare('array_clean_pattern', 1, true, __FILE__, __LINE__) ) {
 		return $array;
 	}
 }
+
+
+if ( function_compare('array_clean_form', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Clean desired form keys from the array
+	 * @version 1, February 21, 2010
+	 * @param array &$array
+	 * @return mixed
+	 */
+	function array_clean_form  ( &$array ) {
+		return array_clean_pattern($item, '/^__[^_]+__$/');
+	}
+}
+
 
 if ( function_compare('implode_recursive', 1, true, __FILE__, __LINE__) ) {
 
