@@ -55,12 +55,22 @@ BalUser:
             
         description:
             type: string
-            
+        
+        level:
+            # Permission Level - Calculated by highest role
+            type: integer(1)
+            unsigned: true
+            notnull: true
+            default: 0
+            extra:
+                auto: true
         subscriptions:
-            # - CSV generated from SubscriptionTags. Used for searchable.
+            # CSV generated from SubscriptionTags. Used for searchable.
             type: string(255)
             notnull: true
             default: ""
+            extra:
+                csv: true
         code:
             # Alias for Username
             type: string(33)
@@ -114,7 +124,7 @@ BalUser:
 # ==============================================
 # BAL PERMISSIONS
 
-Role:
+BalRole:
     columns:
         id:
             type: integer(2)
@@ -126,6 +136,11 @@ Role:
             type: string(15)
             notblank: true
             unique: true
+        level:
+            type: integer(1)
+            notblank: true
+            unsigned: true
+            default: 1
     relations:
         Permissions:
             class: Permission
@@ -134,7 +149,7 @@ Role:
             foreignAlias: Roles
             refClass: PermissionAndRole
 
-PermissionAndRole:
+BalPermissionAndRole:
     columns:
         id:
             type: integer(2)
@@ -157,7 +172,7 @@ PermissionAndRole:
             local: permission_id
             foreign: id
         
-Permission:
+BalPermission:
     columns:
         id:
             type: integer(2)
@@ -169,7 +184,7 @@ Permission:
             notblank: true
             unique: true
 
-RoleAndUser:
+BalRoleAndUser:
     columns:
         id:
             type: integer(2)
@@ -203,7 +218,7 @@ RoleAndUser:
             local: role_id
             foreign: id
 
-PermissionAndUser:
+BalPermissionAndUser:
     columns:
         id:
             type: integer(3)

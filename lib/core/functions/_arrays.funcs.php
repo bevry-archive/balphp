@@ -699,7 +699,7 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	 * Clean empty values from an array
 	 * @version 1, July 22, 2008
 	 * @param array &$array
-	 * @param mixed $to [optional]
+	 * @param mixed $to [optional] if null unset value, if else set as default
 	 * @return mixed
 	 */
 	function array_clean ( &$array, $to = null ) {
@@ -731,6 +731,35 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('array_clean_pattern', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Clean empty values from an array
+	 * @version 1, July 22, 2008
+	 * @param array &$array
+	 * @param mixed $pattern [optional]
+	 * @return mixed
+	 */
+	function array_clean_pattern  ( &$array, $pattern = null ) {
+		# Prepare
+		if ( !is_array($array) )
+			return $array;
+		if ( $pattern === null ) {
+			$pattern = '^\\.';
+		}
+		
+		# Cycle
+		foreach ( $array as $key => $value ) {
+			if ( preg_match($pattern, $key) ) {
+				unset($array[$key]);
+			}
+		}
+		
+		# Return
+		return $array;
+	}
+}
 
 if ( function_compare('implode_recursive', 1, true, __FILE__, __LINE__) ) {
 

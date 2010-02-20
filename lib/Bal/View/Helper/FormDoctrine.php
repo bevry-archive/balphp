@@ -165,7 +165,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				# Options: Empty Value
 				if ( !$notnull ) {
-					$options[''] = $Locale->translate('Empty');
+					$options['null'] = $Locale->translate('Empty');
 				}
 				
 				# Options: Relations
@@ -204,7 +204,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				# Options: Empty Value
 				if ( !$notnull && empty($attribs['multiple']) ) {
-					$options[''] = $Locale->translate('Empty');
+					$options['null'] = $Locale->translate('Empty');
 				}
 				
 				# options: Enum Values

@@ -294,5 +294,133 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		}
 		return false;
 	}
+	
+	
+	# ========================
+	# ITEMS
+	
+	public function saveItem ( $input, $keep = null, $remove = null ) {
+		# Prepare
+		$Connection = Bal_App::getDataConnection();
+		$Request = $this->getRequest();
+		$Log = Bal_App::getLog();
+		$item = $Item = null;
 		
+		# Fetch
+		$Item = $this->fetchItem($input);
+		$item = $this->fetchItemParams($input);
+		$itemTable = $Item->getTable();
+		$itemType = $itemTable->getComponentName();
+		$itemTypeLower = strtolower($itemType);
+		
+		# Handle
+		try {
+			# Check Existance of Save
+			if ( empty($item) || !is_array($item) ) {
+				# Return Found/New Content
+				return $Item;
+			}
+			
+			# Start
+			$Connection->beginTransaction();
+			
+			# Prepare
+			if ( !empty($keep) )
+				array_keys_keep($iem, $keep);
+			if ( !empty($remove) )
+				array_keys_unset($item, $remove);
+			
+			# Clean any that start with a .
+			array_clean_pattern($item, '/^__[^_]+__$/');
+			
+			# Apply
+			foreach ( $item as $key => $value ) {
+				$Item->set($key, $value);
+			}
+			// $Item->merge($item);
+			// ^ Always fires special setters this way
+			
+			# Save
+			$Item->save();
+			
+			# Stop Duplicates
+			$Request->setPost($itemTypeLower, $Item->id);
+			
+			# Finish
+			$Connection->commit();
+			
+			# Log
+			$log_details = array(
+				$itemType			=> $Item->toArray(),
+				$itemType.'_url'	=> $this->getActionControllerView()->url()->item($Item)->toString()
+			);
+			$Log->log(array('log-'.$itemTypeLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+		}
+		catch ( Exception $Exception ) {
+			# Rollback
+			$Connection->rollback();
+			
+			# Log the Event and Continue
+			$Exceptor = new Bal_Exceptor($Exception);
+			$Exceptor->log();
+		}
+		
+		# Done
+		return $Item;
+	}
+	
+	public function deleteItem ( $input ) {
+		# Prepare
+		$Connection = Bal_App::getDataConnection();
+		$Log = Bal_App::getLog();
+		$result = true;
+		
+		# Fetch
+		$Item = $this->fetchItem($input);
+		$itemTable = $Item->getTable();
+		$itemType = $itemTable->getComponentName();
+		$itemTypeLower = strtolower($itemType);
+		
+		# Handle
+		try {
+			# Start
+			$Connection->beginTransaction();
+			
+			# Handle
+			if ( $Item && $Item->exists() ) {
+				# Extract
+				$ItemArray = $Item->toArray(true);
+		
+				# Delete
+				$Item->delete();
+			
+				# Commit
+				$Connection->commit();
+		
+				# Log
+				$log_details = array(
+					$itemType	=> $ItemArray
+				);
+				$Log->log(array('log-'.$itemTypeLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+			}
+			else {
+				throw new Zend_Exception('error-'.$itemTypeLower.'-missing');
+			}
+		}
+		catch ( Exception $Exception ) {
+			# Rollback
+			$Connection->rollback();
+			
+			# Log the Event and Continue
+			$Exceptor = new Bal_Exceptor($Exception);
+			$Exceptor->log();
+			
+			# Error
+			$result = false;
+		}
+		
+		# Return result
+		return $result;
+	}
+	
 }
