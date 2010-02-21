@@ -191,6 +191,20 @@ if ( function_compare('ensure_keys', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('is_taversable', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks to see if the passed input is traversable
+	 * @version 1, February 21, 2010
+	 * @param mixed $input
+	 * @return boolean
+	 */
+	function is_taversable ( $input ) {
+		# Prepare
+		$result = is_array($input) || (is_object($input) && $input instanceOf Traversable);
+		# Done
+		return $result;
+	}
+}
 
 if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
 
@@ -205,7 +219,7 @@ if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
 	function nvp ( $arr, $name = 'id', $value = 'title' ) {
 		# Prepare
 		$result = array();
-		if ( !is_array($arr) ) return array();
+		if ( !is_taversable($arr) ) return array();
 		
 		# Cycle
 		foreach ( $arr as $item ) {
@@ -1085,7 +1099,7 @@ if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 				$csv[] = trim($item);
 			}
 		}
-		elseif ( is_array($value) ) {
+		elseif ( is_taversable($value) ) {
 			# Cycle Through Array
 			foreach ( $value as $item ) {
 				# Add values to CSV

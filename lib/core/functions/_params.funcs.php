@@ -171,6 +171,7 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 		# Merge
 		$_PARAMS_HYDRATED = array_merge_recursive_keys($_FILES_HYDRATED, $_GET_HYDRATED, $_POST_HYDRATED);
 		
+		
 		# Done
 		return true;
 	}

@@ -688,56 +688,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	
 	# ========================
-	# DOCTRINE
-	
-	
-	/**
-	 * Determine and return a Record of $type using in
-	 * @param string $type The table/type of the record
-	 * @param mixed ... [optional] The input used to determine the record
-	 * @return
-	 */
-	public function getRecord ( $type ) {
-		# Prepare
-		$Record = null;
-		$args = func_get_args(); array_shift($args); // pop first (type)
-		
-		# Handle
-		foreach ( $args as $in ) {
-			if ( $in instanceof $type ) {
-				$Record = $in;
-			} elseif ( is_object($in) ) {
-				if ( !empty($in->id) )
-					$Record = $this->getRecord($type, $in->id);
-			} elseif ( is_numeric($in) ) {
-				$Record = Doctrine::getTable($type)->find($in);
-			} elseif ( is_string($in) ) {
-				if ( Doctrine::getTable($type)->hasColumn($in) )
-					$Record = Doctrine::getTable($type)->findByCode($in);
-			} elseif ( is_array($in) ) {
-				if ( !empty($in['id']) ) {
-					$Record = $this->getRecord($type, $in['id']);
-				} elseif ( !empty($in['code']) ) {
-					$Record = $this->getRecord($type, $in['code']);
-				}
-			}
-			
-			if ( !empty($Record->id) ) {
-				break;
-			}
-		}
-		
-		# Check
-		if ( empty($Record) ) {
-			$Record = new $type;
-		}
-		
-		# Done
-		return $Record;
-	}
-	
-	# -----------
-	# Paging
+	# PAGING
 	
 	
 	/**
@@ -936,6 +887,50 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	
+	/**
+	 * Determine and return a Record of $type using in
+	 * @param string $type The table/type of the record
+	 * @param mixed ... [optional] The input used to determine the record
+	 * @return
+	 */
+	public function getRecord ( $type ) {
+		# Prepare
+		$Record = null;
+		$args = func_get_args(); array_shift($args); // pop first (type)
+		
+		# Handle
+		foreach ( $args as $in ) {
+			if ( $in instanceof $type ) {
+				$Record = $in;
+			} elseif ( is_object($in) ) {
+				if ( !empty($in->id) )
+					$Record = $this->getRecord($type, $in->id);
+			} elseif ( is_numeric($in) ) {
+				$Record = Doctrine::getTable($type)->find($in);
+			} elseif ( is_string($in) ) {
+				if ( Doctrine::getTable($type)->hasColumn($in) )
+					$Record = Doctrine::getTable($type)->findByCode($in);
+			} elseif ( is_array($in) ) {
+				if ( !empty($in['id']) ) {
+					$Record = $this->getRecord($type, $in['id']);
+				} elseif ( !empty($in['code']) ) {
+					$Record = $this->getRecord($type, $in['code']);
+				}
+			}
+			
+			if ( !empty($Record->id) ) {
+				break;
+			}
+		}
+		
+		# Check
+		if ( empty($Record) ) {
+			$Record = new $type;
+		}
+		
+		# Done
+		return $Record;
+	}
 	
 	
 	# ========================
