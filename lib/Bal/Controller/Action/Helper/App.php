@@ -138,6 +138,51 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $result;
 	}
 	
+	
+	/**
+	 * Has an Nagivation Item?
+	 * @param string $menu
+	 * @param string $id
+	 * @param boolean $prefix [optional] Whether or not to prefix the id with the menu name
+	 * @return bool
+	 */
+	public function hasNavigationItem ( $code, $id, $prefix = false ) {
+		# Prepare
+		$View = $this->getActionControllerView();
+		
+		# Find
+		$NavigationMenu = delve($View, 'Navigation.'.$code);
+		if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+		
+		# Prefix
+		if ( $prefix ) {
+			$id = str_replace('.','-',$code).'-'.$id;
+		}
+		
+		# Activiate
+		$result = $this->hasNavigationMenuItem($NavigationMenu, $id);
+		
+		# Return Result
+		return $result;
+	}
+	
+	/**
+	 * Has a Navigation Menu Item?
+	 * @return
+	 */
+	public function hasNavigationMenuItem ( Zend_Navigation $Menu, $id ) {
+		# Find Current
+		$Item = $Menu->findBy('id', $id);
+		
+		# Check
+		if ( !$Item ) {
+			return false;
+		}
+		
+		# Done
+		return true;
+	}
+	
 	/**
 	 * Activate a Navigation Menu Item
 	 * @return

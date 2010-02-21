@@ -383,6 +383,24 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
+	public static function fetchListingColumns ( $table ) {
+		# Prepare
+		$tableName = self::getTableName($table);
+		$columns = null;
+		
+		# Check to see if table has form
+		if ( method_exists($tableName, 'fetchListingColumns') ) {
+			$columns = call_user_func_array($tableName.'::fetchListingColumns', array());
+			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
+		} else {
+			$labelColumnName = self::getTableLabelColumnName($table);
+			$columns = array($labelColumnName);
+		}
+		
+		# Return columns
+		return $columns;
+	}
+	
 	public static function fetchForm ( $table, $Record = null ) {
 		# Prepare
 		$tableName = self::getTableName($table);
