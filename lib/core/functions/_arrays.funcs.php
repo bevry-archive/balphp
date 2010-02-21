@@ -891,7 +891,7 @@ if ( function_compare('array_clean_form', 1, true, __FILE__, __LINE__) ) {
 	 * @return mixed
 	 */
 	function array_clean_form  ( &$array ) {
-		return array_clean_pattern($item, '/^__[^_]+__$/');
+		return array_clean_pattern($array, '/^__[^_]+__$/');
 	}
 }
 

@@ -398,7 +398,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			array_keys_unset_empty($data, $empty);
 		
 		# Clean special values
-		array_clean_form($item);
+		array_clean_form($data);
 		
 		# Cycle through values applying each one
 		foreach ( $data as $key => $value ) {
