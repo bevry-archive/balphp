@@ -167,6 +167,7 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 		array_hydrate($_REQUEST_HYDRATED,true);
 		array_hydrate($_FILES_HYDRATED,true);
 		liberate_files($_FILES_HYDRATED);
+		unset_empty_files($_FILES_HYDRATED);
 		
 		# Merge
 		$_PARAMS_HYDRATED = array_merge_recursive_keys($_FILES_HYDRATED, $_GET_HYDRATED, $_POST_HYDRATED);
@@ -285,6 +286,36 @@ if ( function_compare('liberate_files', 1, true, __FILE__, __LINE__) ) {
 				}
 			}
 		}
+	}
+}
+
+if ( function_compare('unset_empty_files', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unset empty files
+	 * The purpose of this function is to unset empty files (error==4)
+	 * @version 1, February 22, 2010
+	 */
+	function unset_empty_files ( &$files, $current = null, $prefix = '', $last = '' ) {
+		# Prepare
+		$prefix = trim($prefix, '.');
+		if ( $prefix === '' && $current === null ) $current = $files;
+		
+		# Handle
+		if ( is_array($current) ) {
+			# Deeper
+			foreach ( $current as $key => $value ) {
+				if ( is_array($value) ) {
+					unset_empty_files($files, $value, $prefix.'.'.$key, $key);
+				}
+				elseif ( $key === 'error' && $value === 4 ) {
+					array_unapply($files, $prefix);
+				}
+			}
+		}
+		
+		# Done
+		return true;
 	}
 }
 

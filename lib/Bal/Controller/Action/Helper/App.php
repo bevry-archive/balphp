@@ -324,6 +324,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 				'request'	=> array(
 					'get'		=> $_GET,
 					'post'		=> $_POST,
+					'files'		=> $_FILES,
 					'session'	=> $_SESSION,
 					'cookie'	=> $_COOKIE,
 					'params' 	=> $_REQUEST,
@@ -338,6 +339,80 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	
 	# ========================
 	# ITEMS
+	
+	public function applyRecord ( Doctrine_Record $Record, $data, $keep = null, $remove = null, $empty = null ) {
+		# Prepare
+		$Table = $Record->getTable();
+		
+		# Prepare
+		if ( !empty($keep) )
+			array_keys_keep($data, $keep);
+		if ( !empty($remove) )
+			array_keys_unset($data, $remove);
+		if ( !empty($empty) )
+			array_keys_unset_empty($data, $empty);
+		
+		# Clean special values
+		array_clean_form($item);
+		
+		# Cycle through values applying each one
+		foreach ( $data as $key => $value ) {
+			# Check Relation
+			if ( $Table->hasRelation($key) ) {
+				# Is Relation
+				$Relation = $Table->getRelation($key);
+				if ( !is_object($value) ) {
+					if ( $Relation->getType() === Doctrine_Relation::MANY ) {
+						# Many Type, Needs Doctrine_Collection
+						if ( empty($value) ) {
+							# Empty
+							$value = new Doctrine_Collection();
+						}
+						else {
+							# Discover
+							if ( !is_array($value) ) $value = array($value);
+							$value = $Table->getRelation($key)->getTable()->createQuery()->select('*')->whereIn('id', $value)->execute();
+						}
+					} else {
+						# One Type, Needs Record
+						if ( empty($value) ) {
+							# Empty
+							$value = null;
+						}
+						elseif ( is_array($value) ) {
+							# Create
+							$valueRecord = $Table->getRelation($key)->getTable()->create();
+							$this->applyRecord($valueRecord,$value);
+							$value = $valueRecord; 
+						}
+						else {
+							# Discover
+							$value = $Table->getRelation($key)->getTable()->find($value);
+						}
+					}
+				}
+			}
+			
+			# Apply
+			$Record->set($key, $value);
+		}
+		// $Item->merge($item);
+		// ^ Always fires special setters this way
+		
+		# Chain
+		return $this;
+	}
+	
+	public function saveRecord ( Doctrine_Record $Record, $data, $keep = null, $remove = null, $empty = null ) {
+		# Apply
+		$this->applyRecord($Record, $data, $keep, $remove, $empty);
+		
+		# Save
+		$Record->save();
+		
+		# Chain
+		return $this;
+	}
 	
 	public function saveItem ( $table, $record = null, $Query = null, $keep = null, $remove = null, $empty = null ) {
 		# Prepare
@@ -364,50 +439,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			# Start
 			$Connection->beginTransaction();
 			
-			# Prepare
-			if ( !empty($keep) )
-				array_keys_keep($iem, $keep);
-			if ( !empty($remove) )
-				array_keys_unset($item, $remove);
-			if ( !empty($empty) )
-				array_keys_unset_empty($item, $empty);
-			
-			# Clean special values
-			array_clean_form($item);
-			
-			# Cycle through values applying each one
-			foreach ( $item as $key => $value ) {
-				# Check Relation
-				if ( $Table->hasRelation($key) ) {
-					# Is Relation
-					$Relation = $Table->getRelation($key);
-					if ( $value && !is_object($value) ) {
-						if ( $Relation->getType() === Doctrine_Relation::MANY ) {
-							# Many Type, Needs Doctrine_Collection
-							if ( empty($value) ) {
-								# Empty
-								$value = new Doctrine_Collection();
-							}
-							else {
-								# Discover
-								if ( !is_array($value) ) $value = array($value);
-								$value = $Table->getRelation($key)->getTable()->createQuery()->select('*')->whereIn('id', $value)->execute();
-							}
-						} else {
-							# One Type, Needs Record
-							$value = $Table->getRelation($key)->getTable()->find($value);
-						}
-					}
-				}
-				
-				# Apply
-				$Item->set($key, $value);
-			}
-			// $Item->merge($item);
-			// ^ Always fires special setters this way
-			
 			# Save
-			$Item->save();
+			$this->saveRecord($Item, $item, $keep, $remove, $empty);
 			
 			# Stop Duplicates
 			$Request->setPost($tableName, $Item->id);

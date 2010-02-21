@@ -274,26 +274,88 @@ if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 	 */
 	function array_apply ( &$arr, $keys, &$value, $copy = true ) {
 		# Prepare
+		$result = null;
 		ensure_keys($keys, $arr);
 		
 		# Handle
 		$key = array_shift($keys);
 		if ( empty($key) ) {
+			# We've reached our destination
 			if ( $copy ) {
 				$arr = $value;
 			} else {
 				$arr =& $value;
 			}
+			# Apply
+			$result = true;
 		} elseif ( is_array($arr) ) {
+			# Delve into array
+			# Prepare
 			if ( !array_key_exists($key, $arr) || !is_array($arr[$key]) )
 				$arr[$key] = array();
-			return array_apply($arr[$key], $keys, $value, $copy);
+			# Apply
+			$result = array_apply($arr[$key], $keys, $value, $copy);
 		} elseif ( is_object($arr) ) {
+			# Delve into object
+			# Prepare
 			if ( !isset($arr->$key) || !is_array($arr->$key) )
 				$arr->$key = array();
-			return array_apply($arr->$key, $keys, $value, $copy);
+			# Apply
+			$result = array_apply($arr->$key, $keys, $value, $copy);
 		}
-		return true;
+		
+		# Return
+		return $result;
+	}
+}
+
+if ( function_compare('array_unapply', 2, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Delve into an array to unset a value from a set of keys
+	 * @version 1, February 22, 2010
+	 * @param array $arr
+	 * @param array $keys
+	 * @return array
+	 */
+	function array_unapply ( &$arr, $keys ) {
+		# Prepare
+		$result = null;
+		ensure_keys($keys, $arr);
+		
+		# Handle
+		$key = array_shift($keys);
+		if ( empty($key) ) {
+			# We've reached our destination
+			$result = false; // signify we were found
+		} elseif ( is_array($arr) ) {
+			# Delve into array
+			# Prepare
+			if ( !array_key_exists($key, $arr) || !is_array($arr[$key]) )
+				$arr[$key] = array();
+			# Apply
+			$result = array_unapply($arr[$key], $keys);
+			if ( $result === false ) {
+				# Unset
+				unset($arr[$key]);
+				$result = true; // removed
+			}
+		} elseif ( is_object($arr) ) {
+			# Delve into object
+			# Prepare
+			if ( !isset($arr->$key) || !is_array($arr->$key) )
+				$arr->$key = array();
+			# Apply
+			$result = array_unapply($arr->$key, $keys);
+			if ( $result === false ) {
+				# Unset
+				unset($arr->$key);
+				$result = true; // removed
+			}
+		}
+		
+		# Return
+		return $result;
 	}
 }
 
