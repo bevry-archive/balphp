@@ -72,14 +72,14 @@ if ( function_compare('become_file_download', 1, true, __FILE__, __LINE__) ) {
 	 *
 	 * @return boolean	true on success, false on error
 	 */
-	function become_file_download ( $file_path_or_data, $content_type = NULL, $buffer_size = null, $file_name = null, $file_time = null ) {
+	function become_file_download ( $file_path_or_data, $content_type = NULL, $buffer_size = null, $file_name = null, $file_time = null, $expires = null ) {
 		
 		// Prepare
 		if ( empty($buffer_size) )
 			$buffer_size = 4096;
 		if ( empty($content_type) )
 			$content_type = 'application/force-download';
-			
+		
 		// Check if we are data
 		$file_descriptor = null;
 		if ( file_exists($file_path_or_data) && $file_descriptor = fopen($file_path_or_data, 'rb') ) {
@@ -99,15 +99,20 @@ if ( function_compare('become_file_download', 1, true, __FILE__, __LINE__) ) {
 			$etag = md5($file_data);
 			if ( $file_time === null )
 				$file_time = time();
+			else
+				$file_time = ensure_timestamp($file_time);
 		} else {
 			// We couldn't find the file
 			header('HTTP/1.1 404 Not Found');
 			return false;
 		}
 		
+		// Prepare timestamps
+		$expires = ensure_timestamp($expires);
+		
 		// Set some variables
 		$date = gmdate('D, d M Y H:i:s') . ' GMT';
-		$expires = gmdate('D, d M Y H:i:s', strtotime('+1 month')) . ' GMT';
+		$expires = gmdate('D, d M Y H:i:s', $expires) . ' GMT';
 		$last_modified = gmdate('D, d M Y H:i:s', $file_time) . ' GMT';
 		
 		// Say we can go on forever

@@ -1194,3 +1194,26 @@ if ( function_compare('prepare_csv_str', 1, true, __FILE__, __LINE__) ) {
 		return $csv;
 	}
 }
+
+
+if ( function_compare('prepare_csv_content', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Generates an string from CSV values
+	 * @version 1, February 16, 2010
+	 * @param mixed $item
+	 * @param string $glue [optional]
+	 * @return string
+	 */
+	function prepare_csv_content ( $columns, $values, $glue = ', ' ) {
+		# Prepare
+		$csv = prepare_csv_str($columns)."\r\n";
+		
+		# Add Content
+		foreach ( $values as $value ) {
+			$csv .= '"'.implode('","',$value).'"'."\r\n";
+		}
+		
+		# Return csv
+		return $csv;
+	}
+}
