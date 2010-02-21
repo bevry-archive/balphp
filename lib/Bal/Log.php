@@ -27,6 +27,7 @@ class Bal_Log extends Zend_Log {
 
 	protected $_Writer = null;
 	protected $_Session;
+	protected $_store = false;
 	
     /**
      * Class constructor.  Startup log writers
@@ -38,6 +39,23 @@ class Bal_Log extends Zend_Log {
 		
 		# Return result
 		return $result;
+	}
+	
+	public function enableStore ( $value ) {
+		# Handle
+		if ( $value === true ) {
+			# Apply
+			$this->_store = true;
+			# Load Stored Events
+			$this->loadEvents();
+		}
+		else {
+			# Apply
+			$this->_store = false;
+		}
+		
+		# Chain
+		return $this;
 	}
 	
 	/**
@@ -63,6 +81,12 @@ class Bal_Log extends Zend_Log {
 	 * @return
 	 */
 	public function storeEvent ( $event ) {
+		# Check
+		if ( !$this->_store ) {
+			# Don't store
+			return $this;
+		}
+		
 		# Prepare
 		$Session = $this->getSession();
 		

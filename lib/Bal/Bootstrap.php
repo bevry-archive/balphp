@@ -100,23 +100,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$Log->addWriter($Writer_Mail);
 		}
 		
-		# Load Stored Events
-		$Log->loadEvents();
-		
-		# Log Request Details
-		global $_SESSION;
-		$details = array(
-			'server'	=> $_SERVER,
-			'request'	=> array(
-				'get'		=> $_GET,
-				'post'		=> $_POST,
-				'session'	=> $_SESSION,
-				'cookie'	=> $_COOKIE,
-				'params' 	=> $_REQUEST,
-			)
-		);
-		$Log->log('log-request_details', Bal_Log::DEBUG, array('details'=>$details));
-		
 		# Done
 		return true;
 	}

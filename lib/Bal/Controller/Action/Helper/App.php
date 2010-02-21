@@ -296,6 +296,46 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 	}
 	
 	
+	
+	# ========================
+	# LOG
+	
+	public function prepareLog ( $store = null, $log_request = null ) {
+		# Prepare
+		$Log = Bal_App::getLog();
+		if ( $store === null || $log_request === null ) {
+			$xhr = $this->getActionControllerRequest()->isXmlHttpRequest();
+			if ( !$xhr && !empty($_REQUEST['ajax']) ) $xhr = true;
+			# Apply
+			if ( $store === null ) $store = !$xhr;
+			if ( $log_request === null ) $log_request = !$xhr;
+		}
+		
+		# Enable Sore
+		if ( $store ) {
+			$Log->enableStore($store);
+		}
+		
+		# Log Request Details
+		if ( $log_request ) {
+			global $_SESSION;
+			$details = array(
+				'server'	=> $_SERVER,
+				'request'	=> array(
+					'get'		=> $_GET,
+					'post'		=> $_POST,
+					'session'	=> $_SESSION,
+					'cookie'	=> $_COOKIE,
+					'params' 	=> $_REQUEST,
+				)
+			);
+			$Log->log('log-request_details', Bal_Log::DEBUG, array('details'=>$details));
+		}
+		
+		# Chain
+		return $this;
+	}
+	
 	# ========================
 	# ITEMS
 	
