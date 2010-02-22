@@ -621,7 +621,7 @@ class Bal_Locale {
 	 * @param array $options
 	 * @return string
 	 */
-	public function decimalpercent ( $number) {
+	public function percentdecimal ( $number) {
 		return $this->percent($number*100);
 	}
 	
