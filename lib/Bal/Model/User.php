@@ -70,7 +70,7 @@ class Bal_Model_User extends Base_BalUser {
 		
 		# Create Welcome Message
 		$Message = new Message();
-		$Message->Receiver = $this;
+		$Message->For = $this;
 		$Message->useTemplate('user-password-reset',compact('password'));
 		$Message->save();
 		
@@ -421,7 +421,7 @@ class Bal_Model_User extends Base_BalUser {
 		
 		# Create Welcome Message
 		$Message = new Message();
-		$Message->Receiver = $User;
+		$Message->For = $User;
 		$Message->useTemplate('user-insert');
 		$Message->save();
 		

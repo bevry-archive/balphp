@@ -96,7 +96,7 @@ class Bal_Model_Invoice extends Base_BalInvoice
 		}
 		
 		# Chain
-		return $this;
+		return $Invoice;
 	}
 	
 	protected function _templateUserInvoice ( ) {

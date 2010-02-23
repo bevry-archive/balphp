@@ -50,21 +50,21 @@ BalMessage:
             default: "user_message"
             extra:
                 auto: true
-        sender_id:
+        for_id:
             type: integer(2)
             unsigned: true
-        receiver_id:
+        by_id:
             type: integer(2)
             unsigned: true
-            notblank: true
     relations:
-        Sender:
+        For:
             class: User
-            local: sender_id
+            local: for_id
             foreign: id
-            foreignAlias: SentMessages
-        Receiver:
+            foreignAlias: MessagesFor
+        By:
             class: User
-            local: receiver_id
+            local: by_id
             foreign: id
-            foreignAlias: ReceivedMessages
+            foreignAlias: MessagesBy
+    

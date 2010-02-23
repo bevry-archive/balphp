@@ -84,3 +84,21 @@ BalInvoice:
             # Cache of any information that may change externally
             type: array
             notnull: true
+
+        for_id:
+            type: integer(2)
+            unsigned: true
+        by_id:
+            type: integer(2)
+            unsigned: true
+    relations:
+        For:
+            class: User
+            local: for_id
+            foreign: id
+            foreignAlias: InvoicesFor
+        By:
+            class: User
+            local: by_id
+            foreign: id
+            foreignAlias: InvoicesBy

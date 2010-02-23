@@ -30,7 +30,8 @@ class Bal_Model_Message extends Base_BalMessage
 		# Prepare Params
 		$params = is_array($data) ? $data : array();
 		$params['Message'] = $Message->toArray();
-		$params['sender'] = delve($Message,'Sender.fullname','System');
+		$params['by'] = delve($Message,'By.fullname','System');
+		$params['for'] = delve($Message,'For.fullname','System');
 		
 		# Apply URLs
 		$messageUrl = $rootUrl.$View->url()->message($Message)->toString();
@@ -74,10 +75,10 @@ class Bal_Model_Message extends Base_BalMessage
 		# --------------------------
 		
 		# Prepare
-		$Receiver = $this->Receiver;
+		$For = $this->For;
 		
 		# Prepare URL
-		$activateUrl = $rootUrl.$View->url()->userActivate($Receiver)->toString();
+		$activateUrl = $rootUrl.$View->url()->userActivate($For)->toString();
 		$params['activateUrl'] = $activateUrl;
 
 		# --------------------------
@@ -91,7 +92,7 @@ class Bal_Model_Message extends Base_BalMessage
 	 */
 	public function send ( ) {
 		# Prepare
-		$Receiver = $this->Receiver;
+		$For = $this->For;
 		$View = Bal_App::getView(true);
 		$mail = Bal_App::getConfig('mail');
 		
@@ -111,8 +112,8 @@ class Bal_Model_Message extends Base_BalMessage
 		$Mail->setBodyHtml($mail['html']);
 		
 		# Add Receipient
-		$email = $Receiver->email;
-		$fullname = $Receiver->fullname;
+		$email = $For->email;
+		$fullname = $For->fullname;
 		$Mail->addTo($email, $fullname);
 		
 		# Send Mail
@@ -144,7 +145,7 @@ class Bal_Model_Message extends Base_BalMessage
 		}
 		
 		# Hash
-		$hash = md5($Message->send_on.$Message->title.$Message->description.$Message->Receiver->id);
+		$hash = md5($Message->send_on.$Message->title.$Message->description.$Message->For->id);
 		if ( $Message->hash != $hash ) {
 			$Message->hash = $hash;
 		}
