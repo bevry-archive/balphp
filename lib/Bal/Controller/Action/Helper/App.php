@@ -501,7 +501,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $this;
 	}
 	
-	public function saveItem ( $table, $record = null, $Query = null, $keep = null, $remove = null, $empty = null ) {
+	public function saveItem ( $table, Doctrine_Record $Record = null, $Query = null, $keep = null, $remove = null, $empty = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Request = $this->getRequest();
@@ -512,7 +512,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$tableNameLower = strtolower($tableName);
 		
 		# Fetch
-		$Item = $this->fetchItem($table,$record,$Query);
+		$Item = $this->fetchItem($table,$Record,$Query);
 		$item = $this->fetchItemParams($tableName);
 		
 		# Handle
@@ -555,7 +555,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $Item;
 	}
 	
-	public function deleteItem ( $table, $record = null ) {
+	public function deleteItem ( $table, Doctrine_Record $Record = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Log = Bal_App::getLog();
@@ -565,7 +565,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$tableNameLower = strtolower($tableName);
 		
 		# Fetch
-		$Item = $this->fetchItem($table, $record);
+		$Item = $this->fetchItem($table, $Record);
 		$item = $this->fetchItemParams($tableName);
 		
 		# Handle
