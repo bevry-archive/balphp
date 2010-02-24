@@ -38,10 +38,10 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 	
 	protected function optionEnabled ( $option ) {
 		return
-				array_key_exists($option, $this->_options)
+			array_key_exists($option, $this->_options)
 			&&	(
-						!array_key_exists('disabled', $this->_options[$option])
-					||	$this->_options[$option]['disabled']
+					!array_key_exists('disabled', $this->_options[$option])
+					||	!$this->_options[$option]['disabled']
 				)
 		;	
 	}
@@ -107,7 +107,7 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 	            'foreign'  => 'id',
 	            'refClass' => $tableName
 	        );
-	        Doctrine::getTable($this->_options['avatar']['class'])->bind(array($relationName, $options), Doctrine_Relation::MANY);
+	        Doctrine::getTable($column['class'])->bind(array($relationName, $options), Doctrine_Relation::MANY);
 		}
 		
 		# Chain

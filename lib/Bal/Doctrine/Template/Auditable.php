@@ -134,24 +134,26 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 
 	/**
 	 * Ensure the authorstr field
-	 * @param int $position [optional] defaults to id
+	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureAuthorstr ( $author = null ) {
+	public function ensureAuthorstr ( Doctrine_Event $Event ) {
 		# Prepare
-		$Record = $this->getInvoker();
+		$Record = $Event->getInvoker();
 		
 		# Default
-		if ( is_null($author) ) {
+		if ( $this->optionEnabled('Author') ) {
 			if ( isset($Record->Author) && $Record->Author->exists() ) {
 				$author = $Record->Author->displayname;
 			}
 		}
 		
 		# Has changed?
-		if ( $Record->authorstr != $author ) {
-			$Record->set('authorstr', $author, false);
-			return true;
+		if ( $this->optionEnabled('authorstr') ) {
+			if ( $Record->authorstr != $author ) {
+				$Record->set('authorstr', $author, false);
+				return true;
+			}
 		}
 		
 		# No Change
@@ -161,14 +163,15 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 
 	/**
 	 * Ensure Consistency
+	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureAuditableConsistency ( ) {
+	public function ensureAuditableConsistency ( Doctrine_Event $Event ) {
 		# Prepare
 		$save = false;
 		
 		# Author
-    	if ( !$this->_options['authorstr']['disabled'] && $this->ensureAuthorstr() ) {
+    	if ( $this->ensureAuthorstr($Event) ) {
 			$save = true;
 		}
 		

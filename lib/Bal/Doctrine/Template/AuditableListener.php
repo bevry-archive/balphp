@@ -38,6 +38,16 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 	 */
 	protected $_options = array();
 
+	protected function optionEnabled ( $option ) {
+		return
+			array_key_exists($option, $this->_options)
+			&&	(
+					!array_key_exists('disabled', $this->_options[$option])
+					||	!$this->_options[$option]['disabled']
+				)
+		;	
+	}
+
 	/**
 	 * __construct
 	 *
@@ -60,12 +70,12 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		$published_column = $this->_options['published_at']['name'];
 		
 		# Published
-		if ( empty($Invoker->$published_column) && !$this->_options['published_at']['disabled'] ) {
+		if ( $this->optionEnabled('published_at') && empty($Invoker->$published_column) && !$this->_options['published_at']['disabled'] ) {
 			$Invoker->$published_column = $Invoker->$created_column;
 		}
 		
 		# Author
-		if ( empty($Invoker->author_id) ) {
+		if ( $this->optionEnabled('Auhtor') && empty($Invoker->author_id) ) {
 			$User = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App')->getUser();
 			if ( $User && $User->id ) {
 				$Invoker->Author = $User;
@@ -86,7 +96,7 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		$save = false;
 		
 		# Ensure
-		if ( $Invoker->ensureAuditableConsistency() ) {
+		if ( $Invoker->ensureAuditableConsistency($Event) ) {
 			$save = true;
 		}
 		
@@ -105,7 +115,7 @@ class Bal_Doctrine_Template_AuditableListener extends Doctrine_Record_Listener {
 		$save = false;
 		
 		# Ensure
-		if ( $Invoker->ensureAuditableConsistency() ) {
+		if ( $Invoker->ensureAuditableConsistency($Event) ) {
 			$save = true;
 		}
 		
