@@ -25,13 +25,9 @@ if ( function_compare('gen_url', 2, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Does something
-	 *
 	 * @version 1.1, April 27, 2008
-	 *
 	 * @return string
-	 *
 	 * @todo figure out what the hell this does
-	 *
 	 */
 	function gen_url ( ) {
 		$s = empty($_SERVER['HTTPS']) ? '' : ($_SERVER['HTTPS'] == 'on') ? 's' : '';
@@ -58,7 +54,6 @@ if ( function_compare('selfURL', 2, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Alias for gen_url
-	 *
 	 * @see gen_url
 	 */
 	function selfURL ( ) {
@@ -70,13 +65,9 @@ if ( function_compare('url_remove_params', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Does something
-	 *
 	 * @version 1
-	 *
 	 * @return string
-	 *
 	 * @todo figure out what the hell this does
-	 *
 	 */
 	function url_remove_params ( $params, $url = NULL, $recurse = 0 ) {
 		++$recurse;
@@ -98,13 +89,9 @@ if ( function_compare('regen_url', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Does something
-	 *
 	 * @version 1
-	 *
 	 * @return string
-	 *
 	 * @todo figure out what the hell this does
-	 *
 	 */
 	function regen_url ( $params = NULL, $amp = '&' ) {
 		$url = gen_url();
@@ -134,5 +121,27 @@ if ( function_compare('regen_url', 1, true, __FILE__, __LINE__) ) {
 			$url .= $new_params;
 		}
 		return $url;
+	}
+}
+
+
+if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Checks internet connection
+	 * @author http://www.weberdev.com/get_example-4025.html
+	 * @copyright Unkown
+	 * @version 1, February 24, 2010
+	 * @return string
+	 * @todo figure out what the hell this does
+	 */
+	function is_connected ( ) {
+		$result = false;
+	    $connected = @fsockopen('www.google.com', 80); 
+	    if ( $connected ){ 
+	        $result = true; 
+	        fclose($connected); 
+	    }
+	    return $result; 
 	}
 }

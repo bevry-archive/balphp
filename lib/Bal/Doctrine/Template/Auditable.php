@@ -97,7 +97,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      */
     public function setTableDefinition() {
     	# Prepare
-    	$column_helpers = array('published_at','Author','status');
+    	$column_helpers = array('published_at','Author','authorstr','status');
     	
     	# Handle
 		$this->hasColumnHelpers($this->_options, $column_helpers);

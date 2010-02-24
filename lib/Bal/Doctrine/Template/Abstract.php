@@ -46,15 +46,15 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 		;	
 	}
 
-	protected function hasColumnHelpers ( $array, array $keys = array() ) {
+	protected function hasColumnHelpers ( $details, array $columns = array() ) {
 		# Prepare
-		if ( empty($keys) ) {
-			$keys = array_keys($array);
+		if ( empty($columns) ) {
+			$columns = array_keys($columns);
 		}
 		
 		# Handle
-		foreach ( $array as $column ) {
-			$this->hasColumnHelper($column);
+		foreach ( $columns as $column ) {
+			$this->hasColumnHelper($details[$column]);
 		}
 		
 		# Chain
@@ -70,6 +70,9 @@ abstract class Bal_Doctrine_Template_Abstract extends Doctrine_Template {
 		
 		# Fetch
 		$name = $column['name'];
+		if ( !isset($column['name']) ) {
+			die('asd');
+		}
 		if ( !empty($column['alias']) ) {
 			$name .= ' as ' . $column['alias'];
 		}

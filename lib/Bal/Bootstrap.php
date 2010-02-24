@@ -32,6 +32,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare Options
 		$use_mail = delve($applicationConfig, 'mail.send_email', true);
 		if ( !$use_mail ) return false;
+		elseif ( !is_connected() ) return false;
 		
 		# Fetch
 		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host');
