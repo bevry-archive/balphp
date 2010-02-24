@@ -216,8 +216,9 @@ if ( function_compare('hydrate_param', 1, true, __FILE__, __LINE__) ) {
 		# Handle
 		if ( is_array($value) ) {
 			# Array
-			foreach ( $value as $_key => &$_value )
+			foreach ( $value as $_key => &$_value ) {
 				hydrate_param($_value, $realvalue, $stripslashes, $trim);
+			}
 		}
 		else {
 			# Value
@@ -308,7 +309,7 @@ if ( function_compare('unset_empty_files', 1, true, __FILE__, __LINE__) ) {
 				if ( is_array($value) ) {
 					unset_empty_files($files, $value, $prefix.'.'.$key, $key);
 				}
-				elseif ( $key === 'error' && $value === 4 ) {
+				elseif ( ($key === 'error' && $value === 4) || ($key === 'size' && !$value) ) {
 					array_unapply($files, $prefix);
 				}
 			}

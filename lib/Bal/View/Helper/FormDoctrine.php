@@ -85,24 +85,27 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		if ( !$table ) $table = $attribs['table'];
 		if ( !$field ) $field = $attribs['field'];
 		
-		# Extract Attributes
-		$notnull = delve($attribs,'notnull');				unset($attribs['notnull']);
-		$notblank = delve($attribs,'notblank');				unset($attribs['notblank']);
-		$auto = delve($attribs,'auto');						unset($attribs['auto']);
-		$relationStatus = delve($attribs,'relationStatus');	unset($attribs['relationStatus']);
-		
 		# Fetch Table Information
 		$Table = Bal_Form_Doctrine::getTable($table);
 		$properties = array();
 		if ( $Table->hasRelation($field) ) {
+			# Relation
 			$Relation = $Table->getRelation($field);
 			$RelationTable = $Relation->getTable();
 		}
 		elseif ( $Table->hasField($field) ) {
+			# Field
 			$properties = $Table->getDefinitionOf($field);
 			array_keys_ensure($properties, array('length'), null);
-			$length = $properties['length'];
 		}
+		
+		# Extract Attributes
+		$notblank	= delve($attribs,	'notblank',	delve($properties,'notblank'));
+		$notnull 	= delve($attribs,	'notnull',	delve($properties,'notnull',$notblank));
+		$auto 		= delve($attribs,	'auto',		delve($properties,'extra.auto'));
+		$length 	= delve($attribs,	'length',	delve($properties,'length'));
+		$relationStatus = delve($attribs,'relationStatus');
+		array_keys_unset($attribs, array('notblank','notnull','auto','length','relationStatus'));
 		
 		# Determine Type
 		if ( delve($attribs,'type') ) {

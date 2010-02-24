@@ -279,7 +279,7 @@ if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		$key = array_shift($keys);
-		if ( empty($key) ) {
+		if ( $key === null ) {
 			# We've reached our destination
 			if ( $copy ) {
 				$arr = $value;

@@ -878,7 +878,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		}
 		
 		# Create if empty?
-		if ( $create && empty($Item) && $tableName ) {
+		if ( $create && !delve($Item,'id') && $tableName ) {
 			$Item = new $tableName();
 		}
 		

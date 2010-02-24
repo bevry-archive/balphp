@@ -352,8 +352,13 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 			$xhr = $this->getActionControllerRequest()->isXmlHttpRequest();
 			if ( !$xhr && !empty($_REQUEST['ajax']) ) $xhr = true;
 			# Apply
-			if ( $store === null ) $store = !$xhr;
-			if ( $log_request === null ) $log_request = !$xhr;
+			if ( $xhr ) {
+				if ( $store === null ) $store = false;
+				if ( $log_request === null ) $log_request = false;
+			} else {
+				if ( $store === null ) $store = $this->getConfig('bal.log.store');
+				if ( $log_request === null ) $log_request = $this->getConfig('bal.log.request');
+			}
 		}
 		
 		# Enable Sore
@@ -401,22 +406,39 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		array_clean_form($data);
 		
 		# Cycle through values applying each one
+		if ( !empty($data) ) 
 		foreach ( $data as $key => $value ) {
 			# Check Relation
 			if ( $Table->hasRelation($key) ) {
 				# Is Relation
 				$Relation = $Table->getRelation($key);
+				$RelationTable = $Relation->getTable();
 				if ( !is_object($value) ) {
 					if ( $Relation->getType() === Doctrine_Relation::MANY ) {
 						# Many Type, Needs Doctrine_Collection
 						if ( empty($value) ) {
 							# Empty
-							$value = new Doctrine_Collection();
+							$value = new Doctrine_Collection($RelationTable);
 						}
 						else {
 							# Discover
-							if ( !is_array($value) ) $value = array($value);
-							$value = $Table->getRelation($key)->getTable()->createQuery()->select('*')->whereIn('id', $value)->execute();
+							if ( is_array($value) && is_array(array_first($value)) ) {
+								# Create Multiple
+								$_values = new Doctrine_Collection($RelationTable);
+								foreach ( $value as $_value ) {
+									if ( !$_value ) continue;
+									# Create
+									$valueRecord = $RelationTable->create();
+									$this->applyRecord($valueRecord,$_value);
+									$_values[] = $valueRecord; 
+								}
+								$value = $_values;
+							}
+							else {
+								# Find Multiple
+								if ( !is_array($value) ) $value = array($value);
+								$value = $RelationTable->createQuery()->select('*')->whereIn('id', $value)->execute();
+							}
 						}
 					} else {
 						# One Type, Needs Record
@@ -426,13 +448,13 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 						}
 						elseif ( is_array($value) ) {
 							# Create
-							$valueRecord = $Table->getRelation($key)->getTable()->create();
+							$valueRecord = $RelationTable->create();
 							$this->applyRecord($valueRecord,$value);
 							$value = $valueRecord; 
 						}
 						else {
 							# Discover
-							$value = $Table->getRelation($key)->getTable()->find($value);
+							$value = $RelationTable->find($value);
 						}
 					}
 				}
@@ -448,7 +470,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		return $this;
 	}
 	
-	public function saveRecord ( Doctrine_Record $Record, $data, $keep = null, $remove = null, $empty = null ) {
+	public function saveRecord ( Doctrine_Record $Record, $data = null, $keep = null, $remove = null, $empty = null ) {
 		# Apply
 		$this->applyRecord($Record, $data, $keep, $remove, $empty);
 		
