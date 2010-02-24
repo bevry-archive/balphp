@@ -408,6 +408,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		# Cycle through values applying each one
 		if ( !empty($data) ) 
 		foreach ( $data as $key => $value ) {
+			# Prepare
+			
 			# Check Relation
 			if ( $Table->hasRelation($key) ) {
 				# Is Relation
@@ -430,7 +432,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 									unset($_value['_delete_']);
 									if ( empty($_value) ) continue;
 									# Create
-									$valueRecord = $RelationTable->create();
+									$valueRecord = $this->getRecord($RelationTable, $_value);
 									$this->applyRecord($valueRecord,$_value);
 									$_values[] = $valueRecord; 
 								}
@@ -442,6 +444,9 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 								$value = $RelationTable->createQuery()->select('*')->whereIn('id', $value)->execute();
 							}
 						}
+						
+						# Clear all previously, will re-apply on set
+						$Record->unlink($key);
 						
 						# Done Multiple
 						
@@ -459,7 +464,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 							if ( !empty($value) ) {
 								if ( is_array($value) && !delve($value,'_delete_') ) {
 									# Create
-									$valueRecord = $RelationTable->create();
+									$valueRecord = $this->getRecord($RelationTable, $value);
 									$this->applyRecord($valueRecord,$value);
 									$value = $valueRecord; 
 								}

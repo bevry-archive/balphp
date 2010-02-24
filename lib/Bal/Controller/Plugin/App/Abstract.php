@@ -889,32 +889,34 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	/**
 	 * Determine and return a Record of $type using in
-	 * @param string $type The table/type of the record
+	 * @param string $table The table/type of the record
 	 * @param mixed ... [optional] The input used to determine the record
 	 * @return
 	 */
-	public function getRecord ( $type ) {
+	public function getRecord ( $table ) {
 		# Prepare
 		$Record = null;
 		$args = func_get_args(); array_shift($args); // pop first (type)
+		$Table = Bal_Form_Doctrine::getTable($table);
+		$tableName = $Table->getComponentName();
 		
 		# Handle
 		foreach ( $args as $in ) {
-			if ( $in instanceof $type ) {
+			if ( $in instanceof $tableName ) {
 				$Record = $in;
 			} elseif ( is_object($in) ) {
 				if ( !empty($in->id) )
-					$Record = $this->getRecord($type, $in->id);
+					$Record = $this->getRecord($tableName, $in->id);
 			} elseif ( is_numeric($in) ) {
-				$Record = Doctrine::getTable($type)->find($in);
+				$Record = Doctrine::getTable($tableName)->find($in);
 			} elseif ( is_string($in) ) {
-				if ( Doctrine::getTable($type)->hasColumn($in) )
-					$Record = Doctrine::getTable($type)->findByCode($in);
+				if ( Doctrine::getTable($tableName)->hasColumn($in) )
+					$Record = Doctrine::getTable($tableName)->findByCode($in);
 			} elseif ( is_array($in) ) {
 				if ( !empty($in['id']) ) {
-					$Record = $this->getRecord($type, $in['id']);
+					$Record = $this->getRecord($tableName, $in['id']);
 				} elseif ( !empty($in['code']) ) {
-					$Record = $this->getRecord($type, $in['code']);
+					$Record = $this->getRecord($tableName, $in['code']);
 				}
 			}
 			
@@ -925,7 +927,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# Check
 		if ( empty($Record) ) {
-			$Record = new $type;
+			$Record = new $tableName;
 		}
 		
 		# Done

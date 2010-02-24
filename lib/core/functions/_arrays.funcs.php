@@ -36,13 +36,20 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 	function array_merge_recursive_keys ( ) {
 		# Prepare
 		$args = func_get_args();
-		$merged = array_shift($args);
+		$replace = array_shift($args);
+		if ( $replace === true || $replace === false ) {
+			$merged = array_shift($args);
+		} else {
+			$merged = $replace;
+			$replace = true;
+		}
+		
 		# Handle
 		foreach ( $args as $array ) {
 			# Prepare
 			if ( !is_array($array) ) $array = array($array);
 			# Check if we have keys
-			if ( is_numeric(implode('',array_keys($array))) ) {
+			if ( $replace && is_simple_array($array) ) {
 				# We don't
 				$merged = $array;
 			}
@@ -52,7 +59,7 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 					# Merge
 					if ( is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key]) ) {
 						# Array is keyed array
-						$merged[$key] = array_merge_recursive_keys($merged[$key], $value);
+						$merged[$key] = array_merge_recursive_keys($replace, $merged[$key], $value);
 					}
 					else {
 						# Normal
@@ -325,7 +332,7 @@ if ( function_compare('array_unapply', 2, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		$key = array_shift($keys);
-		if ( empty($key) ) {
+		if ( $key === null ) {
 			# We've reached our destination
 			$result = false; // signify we were found
 		} elseif ( is_array($arr) ) {
