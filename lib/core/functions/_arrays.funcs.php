@@ -1170,13 +1170,24 @@ if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 		}
 		elseif ( is_taversable($value) ) {
 			# Cycle Through Array
-			foreach ( $value as $item ) {
+			foreach ( $value as $key => $value ) {
 				# Add values to CSV
-				$csv = array_merge($csv, prepare_csv_array($item));
+				if ( is_string($key) ) {
+					# Enable or disable this tag
+					if ( $value )
+						$csv[] = $key;
+					else
+						$csv = array_diff($csv, array($key));
+				}
+				else {
+					# Could have some more tags
+					$csv = array_merge($csv, prepare_csv_array($value));
+				}
 			}
 		}
 		
 		# Sort
+		array_unique($csv);
 		sort($csv);
 	
 		# Return csv
