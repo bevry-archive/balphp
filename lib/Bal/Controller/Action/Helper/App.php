@@ -434,6 +434,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 									# Create
 									$valueRecord = $this->getRecord($RelationTable, $_value);
 									$this->applyRecord($valueRecord,$_value);
+									if ( $valueRecord->id )
+										$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
 									$_values[] = $valueRecord; 
 								}
 								$value = $_values;
@@ -466,6 +468,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 									# Create
 									$valueRecord = $this->getRecord($RelationTable, $value);
 									$this->applyRecord($valueRecord,$value);
+									if ( $valueRecord->id )
+										$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
 									$value = $valueRecord; 
 								}
 								else {

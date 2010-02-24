@@ -115,12 +115,12 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
 
 	function array_hydrate ( &$array, $clean = false ) {
-		if ( !is_array($array) ) $array = array();
-		foreach ( $array as $key => $value ) {
-			if ( is_array($value) ) {
-				array_hydrate($array[$key],$clean);
+		if ( !is_traversable($array) ) $array = array();
+		foreach ( $array as $key => &$value ) {
+			if ( is_traversable($value) ) {
+				array_hydrate($value,$clean);
 			} else {
-				$array[$key] = real_value($value);
+				$value = real_value($value);
 			}
 		}
 		if ( $clean ) array_clean_form($array);
@@ -198,14 +198,14 @@ if ( function_compare('ensure_keys', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('is_taversable', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('is_traversable', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Checks to see if the passed input is traversable
 	 * @version 1, February 21, 2010
 	 * @param mixed $input
 	 * @return boolean
 	 */
-	function is_taversable ( $input ) {
+	function is_traversable ( $input ) {
 		# Prepare
 		$result = is_array($input) || (is_object($input) && $input instanceOf Traversable);
 		# Done
@@ -226,34 +226,11 @@ if ( function_compare('nvp', 1, true, __FILE__, __LINE__) ) {
 	function nvp ( $arr, $name = 'id', $value = 'title' ) {
 		# Prepare
 		$result = array();
-		if ( !is_taversable($arr) ) return array();
+		if ( !is_traversable($arr) ) return array();
 		
 		# Cycle
 		foreach ( $arr as $item ) {
-			$result[$item[$name]] = $item[$value];
-		}
-		
-		# Done
-		return $result;
-	}
-}
-
-
-if ( function_compare('array_values_to_keys', 1, true, __FILE__, __LINE__) ) {
-
-	/**
-	 * Copy the array values to the keys
-	 * @version 1, January 15, 2010
-	 * @param array $arr
-	 * @return array
-	 */
-	function array_values_to_keys ( $arr ) {
-		# Prepare
-		$result = array();
-		
-		# Cycle
-		foreach ( $arr as $value ) {
-			$result[$value] = $value;
+			$result[delve($item,$name)] = delve($item,$value);
 		}
 		
 		# Done
@@ -634,12 +611,17 @@ if ( function_compare('array_unset_empty', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_unset_empty ( &$array ) {
 		# Prepare
-		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
+		if ( !is_traversable($array) ) $array = $array === null ? array() : array($array);
 		$args = func_get_args(); array_shift($args);
-		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
+		if ( sizeof($args) === 1 && is_traversable($args[0]) ) $args = $args[0];
 		# Apply
 		foreach ( $args as $key ) {
-			if ( array_key_exists($key, $array) && !$array[$key] ) {
+			if ( is_object($array) ) {
+				if ( isset($array->$key) && !$array->$key) {
+					unset($array->$key);
+				}
+			}
+			elseif ( array_key_exists($key, $array) && !$array[$key] ) {
 				unset($array[$key]);
 			}
 		}
@@ -660,12 +642,15 @@ if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_unset ( &$array ) {
 		# Prepare
-		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
+		if ( !is_traversable($array) ) $array = $array === null ? array() : array($array);
 		$args = func_get_args(); array_shift($args);
-		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
+		if ( sizeof($args) === 1 && is_traversable($args[0]) ) $args = $args[0];
 		# Apply
 		foreach ( $args as $var ) {
-			unset($array[$var]);
+			if ( is_object($array) )
+				unset($array->$var);
+			else
+				unset($array[$var]);
 		}
 		# Done
 		return $array;
@@ -751,8 +736,8 @@ if ( function_compare('array_key_ensure', 1.1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_key_ensure ( &$array, $key, $value = null ) {
 		# Prepare
-		if ( is_array($key) ) return array_keys_ensure($array, $key, $value);
-		if ( !is_array($array) ) $array = array($array);
+		if ( is_traversable($key) ) return array_keys_ensure($array, $key, $value);
+		if ( !is_traversable($array) ) $array = array($array);
 		# Apply
 		if ( !array_key_exists($key, $array) ) $array[$key] = $value;
 		# Done
@@ -771,10 +756,10 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_ensure ( &$array, $keys, $value = null ) {
 		# Prepare
-		if ( !is_array($array) ) $array = array($array);
+		if ( !is_traversable($array) ) $array = array($array);
 		# Apply
 		foreach ( $keys as $key ) {
-			if ( is_array($key) ) {
+			if ( is_traversable($key) ) {
 				array_keys_ensure($array, $key, $value);
 			} else {
 				array_key_ensure($array, $key, $value);
@@ -831,7 +816,7 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_clean ( &$array, $to = null ) {
 		# Prepare
-		if ( !is_array($array) )
+		if ( !is_traversable($array) )
 			return $array;
 		if ( is_null($to) )
 			$to = 'remove';
@@ -841,12 +826,18 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 			if ( $value === '' || $value === NULL ) {
 				// Empty value, only key
 				if ( $to === 'remove' ) {
-					unset($array[$key]); // unset
+					if ( is_object($array) )
+						unset($array->$key);
+					else
+						unset($array[$key]);
 				} else {
-					$array[$key] = $to;
+					if ( is_object($array) )
+						$array->$key = $to;
+					else
+						$array[$key] = $to;
 				}
-			} elseif ( is_array($value) ) {
-				array_clean($array[$key]);
+			} elseif ( is_traversable($value) ) {
+				array_clean($value);
 			} else {
 				$value = trim($value);
 			}
@@ -870,7 +861,7 @@ if ( function_compare('array_clean_pattern', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_clean_pattern  ( &$array, $pattern = null ) {
 		# Prepare
-		if ( !is_array($array) )
+		if ( !is_traversable($array) )
 			return $array;
 		if ( $pattern === null ) {
 			$pattern = '^\\.';
@@ -914,10 +905,10 @@ if ( function_compare('implode_recursive', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function implode_recursive ( $glue, $array ) {
 		# Prepare
-		if ( !is_array($array) ) return $array;
+		if ( !is_traversable($array) ) return $array;
 		# Handle
 		foreach ( $array as &$value ) {
-			if ( is_array($value) ) {
+			if ( is_traversable($value) ) {
 				$value = implode_recursive($glue, $value);
 			}
 		}
@@ -1168,7 +1159,7 @@ if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 				$csv[] = trim($item);
 			}
 		}
-		elseif ( is_taversable($value) ) {
+		elseif ( is_traversable($value) ) {
 			# Cycle Through Array
 			foreach ( $value as $key => $value ) {
 				# Add values to CSV
