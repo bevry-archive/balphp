@@ -27,7 +27,7 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 		$columns = $Table->getColumns();
 		foreach ( $columns as $column => $properties ) {
 			$orig = $value = $Record->get($column);
-			if ( empty($value) || $properties['type'] !== 'string' ) continue;
+			if ( empty($value) || $properties['type'] !== 'string' || !is_string($value) ) continue;
 			$html = isset($properties['extra']['html']) ? $properties['extra']['html'] : $this->_default;
 			if ( !$html )
 				$html = 'none';

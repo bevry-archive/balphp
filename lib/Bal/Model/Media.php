@@ -285,22 +285,23 @@ class Bal_Model_Media extends Base_BalMedia {
 	/**
 	 * Fetch the Media
 	 * @param mixed $media
+	 * @return mixed null to delete, false means none
 	 */
 	public static function fetch ( $media ) {
 		# Prepare
-		$Media = null;
+		$Media = false;
 		
 		# Create Media
 		if ( is_array($media) ) {
-			if ( delve($media,'delete') ) {
+			if ( delve($media,'_delete_') ) {
 				# Delete Media
-				$Media = false;
+				$Media = null;
 			}
 			elseif ( delve($media,'id') ) {
 				# Database Media
 				$Media = Doctrine::getTable('Media')->find(delve($media,'id'));
 				if ( !delve($Media,'id') ) {
-					$Media = false;
+					$Media = null;
 				}
 			}
 			elseif ( delve($media,'tmpname') ) {
@@ -326,8 +327,11 @@ class Bal_Model_Media extends Base_BalMedia {
 			# Database Media
 			$Media = Doctrine::getTable('Media')->findOneByIdOrCode($media,$media);
 			if ( !delve($Media,'id') ) {
-				$Media = false;
+				$Media = null;
 			}
+		}
+		elseif ( $media === null ) {
+			$Media = null;
 		}
 		
 		# Return Media

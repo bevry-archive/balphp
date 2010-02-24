@@ -1168,6 +1168,9 @@ if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 				$csv = array_merge($csv, prepare_csv_array($item));
 			}
 		}
+		
+		# Sort
+		sort($csv);
 	
 		# Return csv
 		return $csv;

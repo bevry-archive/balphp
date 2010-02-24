@@ -426,7 +426,9 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 								# Create Multiple
 								$_values = new Doctrine_Collection($RelationTable);
 								foreach ( $value as $_value ) {
-									if ( !$_value ) continue;
+									if ( delve($_value,'_delete_') ) continue;
+									unset($_value['_delete_']);
+									if ( empty($_value) ) continue;
 									# Create
 									$valueRecord = $RelationTable->create();
 									$this->applyRecord($valueRecord,$_value);
@@ -440,22 +442,35 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 								$value = $RelationTable->createQuery()->select('*')->whereIn('id', $value)->execute();
 							}
 						}
+						
+						# Done Multiple
+						
 					} else {
 						# One Type, Needs Record
-						if ( empty($value) ) {
+						if ( empty($value) || delve($value,'_delete_') ) {
 							# Empty
 							$value = null;
 						}
-						elseif ( is_array($value) ) {
-							# Create
-							$valueRecord = $RelationTable->create();
-							$this->applyRecord($valueRecord,$value);
-							$value = $valueRecord; 
-						}
 						else {
-							# Discover
-							$value = $RelationTable->find($value);
+							# Prepare
+							unset($value['_delete_']);
+							
+							# Check
+							if ( !empty($value) ) {
+								if ( is_array($value) && !delve($value,'_delete_') ) {
+									# Create
+									$valueRecord = $RelationTable->create();
+									$this->applyRecord($valueRecord,$value);
+									$value = $valueRecord; 
+								}
+								else {
+									# Discover
+									$value = $RelationTable->find($value);
+								}
+							}
 						}
+						
+						# Done One
 					}
 				}
 			}

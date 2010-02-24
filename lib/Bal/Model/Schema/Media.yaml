@@ -9,18 +9,12 @@ BalMedia:
             canUpdate: true
             fields: [name]
         Bal_Doctrine_Template_Auditable:
-            status:
-                disabled: true
-            author:
+            Author:
                 disabled: false
-            authorstr:
-                disabled: true
             created_at:
                 disabled: false
             updated_at:
                 disabled: false
-            published_at:
-                disabled: true
         Searchable:
             fields: [code,title,path,type]
     columns:

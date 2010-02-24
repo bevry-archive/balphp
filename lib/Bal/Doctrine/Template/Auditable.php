@@ -40,17 +40,17 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      */
     protected $_options = array(
 		'created_at' => array(
-			'disabled'		=>	false,
+			'disabled'		=>	true,
         	'name'			=>	'created_at',
 			'type'			=>	'timestamp'
 		),
 		'updated_at' => array(
-			'disabled'		=>	false,
+			'disabled'		=>	true,
         	'name'			=>	'updated_at',
 			'type'			=>	'timestamp'
 		),
 		'published_at' => array(
-			'disabled'		=>	false,
+			'disabled'		=>	true,
         	'name'			=>	'published_at',
 			'type'			=>	'timestamp',
 	        'options'       =>  array(
@@ -58,7 +58,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 			)
 		),
 		'status' => array(
-			'disabled'		=>	false,
+			'disabled'		=>	true,
 	        'name'          =>  'status',
 	        'type'          =>  'enum',
 	        'length'        =>  10,
@@ -68,8 +68,8 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 				'notnull'	=>	true
 			)
 		),
-		'author' => array(
-			'disabled'		=>	false,
+		'Author' => array(
+			'disabled'		=>	true,
 	        'relation'     	=>  'Author',
 	        'class'     	=>  'User',
 	        'name'          =>  'user_id',
@@ -80,7 +80,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 			)
 		),
 		'authorstr' => array(
-			'disabled'		=>	false,
+			'disabled'		=>	true,
         	'name'			=>	'authorstr',
 			'type'			=>	'string',
 			'length'		=>	50,
@@ -97,7 +97,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
      */
     public function setTableDefinition() {
     	# Prepare
-    	$column_helpers = array('published_at','author','status');
+    	$column_helpers = array('published_at','Author','status');
     	
     	# Handle
 		$this->hasColumnHelpers($this->_options, $column_helpers);
@@ -126,7 +126,7 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 		//	$this->getInvoker()->hasMutator('authorstr', 'setAuthorstr');
         
 		# Relations
-		$this->hasOneHelper($this->_options['author']);
+		$this->hasOneHelper($this->_options['Author']);
         
         # Done
         return true;

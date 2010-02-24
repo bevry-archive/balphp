@@ -31,7 +31,7 @@ class Bal_Model_User extends Base_BalUser {
 		$Media = Media::fetch($media);
 		
 		# Apply Media
-		if ( $Media === false || $Media ) {
+		if ( $Media === null || $Media ) {
 			if ( isset($this->$what) ) {
 				$this->$what->delete();
 			}
@@ -278,36 +278,65 @@ class Bal_Model_User extends Base_BalUser {
 	}
 	
 	/**
-	 * Ensure Subscriptions
-	 * @param int $value [optional]
+	 * Ensure Tags
+	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureSubscriptions ( $Event ) {
+	public function ensureSubscriptionTags ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
-		$modified = $User->getModified();
+		$Invoker = $Event->getInvoker();
+		$modified = $Invoker->getModified();
+		$modifiedLast = $Invoker->getLastModified();
 		$save = false;
+		$tagField = 'subscriptions';
+		$tagRelation = 'SubscriptionTags';
+		$tagRelationNames = $tagRelation.'Names';
 		
 		# Fetch
-		$tags = implode(', ', $this->SubscriptionTagsNames);
-		$subscriptions = $this->_get('subscriptions');
-		if ( is_array($subscriptions) ) $subscriptions = implode(', ', $subscriptions);
+		$tagsSystemOrig = $Invoker->$tagRelationNames;
+		$tagsUserOrig = $Invoker->_get($tagField);
+		$tagsSystem = prepare_csv_str($tagsSystemOrig);
+		$tagsUser = prepare_csv_str($tagsUserOrig);
+		$tagsUserNewer = array_key_exists($tagField, $modified);
+		$tagsSystemNewer = !array_key_exists($tagField, $modified) && !array_key_exists($tagField, $modifiedLast);
+		$tagsDiffer = $tagsUser != $tagsSystem;
 		
-		# Has Changed?
-		if ( $subscriptions != $tags ) {
-			if ( array_key_exists('subscriptions', $modified) ) {
-				# Update Subscriptions with Subscriptions String
-				$this->_set('subscriptions', $subscriptions, false); // false at end to prevent comparison
-				# Update SubscriptionTags with Subscriptions
-				if ( $this->id ) {
-					$tags = prepare_csv_str($subscriptions);
-					$this->SubscriptionTags = $tags;
-				}
+		# TagField > TagField
+		if ( ($tagsDiffer || $tagsUserOrig != $tagsUser) && $tagsUserNewer ) {
+			# TagField is newer than TagRelation
+			//var_dump('TagField > TagField');
+			
+			# Save TagField
+			$Invoker->_set($tagField, $tagsUser, false); // false at end to prevent comparison
+			
+			# Save
+			$save = true;
+		}
+		
+		# TagField > TagRelation
+		if ( $tagsDiffer && !$tagsSystemNewer ) {
+			# TagField is newer than TagRelation
+			//var_dump('TagField > TagRelation');
+			
+			# Check whether we can save
+			if ( $Invoker->id ) {
+				# Save TagRelation
+				$Invoker->$tagRelation = $tagsUser;
+				
+				# Save
+				$save = true;
 			}
-			else {
-				# Update Subscriptions with Tags
-				$this->_set('subscriptions', $tags, false); // false at end to prevent comparison
-			}
+		}
+		
+		# TagRelation > $TagField
+		if ( $tagsDiffer && $tagsSystemNewer ) {
+			# TagRelation is newer than TagField
+			//var_dump('TagRelation > TagField');
+			
+			# Save TagField
+			$Invoker->_set($tagField, $tagsSystem, false); // false at end to prevent comparison
+			
+			# Save
 			$save = true;
 		}
 		
@@ -363,7 +392,7 @@ class Bal_Model_User extends Base_BalUser {
 			$User->ensureFullname($Event,$Event_type),
 			$User->ensureUsername($Event,$Event_type),
 			$User->ensureDisplayname($Event,$Event_type),
-			$User->ensureSubscriptions($Event,$Event_type),
+			$User->ensureSubscriptionTags($Event,$Event_type),
 			$User->ensureLevel($Event,$Event_type)
 		);
 		
