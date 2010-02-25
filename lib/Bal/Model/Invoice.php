@@ -301,7 +301,7 @@ class Bal_Model_Invoice extends Base_BalInvoice
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureCache($Event){
+	public function ensureCache($Event,$Event_type){
 		# Prepare
 		$Invoice = $Event->getInvoker();
 		$save = false;
@@ -328,9 +328,10 @@ class Bal_Model_Invoice extends Base_BalInvoice
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure($Event){
+	public function ensure($Event,$Event_type){
+		$Invoker = $Event->getInvoker();
 		$ensure = array(
-			$this->ensureCache($Event)
+			$Invoker->ensureCache($Event,$Event_type)
 		);
 		return in_array(true,$ensure);
 	}
@@ -345,7 +346,7 @@ class Bal_Model_Invoice extends Base_BalInvoice
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
+		if ( self::ensure($Event,'preSave') ) {
 			// will save naturally
 		}
 		
@@ -360,11 +361,12 @@ class Bal_Model_Invoice extends Base_BalInvoice
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
+		$Invoker = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
-			$this->save();
+		if ( self::ensure($Event,'postSave') ) {
+			$Invoker->save();
 		}
 		
 		# Done

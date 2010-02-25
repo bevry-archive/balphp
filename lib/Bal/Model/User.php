@@ -383,17 +383,17 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function ensure ( $Event, $Event_type ) {
 		# Prepare
-		$User = $Event->getInvoker();
+		$Invoker = $Event->getInvoker();
 		
 		# Handle
 		$ensure = array(
-			$User->ensureCode($Event,$Event_type),
-			$User->ensureUid($Event,$Event_type),
-			$User->ensureFullname($Event,$Event_type),
-			$User->ensureUsername($Event,$Event_type),
-			$User->ensureDisplayname($Event,$Event_type),
-			$User->ensureSubscriptionTags($Event,$Event_type),
-			$User->ensureLevel($Event,$Event_type)
+			$Invoker->ensureCode($Event,$Event_type),
+			$Invoker->ensureUid($Event,$Event_type),
+			$Invoker->ensureFullname($Event,$Event_type),
+			$Invoker->ensureUsername($Event,$Event_type),
+			$Invoker->ensureDisplayname($Event,$Event_type),
+			$Invoker->ensureSubscriptionTags($Event,$Event_type),
+			$Invoker->ensureLevel($Event,$Event_type)
 		);
 		
 		# Return save

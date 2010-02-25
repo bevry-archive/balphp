@@ -219,9 +219,10 @@ class Bal_Model_Media extends Base_BalMedia {
 	 * Ensure Consistency
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure ( ) {
+	public function ensure ( $Event, $Event_type ) {
+		$Invoker = $Event->getInvoker();
 		$ensure = array(
-			$this->ensureUrl()
+			$Invoker->ensureUrl()
 		);
 		return in_array(true,$ensure);
 	}
@@ -236,7 +237,7 @@ class Bal_Model_Media extends Base_BalMedia {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
+		if ( self::ensure($Event,'preSave') ) {
 			// will save naturally
 		}
 		
@@ -254,8 +255,8 @@ class Bal_Model_Media extends Base_BalMedia {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
-			$this->save();
+		if ( self::ensure($Event,'postSave') ) {
+			$Invoker->save();
 		}
 		
 		# Done
