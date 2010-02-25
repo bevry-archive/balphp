@@ -28,8 +28,15 @@ if ( function_compare('ensure_timestamp', 1, true, __FILE__, __LINE__) ) {
 	 * @param mixed	$start
 	 * @return timestamp
 	 */
-	function ensure_timestamp ( $value ) {
-		return is_numeric($value) ? $value : strtotime($value);
+	function ensure_timestamp ( $value = null ) {
+		$result = null;
+		
+		if ( $value === null ) $result = time();
+		elseif ( is_numeric($value) ) $result = $value;
+		elseif ( is_string($value) ) $result = strtotime($value);
+		else throw new Exception('Unkown timestamp type.');
+		
+		return $result;
 	}
 }
 
