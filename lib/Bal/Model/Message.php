@@ -133,31 +133,51 @@ class Bal_Model_Message extends Base_BalMessage
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureMessage($Event){
+	public function ensureMessage (  $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('postSave','preInsert')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
-		$Message = $Event->getInvoker();
 		$save = false;
 		
-		# Send On
-		if ( !$Message->send_on ) {
-			$Message->send_on = doctrine_timestamp();
-			$save = true;
-		}
+		# Fetch
+		$Message = $Event->getInvoker();
 		
-		# Hash
-		$hash = md5($Message->send_on.$Message->title.$Message->description.$Message->For->id);
-		if ( $Message->hash != $hash ) {
-			$Message->hash = $hash;
-		}
+		# preInsert
+		if ( $Event_type === 'preInsert' ) {
+			# Ensure Only One
+			Doctrine_Query::create()
+				->delete('Message m')
+				->where('m.hash = ?', $Message->hash)
+				->execute();
+				;
+			
+			# Send On
+			if ( !$Message->send_on ) {
+				$Message->set('send_on', doctrine_timestamp(), false);
+				$save = true;
+			}
 		
-		# Send
-		if ( $Message->id && empty($Message->sent_on) && strtotime($Message->send_on) <= time() ) {
-			# We want to send now or earlier
-			$Message->send();
-			$save = true;
-		} else {
-			# We want to send later
-			// do nothing
+			# Hash
+			$hash = md5($Message->send_on.$Message->title.$Message->description.$Message->For->id);
+			if ( $Message->hash != $hash ) {
+				$Message->set('hash', $hash, false);
+				$save = true;
+			}
+		}
+		elseif ( $Event_type === 'postSave' ) {
+			# Send
+			if ( $Message->id && empty($Message->sent_on) && strtotime($Message->send_on) <= time() ) {
+				# We want to send now or earlier
+				$Message->send();
+				$save = true;
+			} else {
+				# We want to send later
+				// do nothing
+			}
 		}
 		
 		# Done
@@ -169,11 +189,10 @@ class Bal_Model_Message extends Base_BalMessage
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure($Event){
-		$ensure = array(
-			$this->ensureMessage($Event)
-		);
-		return in_array(true,$ensure);
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureMessage'
+		));
 	}
 	
 	/**
@@ -186,8 +205,8 @@ class Bal_Model_Message extends Base_BalMessage
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
-			// will save naturally
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
 		}
 		
 		# Done
@@ -201,11 +220,12 @@ class Bal_Model_Message extends Base_BalMessage
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
+		$Invoker = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event) ) {
-			$this->save();
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			$Invoker->save();
 		}
 		
 		# Done
@@ -221,11 +241,10 @@ class Bal_Model_Message extends Base_BalMessage
 		$Message = $Event->getInvoker();
 		$result = true;
 		
-		# Ensure Only One
-		Doctrine_Query::create()
-			->delete('Message m')
-			->where('m.hash = ?', $Message->hash)
-			;
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;

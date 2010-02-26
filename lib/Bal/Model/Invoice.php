@@ -302,9 +302,17 @@ class Bal_Model_Invoice extends Base_BalInvoice
 	 * @return boolean	wheter or not to save
 	 */
 	public function ensureCache($Event,$Event_type){
+		# Check
+		if ( !in_array($Event_type,array('postInsert')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
-		$Invoice = $Event->getInvoker();
 		$save = false;
+		
+		# Fetch
+		$Invoice = $Event->getInvoker();
 		
 		# Check Existance
 		if ( $Invoice->id && empty($Invoice->cache) ) {
@@ -323,17 +331,16 @@ class Bal_Model_Invoice extends Base_BalInvoice
 		return $save;
 	}
 	
+	
 	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure($Event,$Event_type){
-		$Invoker = $Event->getInvoker();
-		$ensure = array(
-			$Invoker->ensureCache($Event,$Event_type)
-		);
-		return in_array(true,$ensure);
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureCache'
+		));
 	}
 	
 	/**
@@ -346,8 +353,8 @@ class Bal_Model_Invoice extends Base_BalInvoice
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'preSave') ) {
-			// will save naturally
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
 		}
 		
 		# Done
@@ -365,11 +372,30 @@ class Bal_Model_Invoice extends Base_BalInvoice
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'postSave') ) {
+		if ( self::ensure($Event, __FUNCTION__) ) {
 			$Invoker->save();
 		}
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
+	
+	/**
+	 * postInsert Event
+	 * @param Doctrine_Event $Event
+	 * @return
+	 */
+	public function postInsert ( $Event ) {
+		# Prepare
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
+	
 }

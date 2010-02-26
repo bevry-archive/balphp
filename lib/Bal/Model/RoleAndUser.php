@@ -19,19 +19,24 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 * @return boolean	wheter or not to save
 	 */
 	public function ensureLevel ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('postInsert','postDelete')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
-		$Item = $Event->getInvoker();
 		$save = false;
 		
-		# Level
-		if ( $Event_type === 'postSave' ) {
-			# Update the User's level with the latest highest role level
-			$User = $Item->User;
-			$Role = $Item->Role;
-			if ( $Role->level > $User->level ) {
-				$User->level = $Role->level;
-				$User->save();
-			}
+		# Fetch
+		$Item = $Event->getInvoker();
+		
+		# Update the User's level with the latest highest role level
+		$User = $Item->User;
+		$Role = $Item->Role;
+		if ( $Role->level > $User->level ) {
+			$User->level = $Role->level;
+			$User->save();
 		}
 		
 		# Return
@@ -41,20 +46,12 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
-	 * @param string $Event_type
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure ( $Event, $Event_type ) {
-		# Prepare
-		$Item = $Event->getInvoker();
-		
-		# Handle
-		$ensure = array(
-			$Item->ensureLevel($Event,$Event_type)
-		);
-		
-		# Return save
-		return in_array(true,$ensure);
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureLevel'
+		));
 	}
 	
 	/**
@@ -64,12 +61,11 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
-		$Item = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event, 'preSave') ) {
-			// will save naturally
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
 		}
 		
 		# Done
@@ -83,16 +79,33 @@ class Bal_Model_RoleAndUser extends Base_BalRoleAndUser
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
-		$Item = $Event->getInvoker();
+		$Invoker = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event, 'postSave') ) {
-			$Item->save();
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			$Invoker->save();
 		}
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	/**
+	 * postDelete Event
+	 * @param Doctrine_Event $Event
+	 * @return
+	 */
+	public function postDelete ( $Event ) {
+		# Prepare
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
 }

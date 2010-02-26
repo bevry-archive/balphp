@@ -194,37 +194,47 @@ class Bal_Model_Media extends Base_BalMedia {
 		become_file_download($file_path, null, null);
 		die();
 	}
-
 	
 	/**
-	 * Ensure Url
+	 * Ensure Level
+	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureUrl(){
-		# Prepare
-		$save = false;
-		return $save;
-		
-		# Ensure URL
-		if ( $this->_get('url') !== $this->getUrl() ) {
-			$this->_set('url', $this->getUrl(), false); // false at end to prevent comparison
-			$save = true;
+	public function ensureFile ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('postDelete')) ) {
+			# Not designed for these events
+			return null;
 		}
 		
-		# Done
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$Media = $Event->getInvoker();
+		
+		# Delete
+		if ( $Event_type === 'postDelete' ) {
+			# Get Path
+			$file_path = $Media->path;
+		
+			# Delete the file
+			unlink($file_path);
+		}
+		
+		# Return
 		return $save;
 	}
 	
 	/**
 	 * Ensure Consistency
+	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure ( $Event, $Event_type ) {
-		$Invoker = $Event->getInvoker();
-		$ensure = array(
-			$Invoker->ensureUrl()
-		);
-		return in_array(true,$ensure);
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureFile'
+		));
 	}
 	
 	/**
@@ -237,8 +247,8 @@ class Bal_Model_Media extends Base_BalMedia {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'preSave') ) {
-			// will save naturally
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
 		}
 		
 		# Done
@@ -255,7 +265,7 @@ class Bal_Model_Media extends Base_BalMedia {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'postSave') ) {
+		if ( self::ensure($Event, __FUNCTION__) ) {
 			$Invoker->save();
 		}
 		
@@ -269,15 +279,12 @@ class Bal_Model_Media extends Base_BalMedia {
 	 */
 	public function postDelete ( $Event ) {
 		# Prepare
-		global $Application;
-		$Invoker = $Event->getInvoker();
 		$result = true;
 		
-		# Get Path
-		$file_path = $Invoker->path;
-		
-		# Delete the file
-		unlink($file_path);
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;

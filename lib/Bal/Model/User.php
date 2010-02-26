@@ -185,14 +185,23 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureUid ( $Event ) {
+	public function ensureUid ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave','postSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
-		$uid = md5($this->username.$this->email);
 		$save = false;
 		
+		# Fetch
+		$User = $Event->getInvoker();
+		
 		# Is it different?
-		if ( $this->_get('uid') != $uid ) {
-			$this->_set('uid', $uid, false);
+		$uid = md5($this->username.$this->email);
+		if ( $User->get('uid') != $uid ) {
+			$User->set('uid', $uid, false);
 			$save = true;
 		}
 		
@@ -205,14 +214,23 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureFullname ( $Event ) {
+	public function ensureFullname ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave','postSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
 		$save = false;
 		
+		# Fetch
+		$User = $Event->getInvoker();
+		
 		# Fullname
-		$fullname = implode(' ', array($this->title, $this->firstname, $this->lastname));
-		if ( $this->_get('fullname') !== $fullname ) {
-			$this->_set('fullname', $fullname, false); // false at end to prevent comparison
+		$fullname = implode(' ', array($User->title, $User->firstname, $User->lastname));
+		if ( $User->get('fullname') !== $fullname ) {
+			$User->set('fullname', $fullname, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -225,13 +243,22 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureCode ( $Event ) {
+	public function ensureCode ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
 		$save = false;
 		
+		# Fetch
+		$User = $Event->getInvoker();
+		
 		# Fullname
-		if ( !$this->_get('code') ) {
-			$this->_set('code', $this->username, false); // false at end to prevent comparison
+		if ( !$User->get('code') ) {
+			$User->set('code', $User->username, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -244,13 +271,22 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureDisplayname ( $Event ) {
+	public function ensureDisplayname ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
 		$save = false;
 		
+		# Fetch
+		$User = $Event->getInvoker();
+		
 		# Fullname
-		if ( !$this->_get('displayname') ) {
-			$this->_set('displayname', $this->username, false); // false at end to prevent comparison
+		if ( !$User->get('displayname') ) {
+			$User->set('displayname', $User->username, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -263,13 +299,22 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureUsername ( $Event ) {
+	public function ensureUsername ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
 		# Prepare
 		$save = false;
 		
+		# Fetch
+		$User = $Event->getInvoker();
+		
 		# Fullname
-		if ( !$this->_get('username') ) {
-			$this->_set('username', $this->email, false); // false at end to prevent comparison
+		if ( !$User->get('username') ) {
+			$User->set('username', $User->email, false); // false at end to prevent comparison
 			$save = true;
 		}
 		
@@ -282,97 +327,43 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
-	public function ensureSubscriptionTags ( $Event ) {
-		# Prepare
-		$Invoker = $Event->getInvoker();
-		$modified = $Invoker->getModified();
-		$modifiedLast = $Invoker->getLastModified();
-		$save = false;
-		$tagField = 'subscriptions';
-		$tagRelation = 'SubscriptionTags';
-		$tagRelationNames = $tagRelation.'Names';
-		
-		# Fetch
-		$tagsSystemOrig = $Invoker->$tagRelationNames;
-		$tagsUserOrig = $Invoker->_get($tagField);
-		$tagsSystem = prepare_csv_str($tagsSystemOrig);
-		$tagsUser = prepare_csv_str($tagsUserOrig);
-		$tagsUserNewer = array_key_exists($tagField, $modified);
-		$tagsSystemNewer = !array_key_exists($tagField, $modified) && !array_key_exists($tagField, $modifiedLast);
-		$tagsDiffer = $tagsUser != $tagsSystem;
-		
-		# TagField > TagField
-		if ( ($tagsDiffer || $tagsUserOrig != $tagsUser) && $tagsUserNewer ) {
-			# TagField is newer than TagRelation
-			//var_dump('TagField > TagField');
-			
-			# Save TagField
-			$Invoker->_set($tagField, $tagsUser, false); // false at end to prevent comparison
-			
-			# Save
-			$save = true;
+	public function ensureSubscriptionTags ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
 		}
 		
-		# TagField > TagRelation
-		if ( $tagsDiffer && !$tagsSystemNewer ) {
-			# TagField is newer than TagRelation
-			//var_dump('TagField > TagRelation');
-			
-			# Check whether we can save
-			if ( $Invoker->id ) {
-				# Save TagRelation
-				$Invoker->$tagRelation = $tagsUser;
-				
-				# Save
-				$save = true;
-			}
-		}
-		
-		# TagRelation > $TagField
-		if ( $tagsDiffer && $tagsSystemNewer ) {
-			# TagRelation is newer than TagField
-			//var_dump('TagRelation > TagField');
-			
-			# Save TagField
-			$Invoker->_set($tagField, $tagsSystem, false); // false at end to prevent comparison
-			
-			# Save
-			$save = true;
-		}
-		
-		# Return
-		return $save;
+		# Handle
+		return Bal_Doctrine_Core::ensureTags($Event,'SubscriptionTags','subscriptions');
 	}
 	
 	/**
-	 * Ensure Level
+	 * Ensure Messages
 	 * @param Doctrine_Event $Event
+	 * @param string $Event_type
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensureLevel ( $Event, $Event_type ) {
-		# Prepare
-		$User = $Event->getInvoker();
-		$modified = $User->getModified();
-		$save = false;
-		
-		# Level
-		if ( $Event_type === 'preSave' && empty($modified['level']) ) {
-			# Update the User's level with the latest highest role level
-			$level_highest = 0;
-			$User_Roles = $User->Roles;
-			foreach ( $User_Roles as $User_Role ) {
-				$level = $User_Role->level;
-				if ( $level && $level > $level_highest ) {
-					$level_highest = $level;
-				}
-			}
-			if ( $User->level !== $level_highest ) {
-				$User->_set('level', $level_highest, false); // false at end to prevent comparison
-				$save = true;
-			}
+	public function ensureMessages ( $Event, $Event_type ) {
+		# Check
+		if ( !in_array($Event_type,array('postInsert')) ) {
+			# Not designed for these events
+			return null;
 		}
 		
-		# Return
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$User = $Event->getInvoker();
+		
+		# Create Welcome Message
+		$Message = new Message();
+		$Message->For = $User;
+		$Message->useTemplate('user-insert');
+		$Message->save();
+		
+		# Return save
 		return $save;
 	}
 	
@@ -381,23 +372,16 @@ class Bal_Model_User extends Base_BalUser {
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
-	public function ensure ( $Event, $Event_type ) {
-		# Prepare
-		$Invoker = $Event->getInvoker();
-		
-		# Handle
-		$ensure = array(
-			$Invoker->ensureCode($Event,$Event_type),
-			$Invoker->ensureUid($Event,$Event_type),
-			$Invoker->ensureFullname($Event,$Event_type),
-			$Invoker->ensureUsername($Event,$Event_type),
-			$Invoker->ensureDisplayname($Event,$Event_type),
-			$Invoker->ensureSubscriptionTags($Event,$Event_type),
-			$Invoker->ensureLevel($Event,$Event_type)
-		);
-		
-		# Return save
-		return in_array(true,$ensure);
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureCode',
+			'ensureUid',
+			'ensureFullname',
+			'ensureUsername',
+			'ensureDisplayname',
+			'ensureSubscriptionTags',
+			'ensureMessages'
+		));
 	}
 	
 	/**
@@ -407,12 +391,11 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function preSave ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'preSave') ) {
-			// will save naturally
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
 		}
 		
 		# Done
@@ -426,12 +409,12 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function postSave ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
+		$Invoker = $Event->getInvoker();
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event,'postSave') ) {
-			$User->save();
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			$Invoker->save();
 		}
 		
 		# Done
@@ -445,14 +428,12 @@ class Bal_Model_User extends Base_BalUser {
 	 */
 	public function postInsert ( $Event ) {
 		# Prepare
-		$User = $Event->getInvoker();
 		$result = true;
 		
-		# Create Welcome Message
-		$Message = new Message();
-		$Message->For = $User;
-		$Message->useTemplate('user-insert');
-		$Message->save();
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
