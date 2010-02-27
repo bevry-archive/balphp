@@ -18,8 +18,8 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 
-require_once (dirname(__FILE__) . '/_general.funcs.php');
-require_once (dirname(__FILE__) . '/_strings.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_strings.funcs.php');
 
 if ( function_compare('get_user_variable', 4, true, __FILE__, __LINE__) ) {
 

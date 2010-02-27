@@ -27,8 +27,7 @@ class Bal_Framework {
 		} elseif ( defined('BALPHP_PATH') && file_exists(BALPHP_PATH.DIRECTORY_SEPARATOR.$file) ) {
 			require(BALPHP_PATH.DIRECTORY_SEPARATOR.$file);
 		} else {
-			var_dump(get_include_path());
-			throw new Zend_Exception ('Could not find balPHP');
+			throw new Zend_Exception ('Could not find balPHP: '.get_include_path());
 		}
 	}
 	

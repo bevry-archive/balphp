@@ -18,19 +18,9 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 
-require_once (dirname(__FILE__) . '/_general.funcs.php');
-require_once (dirname(__FILE__) . '/_arrays.funcs.php');
-require_once (dirname(__FILE__) . '/_strings.funcs.php');
-
-if ( !function_exists('__') && function_compare('__', 1, true, __FILE__, __LINE__) ) {
-	/**
-	 * Translate some text with some params using a simple vsprintf
-	 * @version 1
-	 */
-	function __ ( $text, $params = NULL ) {
-		return vsprintf($text, $params);
-	}
-}
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_arrays.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_strings.funcs.php');
 
 if ( function_compare('populate', 1, true, __FILE__, __LINE__) ) {
 	/**

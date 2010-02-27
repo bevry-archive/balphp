@@ -237,7 +237,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 */
 	protected function _initIndex ( ) {
 		# Prepare
-		$this->bootstrap('app');
+		$this->bootstrap('autoload');
+		$this->bootstrap('config');
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
@@ -303,7 +304,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('autoload');
 		$this->bootstrap('config');
 		$this->bootstrap('routes');
-		$this->bootstrap('doctrine');
 		$this->bootstrap('balphp');
 		$this->bootstrap('mail'); // we require mailing in case something goes wrong
 		$this->bootstrap('log'); // we require logging in various areas
@@ -329,7 +329,34 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Done
 		return true;
 	}
-
+	
+	/**
+	 * Initialise our Data.
+	 * Options: +VALIDATE_ALL
+	 * @return
+	 */
+	protected function _initData ( ) {
+		# Prepare
+		$this->bootstrap('autoload');
+		$this->bootstrap('config');
+		
+		# Config
+		$applicationConfig = Zend_Registry::get('applicationConfig');
+		$compile_use = $applicationConfig['data']['compile']['use'];
+		$compile_path = $applicationConfig['data']['compile']['path'];
+		
+		# Autoload
+		if ( $compile_use && file_exists($compile_path) ) {
+			require_once($compile_path);
+		}
+		
+		# Doctrine
+		$this->bootstrap('doctrine');
+		
+		# Done
+		return true;
+	}
+	
 	/**
 	 * Initialise our Doctrine ORM.
 	 * Options: +VALIDATE_ALL
@@ -339,19 +366,24 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('autoload');
 		$this->bootstrap('config');
+		$Autoloader = Zend_Loader_Autoloader::getInstance();
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		$extensions_path = $applicationConfig['data']['extensions_path'];
 		$models_path = $applicationConfig['data']['models_path'];
 		
+		# Load
+		if ( !class_exists('Doctrine') ) {
+			require_once(DOCTRINE_PATH . DIRECTORY_SEPARATOR . 'Doctrine.php');
+			$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
+			require_once(implode(DIRECTORY_SEPARATOR, array(DOCTRINE_PATH, 'Doctrine', 'Parser', 'sfYaml', 'sfYaml.php')));
+			//$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'sfYaml');
+		}
+		
 		# Autoload
-		require_once (DOCTRINE_PATH . '/Doctrine.php');
-		$Autoloader = Zend_Loader_Autoloader::getInstance();
-		$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
 		$Autoloader->pushAutoloader(array('Doctrine', 'modelsAutoload'));
 		$Autoloader->pushAutoloader(array('Doctrine', 'extensionsAutoload'));
-		$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'sfYaml');
 		
 		# Apply Paths
 		Doctrine_Core::setPath(DOCTRINE_PATH);

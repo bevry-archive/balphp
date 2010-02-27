@@ -18,7 +18,7 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 
-require_once (dirname(__FILE__) . '/_general.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
 
 
 if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__) ) {

@@ -18,8 +18,8 @@
  * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
  */
 
-require_once (dirname(__FILE__) . '/_general.funcs.php');
-require_once (dirname(__FILE__) . '/_scan_dir.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_scan_dir.funcs.php');
 
 if ( !function_exists('file_put_contents') && function_compare('file_put_contents', 1, true, __FILE__, __LINE__) ) {
 	define('FILE_APPEND', 0);

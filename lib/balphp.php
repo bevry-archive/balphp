@@ -1,1 +1,1 @@
-<?php require(dirname(__FILE__).'/_import.inc.php'); ?>
+<?php require(dirname(__FILE__).DIRECTORY_SEPARATOR.'_import.inc.php'); ?>

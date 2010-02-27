@@ -73,9 +73,6 @@ class Bal_App {
 		$Application->bootstrap('locale');
 		$Application->bootstrap('presentation'); // required for messages
 		
-		# Custom Overwrites
-		require_once ('Doctrine/Task/DumpData.php');
-		
 		# Chain
 		return $this;
 	}
@@ -147,7 +144,7 @@ class Bal_App {
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
-			case 'reload':
+			case 'refresh':
 				$ensure = array('createindex', 'usedump', 'makedump', 'regenschema', 'reload', 'optimiseindex', 'permissions', 'rescure');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: reload ['.implode(array_keys($args),',').']'."\n";
@@ -157,12 +154,6 @@ class Bal_App {
 				$ensure = array('optimiseindex');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: update ['.implode(array_keys($args),',').']'."\n";
-				break;
-			
-			case 'debug':
-				$ensure = array('debug');
-				array_keys_ensure($args, $ensure, true);
-				echo 'Setup: mode: debug ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
 			case 'cancel':
@@ -197,7 +188,9 @@ class Bal_App {
 			# Run a Bunch of Command Line Stuff
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
-				"mkdir -p $cwd/application/models/Base $cwd/application/data/dump",
+				"mkdir -p ".
+					"$cwd/application/models/Base $cwd/application/data/dump ".
+					"$cwd/scripts/paypal/logs ",
 				// Standard Files
 				"sudo chmod -R 755 ".
 					"$cwd ",
@@ -206,7 +199,8 @@ class Bal_App {
 					"$cwd/application/data/dump $cwd/application/data/schema ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
-					"$cwd/scripts/paypal/logs ",
+					"$cwd/scripts/paypal/logs ".
+					"$cwd/application/config/application.ini ",
 				// Executable Files
 				"sudo chmod +x ".
 					"$cwd ".
@@ -214,7 +208,7 @@ class Bal_App {
 					"$cwd/application/models/*.php ".
 					"$cwd/application/models/Base/*.php ".
 					"$cwd/public/media/*.php ".
-					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine",
+					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine ",
 			);
 			$result = systems($commands);
 		}
@@ -234,11 +228,11 @@ class Bal_App {
 			}
 	
 			# Scan directories
-			$scan = scan_dir($images_path,null,null,$images_path.'/')+scan_dir($upload_path,null,null,$upload_path.'/');
+			$scan = scan_dir($images_path)+scan_dir($upload_path);
 	
 			# Wipe files
-			foreach ( $scan as $file ) {
-				echo 'Media: Deleted the File ['.$file.']'."\n";
+			foreach ( $scan as $filepath => $filename ) {
+				echo 'Media: Deleted the File ['.$filepath.']'."\n";
 				unlink($file);
 			}
 		}
@@ -262,6 +256,7 @@ class Bal_App {
 		
 		
 		# Doctrine
+		$data_compile_generate = delve($applicationConfig,'data.compile.generate',false);
 		$data_fixtures_path = delve($applicationConfig,'data.fixtures_path');
 		$data_dump_path = delve($applicationConfig,'data.dump_path');
 		$data_path_to_use = $data_fixtures_path;
@@ -270,21 +265,29 @@ class Bal_App {
 		$data_yaml_schema_includes = delve($applicationConfig,'data.yaml_schema_includes');
 		$data_models_path = delve($applicationConfig,'data.models_path');
 		
+		# Doctrine: compile
+		if ( delve($args,'compile') && !empty($data_compile_generate) ) {
+			$data_compile_drivers = delve($applicationConfig,'data.compile.drivers',array());
+			$data_compile_path = delve($applicationConfig,'data.compile.path');
+			echo '- [compile] -'."\n";
+			echo 'Doctrine: Compiling Doctrine to ['.$data_compile_path.'] with drivers ['.implode(',',$data_compile_drivers).']'."\n";
+			Doctrine::compile($data_compile_path, $data_compile_drivers);
+		}
+		
 		# Doctrine: cleanmodels
 		if ( delve($args,'cleanmodels') ) {
 			echo '- [cleanmodels] -'."\n";
 			echo 'Doctrine: Cleaning models from Base directory'."\n";
 			
 			# Scan directory
-			$scan = scan_dir($data_models_path.'/Base',null,null,$data_models_path.'/Base/');
+			$scan = scan_dir($data_models_path.'/Base');
 	
 			# Wipe files
-			foreach ( $scan as $file ) {
-				echo 'Doctrine: Deleted the Base Model ['.$file.']'."\n";
+			foreach ( $scan as $filepath => $filename ) {
+				echo 'Doctrine: Deleted the Base Model ['.$filepath.']'."\n";
 				unlink($file);
 			}
 		}
-		
 		
 		# Doctrine: usedump
 		if ( delve($args,'usedump') ) {
@@ -301,6 +304,8 @@ class Bal_App {
 			Doctrine::loadModels(
 				$data_models_path
 			);
+			# Overrides
+			require_once ('Doctrine/Task/DumpData.php');
 			# Perform the Dump
 			echo 'Doctrine: Performing the Dump ['.$data_dump_path.']'."\n";
 			Doctrine::dumpData(
@@ -330,11 +335,11 @@ class Bal_App {
 			Doctrine::dropDatabases();
 			Doctrine::createDatabases();
 			# Check Generate Models
-			if ( delve($applicationConfig,'data.generate_models',false) ) {
+			if ( delve($applicationConfig,'data.models.generate',false) ) {
 				echo 'Doctrine: Generating Models...'."\n";
 				# Importer
 				$Import = new Doctrine_Import_Schema();
-				$Import->setOptions(delve($applicationConfig,'data.generate_models_options'));
+				$Import->setOptions(delve($applicationConfig,'data.models.options'));
 				$Import->importSchema(
 					$data_yaml_schema_path,
 					'yml',

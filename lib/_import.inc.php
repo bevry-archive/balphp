@@ -20,8 +20,8 @@
 // ------------------------
 // Load resources
 
-$dir = dirname(__FILE__).'/';
-require_once($dir.'core/functions/_scan_dir.funcs.php');
+$dir = dirname(__FILE__).DIRECTORY_SEPARATOR;
+require_once($dir.'core'.DIRECTORY_SEPARATOR.'functions'.DIRECTORY_SEPARATOR.'_scan_dir.funcs.php');
 
 // ------------------------
 // Load the sub packages
@@ -44,9 +44,12 @@ $balphp__sub_packages__loaded = array_merge($balphp__sub_packages, $balphp__sub_
 // loaded is set here, to stop overflow
 
 // Load sub packages
-foreach ( $balphp__sub_packages as $sub_package )
-{	// Load the sub package
-	scan_dir( $dir.$sub_package.'/', 'inc_php', 'inc_php' );
+foreach ( $balphp__sub_packages as $sub_package ) {
+	// Load the sub package
+	scan_dir( $dir.$sub_package.DIRECTORY_SEPARATOR, array(
+		'pattern' => 'inc_php',
+		'action' => 'inc_php'
+	));
 }
 
 /*
