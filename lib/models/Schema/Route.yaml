@@ -2,7 +2,7 @@
 # ==============================================
 # BAL ROUTE
 
-Balcms_Route:
+Bal_Route:
     actAs:
         SoftDelete:
         Searchable:
