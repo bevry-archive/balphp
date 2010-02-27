@@ -372,18 +372,29 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		$extensions_path = $applicationConfig['data']['extensions_path'];
 		$models_path = $applicationConfig['data']['models_path'];
+		$autoloader = $applicationConfig['data']['autoloader'];
+		$baseClassPrefix = $applicationConfig['data']['models']['options']['baseClassPrefix'];
+		$compile_use = $applicationConfig['data']['compile']['use'];
 		
 		# Load
-		if ( !class_exists('Doctrine') ) {
+		if ( !$compile_use ) {
 			require_once(DOCTRINE_PATH . DIRECTORY_SEPARATOR . 'Doctrine.php');
-			$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
 			require_once(implode(DIRECTORY_SEPARATOR, array(DOCTRINE_PATH, 'Doctrine', 'Parser', 'sfYaml', 'sfYaml.php')));
+			$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
 			//$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'sfYaml');
 		}
 		
-		# Autoload
+		# Autoload Models
 		$Autoloader->pushAutoloader(array('Doctrine', 'modelsAutoload'));
+		$Autoloader->registerNamespace('Base_');
+		
+		# Autoload Extensions
 		$Autoloader->pushAutoloader(array('Doctrine', 'extensionsAutoload'));
+		
+		# Override Generator - Fixes Pear Style Record Generators
+		if ( !$compile_use ) {
+			require_once(implode(DIRECTORY_SEPARATOR, array(BALPHP_PATH, 'Doctrine', 'Record', 'Generator.php')));
+		}
 		
 		# Apply Paths
 		Doctrine_Core::setPath(DOCTRINE_PATH);
@@ -394,9 +405,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$Manager = Doctrine_Manager::getInstance();
 		
 		# Apply Config
-		$Manager->setAttribute(Doctrine::ATTR_PORTABILITY, Doctrine::PORTABILITY_EMPTY_TO_NULL | Doctrine::PORTABILITY_RTRIM);
-		$Manager->setAttribute(Doctrine::ATTR_MODEL_LOADING, Doctrine::MODEL_LOADING_CONSERVATIVE);
-		$Manager->setAttribute(Doctrine::ATTR_VALIDATE, Doctrine::VALIDATE_ALL);
+		$Manager->setAttribute(Doctrine_Core::ATTR_PORTABILITY, Doctrine_Core::PORTABILITY_EMPTY_TO_NULL | Doctrine_Core::PORTABILITY_RTRIM);
+		$Manager->setAttribute(Doctrine_Core::ATTR_MODEL_LOADING, Doctrine_Core::MODEL_LOADING_CONSERVATIVE);
+		$Manager->setAttribute(Doctrine_Core::ATTR_VALIDATE, Doctrine_Core::VALIDATE_ALL);
 		$Manager->setAttribute(Doctrine_Core::ATTR_USE_DQL_CALLBACKS, true);
 		
 		# Apply Extensions
@@ -405,8 +416,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Cache
 		//$cacheConn = Doctrine_Manager::connection(new PDO('sqlite::memory:'));
 		//$cacheDriver = new Doctrine_Cache_Db(array('connection' => $cacheConn,'tableName' => 'cache'));
-		//$manager->setAttribute(Doctrine::ATTR_QUERY_CACHE, $cacheDriver);
-		//$manager->setAttribute(Doctrine::ATTR_RESULT_CACHE, $cacheDriver);
+		//$manager->setAttribute(Doctrine_Core::ATTR_QUERY_CACHE, $cacheDriver);
+		//$manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE, $cacheDriver);
 		
 
 		# Prepare Connection
@@ -452,10 +463,10 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$models_path = $applicationConfig['data']['models_path'];
 		
 		# Apply Listener To Tables - Ensure it will run
-		Doctrine::loadModels($models_path);
-		$Models = Doctrine::getLoadedModelFiles();
+		Doctrine_Core::loadModels($models_path);
+		$Models = Doctrine_Core::getLoadedModelFiles();
 		foreach ( $Models as $tableName => $modelPath ) {
-			Doctrine::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+			Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		}
 		//$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		

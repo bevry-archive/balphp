@@ -285,7 +285,7 @@ class Bal_App {
 			# Wipe files
 			foreach ( $scan as $filepath => $filename ) {
 				echo 'Doctrine: Deleted the Base Model ['.$filepath.']'."\n";
-				unlink($file);
+				unlink($filepath);
 			}
 		}
 		
