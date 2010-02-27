@@ -463,11 +463,18 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$models_path = $applicationConfig['data']['models_path'];
 		
 		# Apply Listener To Tables - Ensure it will run
-		Doctrine_Core::loadModels($models_path);
-		$Models = Doctrine_Core::getLoadedModelFiles();
-		foreach ( $Models as $tableName => $modelPath ) {
-			Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		$base_path = MODELS_PATH.DIRECTORY_SEPARATOR.'Base';
+		$models = scan_dir($base_path, array('return_dirs'=>false));
+		foreach ( $models as $model_path => $model_filename ) {
+			$class_name =
+				str_replace(DIRECTORY_SEPARATOR,'_',substr(substr($model_path,strlen($base_path)+1),0,-4));
+			Doctrine_Core::getTable($class_name)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		}
+		//Doctrine_Core::loadModels($models_path);
+		//$Models = Doctrine_Core::getLoadedModelFiles();
+		//foreach ( $Models as $tableName => $modelPath ) {
+		//	Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		//}
 		//$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		
 		# Done
