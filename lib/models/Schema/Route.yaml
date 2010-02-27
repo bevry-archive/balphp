@@ -1,0 +1,24 @@
+
+# ==============================================
+# BAL ROUTE
+
+Balcms_Route:
+    actAs:
+        SoftDelete:
+        Searchable:
+            fields: [path]
+    columns:
+        id:
+            primary: true
+            type: integer(2)
+            unsigned: true
+            autoincrement: true
+        path:
+            type: string(150)
+            notblank: true
+            unique: true
+        type:
+            type: string(15)
+            notblank: true
+        data:
+            type: array
