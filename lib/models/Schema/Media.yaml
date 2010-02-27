@@ -2,7 +2,7 @@
 # ==============================================
 # BAL MEDIA
 
-BalMedia:
+Bal_Media:
     actAs:
         Sluggable:
             name: code

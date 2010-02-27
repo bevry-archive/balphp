@@ -10,7 +10,7 @@
  * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 6820 2009-11-30 17:27:49Z jwage $
  */
-class Bal_Model_Message extends Base_BalMessage
+class Bal_Message extends Base_Bal_Message
 {
 	
 	/**

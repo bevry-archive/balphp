@@ -10,7 +10,7 @@
  * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 6365 2009-09-15 18:22:38Z jwage $
  */
-class Bal_Model_Media extends Base_BalMedia {
+class Bal_Media extends Base_Bal_Media {
 
 	/**
 	 * Apply modifiers

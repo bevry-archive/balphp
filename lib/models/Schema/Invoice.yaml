@@ -2,7 +2,7 @@
 # ==============================================
 # BAL INVOICE
 
-BalInvoiceItem:
+Bal_InvoiceItem:
     actAs:
         SoftDelete:
     columns:
@@ -40,7 +40,7 @@ BalInvoiceItem:
             foreignType: many
             onDelete: "CASCADE"
 
-BalInvoice:
+Bal_Invoice:
     actAs:
         SoftDelete:
         Timestampable:

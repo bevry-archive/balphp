@@ -10,7 +10,7 @@
  * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 6508 2009-10-14 06:28:49Z jwage $
  */
-class Bal_Model_User extends Base_BalUser {
+class Bal_User extends Base_Bal_User {
 
 	/**
 	 * Apply accessors and modifiers

@@ -2,7 +2,7 @@
 # ==============================================
 # BAL MESSAGE
 
-BalMessage:
+Bal_Message:
     columns:
         id:
             type: integer(3)
