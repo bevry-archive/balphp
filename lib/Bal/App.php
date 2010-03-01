@@ -233,7 +233,7 @@ class Bal_App {
 			# Wipe files
 			foreach ( $scan as $filepath => $filename ) {
 				echo 'Media: Deleted the File ['.$filepath.']'."\n";
-				unlink($file);
+				unlink($filepath);
 			}
 		}
 		
