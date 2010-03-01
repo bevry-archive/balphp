@@ -141,12 +141,12 @@ if ( function_compare('from_string', 2.4, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('real_value', 2.4, true, __FILE__, __LINE__) ) {
+if ( function_compare('real_value', 2.6, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Convert a value from it's text value to it's real value
 	 *
-	 * @version 2.5, January 05, 2010
+	 * @version 2.6, March 1, 2010
 	 *
 	 * @param	mixed		$value
 	 * @param	boolean		$bool		convert from boolean?
@@ -158,18 +158,18 @@ if ( function_compare('real_value', 2.4, true, __FILE__, __LINE__) ) {
 	 * @return	mixed
 	 */
 	function real_value ( $value, $bool = true, $null = true, $numeric = true, $question = true, $array = true ) { // Turns a value into it's actual value, regardless of strings
+		// v2.6, March 1, 2010 - Numbers starting with 0 are now kept as strings to keep the 0
 		// v2.5, January 05, 2010 - Added array option
 		// v2.4 - 02/10/2007
 		// v2.3 - 01/12/2006
 		
-
 		if ( $bool && ($value === true || $value === 'TRUE' || $value === 'true' || ($question && ($value === 'on' || $value === 'yes'))) )
 			return true;
 		elseif ( $bool && ($value === false || $value === 'FALSE' || $value === 'false' || ($question && ($value === 'off' || $value === 'no'))) )
 			return false;
 		elseif ( $null && ($value === NULL || $value === 'NULL' || $value === 'null' || $value === 'UNDEFINED' || $value === 'undefined') )
 			return NULL;
-		elseif ( $numeric && is_numeric($value) ) {
+		elseif ( $numeric && is_numeric($value) && substr($value,0,1) !== '0' ) {
 			$int = intval($value);
 			$float = floatval($value);
 			if ( $int == $float ) {

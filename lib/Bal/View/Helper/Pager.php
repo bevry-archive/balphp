@@ -36,7 +36,7 @@ require_once 'Zend/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2009 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Pager extends Zend_View_Helper_Abstract {
+class Zend_View_Helper_Pager extends Bal_View_Helper_Abstract {
 	
 	protected $_options = array();
 	
@@ -83,7 +83,7 @@ class Zend_View_Helper_Pager extends Zend_View_Helper_Abstract {
 
 	public function setOptions ( array $options ) {
 		# Prepare
-		$keys = array('first','last','current','pages','items','chunk','start','finish','total');
+		$keys = array('first','last','current','pages','items','chunk','start','finish','total','count');
 		array_keys_keep_ensure($options, $keys, null);
 		
 		# Apply
@@ -134,10 +134,20 @@ class Zend_View_Helper_Pager extends Zend_View_Helper_Abstract {
 		extract($options);
 		$result = '';
 		
+		if ( $last == 1 ) {
+			$total = $count;
+			$text = $this->view->locale()->translate('pager-totals-single', compact('start','total'));
+		} elseif ( $current == $last ) {
+			$finish = $total = $start+$count;
+			$text = $this->view->locale()->translate('pager-totals-actual', compact('start','finish','total'));
+		} else {
+			$text = $this->view->locale()->translate('pager-totals-approx', compact('start','finish','total'));
+		}
+		
 		# Render
 		$result .=
 			($wrap?'<div class="totals">':'')
-				.$this->view->locale()->translate('pager-totals', compact('start','finish','total'))
+				.$text
 			.($wrap?'</div>':'');
 		
 		# Done

@@ -84,6 +84,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		array_keys_ensure($attribs, array('table','field','class','notnull','notblank','auto','relationStatus'));
 		if ( !$table ) $table = $attribs['table'];
 		if ( !$field ) $field = $attribs['field'];
+		$type = delve($attribs,'type');
 		
 		# Fetch Table Information
 		$Table = Bal_Form_Doctrine::getTable($table);
@@ -92,32 +93,14 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			# Relation
 			$Relation = $Table->getRelation($field);
 			$RelationTable = $Relation->getTable();
+			$type = 'relation';
 		}
 		elseif ( $Table->hasField($field) ) {
 			# Field
 			$properties = $Table->getDefinitionOf($field);
 			array_keys_ensure($properties, array('length'), null);
-		}
-		
-		# Extract Attributes
-		$notblank	= delve($attribs,	'notblank',	delve($properties,'notblank'));
-		$notnull 	= delve($attribs,	'notnull',	delve($properties,'notnull',$notblank));
-		$auto 		= delve($attribs,	'auto',		delve($properties,'extra.auto'));
-		$length 	= delve($attribs,	'length',	delve($properties,'length'));
-		$relationStatus = delve($attribs,'relationStatus');
-		array_keys_unset($attribs, array('notblank','notnull','auto','length','relationStatus'));
-		
-		# Determine Type
-		if ( delve($attribs,'type') ) {
-			# Overide type
-			$type = delve($attribs,'type');
-		}
-		elseif ( $Table->hasRelation($field) ) {
-			# Relation
-			$type = 'relation';
-		}
-		elseif ( $Table->hasField($field) ) {
-			# Column
+			
+			# Type
 			$type = $Table->getTypeOf($field);
 		
 			# Custom Types
@@ -137,9 +120,14 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 					break;
 			}
 		}
-		else {
-			# Unkown
-		}
+		
+		# Extract Attributes
+		$notblank	= delve($attribs,	'notblank',	delve($properties,'notblank'));
+		$notnull 	= delve($attribs,	'notnull',	delve($properties,'notnull',$notblank));
+		$auto 		= delve($attribs,	'auto',		delve($properties,'extra.auto'));
+		$length 	= delve($attribs,	'length',	delve($properties,'length'));
+		$relationStatus = delve($attribs,'relationStatus');
+		array_keys_unset($attribs, array('notblank','notnull','auto','length','relationStatus'));
 		
 		# Formify
 		$tableLower = strtolower($table);
@@ -168,7 +156,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				# Options: Empty Value
 				if ( !$notnull ) {
-					$options['null'] = $Locale->translate('Empty');
+					$options['null'] = $Locale->translate('select-empty');
 				}
 				
 				# Options: Relations
@@ -207,7 +195,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				# Options: Empty Value
 				if ( !$notnull && empty($attribs['multiple']) ) {
-					$options['null'] = $Locale->translate('Empty');
+					$options['null'] = $Locale->translate('select-empty');
 				}
 				
 				# options: Enum Values
@@ -280,7 +268,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				break;
 				
 			default:
-				throw new Zend_Exception('error-unkown_input_type-'.$type);
+				throw new Zend_Exception('error-unkown_input_type['.$type.']['.$field.']');
 				break;
 		}
 		

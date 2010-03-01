@@ -765,6 +765,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			$Pager
 		);
 		$Items = $Pager->execute();
+		$Items_count = count($Items);
 		
 		# Get Pages
 		$Pages = $this->getPages($Pager, $PagerRange, $page_current);
@@ -777,8 +778,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# Totals
 		$total = $page_last*$page_items;
-		$start = ($page_current-1)*$page_items+1;
 		$finish = $page_last==$page_current ? $total : $page_current*$page_items;
+		$start = ($page_current-1)*$page_items+1;
 		
 		# Done
 		return array($Items, array(
@@ -787,6 +788,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			'current' => $page_current,
 			'pages' => $Pages,
 			'items' => $page_items,
+			'count' => $Items_count,
 			'chunk' => $pages_chunk,
 			'start' => $start,
 			'finish' => $finish,
