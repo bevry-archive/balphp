@@ -17,7 +17,7 @@ Bal_Message:
             extra:
                 auto: true
         title:
-            type: string(50)
+            type: string(255)
             notblank: true
         description:
             type: string

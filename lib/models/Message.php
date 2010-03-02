@@ -14,28 +14,68 @@ class Bal_Message extends Base_Bal_Message
 {
 	
 	/**
-	 * Shortcut Message Creation via Codes
-	 * @return string
+	 * Generate the Email's Content
+	 * @return
 	 */
-	public function useTemplate ( $template, array $data = array() ) {
+	protected function _generateEmailContent ( ) {
+		# Prepare
+		$Locale = Bal_App::getLocale();
+		$View = Bal_App::getView(true);
+		$Message = $this;
+
+		# Prepare Message
+		$params				= array();
+		$params['Message']	= is_array($Message) ? $Message : $Message->toArray(true);
+		
+		# Update Params
+		$this->_updateParams($params);
+		
+		# Render
+		$xhtml = 
+			$View->doctype().
+			'<html>'.
+			'<head>'.
+				$View->headTitle().
+				$View->headLink().
+				$View->headStyle().
+			'</head>'.
+			'<body class="email">'.
+				'<div class="email-wrapper">'.
+					'<div class="email-header">'.
+						$Locale->translate('message-header',$params).
+					'</div>'.
+					'<div class="email-body">'.
+						'<div class="email-from">'.
+							$Locale->translate('message-from',$params).
+						'</div>'.
+						'<div class="email-title">'.
+							$Locale->translate('message-title',$params).
+						'</div>'.
+						'<div class="email-description">'.
+							$Locale->translate('message-description',$params).
+						'</div>'.
+					'</div>'.
+					'<div class="email-footer">'.
+						$Locale->translate('message-footer',$params).
+					'</div>'.
+				'</div>'.
+			'</body>'.
+			'</html>';
+		
+		# Return xhtml
+		return $xhtml;
+	}
+	
+	/**
+	 * Update the translation params
+	 * @return
+	 */
+	protected function _updateParams ( array &$params ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
+		$View->url()->renege('route','app');
 		$Message = $this;
-		
-		# --------------------------
-		
-		# Prepare Message
-		$params	= is_array($data) ? $data : array();
-		$params['Message'] 	= $Message->toArray();
-		
-		# Handle Message
-		$function = '_template'.magic_function($template);
-		if ( method_exists($this, $function) ) {
-			$this->$function($params,$data);
-		}
-		
-		# --------------------------
 		
 		# Prepare Relations
 		$By		= delve($Message,'By');
@@ -59,6 +99,34 @@ class Bal_Message extends Base_Bal_Message
 		$params['By_url'] 		= $By_url;
 		$params['For_url'] 		= $For_url;
 		
+		# Chain
+		return $this;
+	}
+	
+	/**
+	 * Shortcut Message Creation via Codes
+	 * @return
+	 */
+	public function useTemplate ( $template, array $data = array() ) {
+		# Prepare
+		$Locale = Bal_App::getLocale();
+		$Message = $this;
+		
+		# --------------------------
+		
+		# Prepare Message
+		$params	= is_array($data) ? $data : array();
+		$params['Message'] 	= $Message->toArray();
+		
+		# Handle Message
+		$function = '_template'.magic_function($template);
+		if ( method_exists($this, $function) ) {
+			$this->$function($params,$data);
+		}
+		
+		# Update Params
+		$this->_updateParams($params);
+		
 		# --------------------------
 		
 		# Render
@@ -78,12 +146,13 @@ class Bal_Message extends Base_Bal_Message
 	
 	/**
 	 * Set Message Code: user-insert
-	 * @return string
+	 * @return
 	 */
 	protected function _templateUserInsert ( &$params, &$data ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
+		$View->url()->renege('route','app');
 		$Message = $this;
 		$For = delve($Message,'For');
 		
@@ -104,21 +173,17 @@ class Bal_Message extends Base_Bal_Message
 	
 	/**
 	 * Send the Message
-	 * @return string
+	 * @return
 	 */
 	public function send ( ) {
 		# Prepare
 		$Message = $this;
 		$For = delve($Message,'For');
-		$View = Bal_App::getView(true);
 		$mail = Bal_App::getConfig('mail');
-		
-		# Apply
-		$View->Message = $Message;
 		
 		# Prepare Mail
 		$mail['subject'] = $Message->title;
-		$mail['html'] = $View->render('email/message.phtml');
+		$mail['html'] = $this->_generateEmailContent();
 		$mail['text'] = strip_tags($mail['html']);
 		
 		# Create Mail
@@ -148,7 +213,6 @@ class Bal_Message extends Base_Bal_Message
 		# Chain
 		return $this;
 	}
-	
 	
 	/**
 	 * Ensure Message
