@@ -228,7 +228,7 @@ class Bal_App {
 			}
 	
 			# Scan directories
-			$scan = scan_dir($images_path)+scan_dir($upload_path);
+			$scan = scan_dir($images_path,array('return_dirs'=>false))+scan_dir($upload_path,array('return_dirs'=>false));
 	
 			# Wipe files
 			foreach ( $scan as $filepath => $filename ) {
@@ -264,6 +264,7 @@ class Bal_App {
 		$data_yaml_schema_file_path = delve($applicationConfig,'data.yaml_schema_file_path');
 		$data_yaml_schema_includes = delve($applicationConfig,'data.yaml_schema_includes');
 		$data_models_path = delve($applicationConfig,'data.models_path');
+		$data_models_generate = delve($applicationConfig,'data.models.generate',false);
 		
 		# Doctrine: compile
 		if ( delve($args,'compile') && !empty($data_compile_generate) ) {
@@ -277,15 +278,19 @@ class Bal_App {
 		# Doctrine: cleanmodels
 		if ( delve($args,'cleanmodels') ) {
 			echo '- [cleanmodels] -'."\n";
-			echo 'Doctrine: Cleaning models from Base directory'."\n";
+			if ( $data_models_generate ) {
+				echo 'Doctrine: Cleaning Models from Base directory'."\n";
 			
-			# Scan directory
-			$scan = scan_dir($data_models_path.'/Base');
+				# Scan directory
+				$scan = scan_dir($data_models_path.'/Base',array('return_dirs'=>false));
 	
-			# Wipe files
-			foreach ( $scan as $filepath => $filename ) {
-				echo 'Doctrine: Deleted the Base Model ['.$filepath.']'."\n";
-				unlink($filepath);
+				# Wipe files
+				foreach ( $scan as $filepath => $filename ) {
+					echo 'Doctrine: Deleted the Base Model ['.$filepath.']'."\n";
+					unlink($filepath);
+				}
+			} else {
+				echo 'Doctrine: Cleaning Models Skipped...'."\n";
 			}
 		}
 		
@@ -335,7 +340,7 @@ class Bal_App {
 			Doctrine::dropDatabases();
 			Doctrine::createDatabases();
 			# Check Generate Models
-			if ( delve($applicationConfig,'data.models.generate',false) ) {
+			if ( $data_models_generate ) {
 				echo 'Doctrine: Generating Models...'."\n";
 				# Importer
 				$Import = new Doctrine_Import_Schema();
