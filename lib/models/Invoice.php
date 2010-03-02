@@ -303,7 +303,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 */
 	public function ensureCache($Event,$Event_type){
 		# Check
-		if ( !in_array($Event_type,array('postInsert')) ) {
+		if ( !in_array($Event_type,array('preInsert')) ) {
 			# Not designed for these events
 			return null;
 		}
@@ -339,8 +339,52 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 */
 	public function ensure ( $Event, $Event_type ){
 		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
-			'ensureCache'
+			'ensureCache',
+			'ensureMessages'
 		));
+	}
+	
+	
+	/**
+	 * Ensure Messages
+	 * @param Doctrine_Event $Event
+	 * @return boolean	success
+	 * @todo on postDelete remove messages that haven't been sent
+	 */
+	public function ensureMessages($Event, $Event_type){
+		# Check
+		if ( !in_array($Event_type,array('postInsert')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$Invoice = $Event->getInvoker();
+		$Booking = $Invoice->Booking;
+	
+		# --------------------------
+		# Messages
+		
+		# Create Invoice Insert Messages
+		$Receivers = array(
+			delve($Invoice,'For'),
+			delve($Invoice,'By')
+		);
+		foreach ( $Receivers as $Receiver ) {
+			$Message = new Message();
+			$Message->For = $Receiver;
+			$Message->Booking = $Booking;
+			$Message->useTemplate('invoice-insert');
+			$Message->save();
+		}
+		
+		# --------------------------
+		
+		# Return save
+		return $save;
 	}
 	
 	/**
@@ -386,6 +430,25 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 * @return
 	 */
 	public function postInsert ( $Event ) {
+		# Prepare
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
+	
+	
+	/**
+	 * preInsert Event
+	 * @param Doctrine_Event $Event
+	 * @return
+	 */
+	public function preInsert ( $Event ) {
 		# Prepare
 		$result = true;
 		

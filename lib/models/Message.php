@@ -37,7 +37,7 @@ class Bal_Message extends Base_Bal_Message
 		$messageUrl = $rootUrl.$View->url()->message($Message)->toString();
 		$params['rootUrl'] = $rootUrl;
 		$params['baseUrl'] = $baseUrl;
-		$params['messageUrl'] = $messageUrl;
+		$params['Message_url'] = $messageUrl;
 		
 		# Handle
 		$function = '_template'.magic_function($template);
@@ -67,6 +67,7 @@ class Bal_Message extends Base_Bal_Message
 		$Locale = Bal_App::getLocale();
 		$View = Bal_App::getView(false);
 		$Message = $this;
+		$For = delve($Message,'For');
 		
 		# Prepare Urls
 		$rootUrl = $View->app()->getRootUrl();
@@ -74,12 +75,9 @@ class Bal_Message extends Base_Bal_Message
 		
 		# --------------------------
 		
-		# Prepare
-		$For = $this->For;
-		
 		# Prepare URL
 		$activateUrl = $rootUrl.$View->url()->userActivate($For)->toString();
-		$params['activateUrl'] = $activateUrl;
+		$params['User_url_activate'] = $activateUrl;
 
 		# --------------------------
 		
@@ -92,15 +90,16 @@ class Bal_Message extends Base_Bal_Message
 	 */
 	public function send ( ) {
 		# Prepare
-		$For = $this->For;
+		$Message = $this;
+		$For = delve($Message,'For');
 		$View = Bal_App::getView(true);
 		$mail = Bal_App::getConfig('mail');
 		
 		# Apply
-		$View->Message = $this;
+		$View->Message = $Message;
 		
 		# Prepare Mail
-		$mail['subject'] = $this->title;
+		$mail['subject'] = $Message->title;
 		$mail['html'] = $View->render('email/message.phtml');
 		$mail['text'] = strip_tags($mail['html']);
 		
@@ -112,16 +111,21 @@ class Bal_Message extends Base_Bal_Message
 		$Mail->setBodyHtml($mail['html']);
 		
 		# Add Receipient
-		$email = $For->email;
-		$fullname = $For->fullname;
+		if ( delve($For,'id') ) {
+			$email = $For->email;
+			$fullname = $For->fullname;
+		} else {
+			$email = $mail['from']['address'];
+			$fullname = $mail['from']['name'];
+		}
 		$Mail->addTo($email, $fullname);
 		
 		# Send Mail
 		$Mail->send();
 		
 		# Done
-		$this->sent_on = doctrine_timestamp();
-		$this->status = 'published';
+		$Message->sent_on = doctrine_timestamp();
+		$Message->status = 'published';
 		
 		# Chain
 		return $this;
@@ -160,9 +164,13 @@ class Bal_Message extends Base_Bal_Message
 				$Message->set('send_on', doctrine_timestamp(), false);
 				$save = true;
 			}
-		
+			
+			# Prepare
+			$For = delve($Message,'For');
+			$For_id = delve($For,'id');
+			
 			# Hash
-			$hash = md5($Message->send_on.$Message->title.$Message->description.$Message->For->id);
+			$hash = md5($Message->send_on.$Message->title.$Message->description.$For_id);
 			if ( $Message->hash != $hash ) {
 				$Message->set('hash', $hash, false);
 				$save = true;
