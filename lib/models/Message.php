@@ -23,9 +23,27 @@ class Bal_Message extends Base_Bal_Message
 		$View = Bal_App::getView(false);
 		$Message = $this;
 		
+		# --------------------------
+		
+		# Prepare Message
+		$params	= is_array($data) ? $data : array();
+		$params['Message'] 	= $Message->toArray();
+		
+		# Handle Message
+		$function = '_template'.magic_function($template);
+		if ( method_exists($this, $function) ) {
+			$this->$function($params,$data);
+		}
+		
+		# --------------------------
+		
 		# Prepare Relations
 		$By		= delve($Message,'By');
 		$For	= delve($Message,'For');
+		
+		# Apply Relations
+		$params['by'] 		= delve($By,'fullname','System');
+		$params['for'] 		= delve($For,'fullname','System');
 		
 		# Prepare Urls
 		$rootUrl		= $View->app()->getRootUrl();
@@ -34,12 +52,6 @@ class Bal_Message extends Base_Bal_Message
 		$By_url			= delve($By,'id') ? $rootUrl.$View->url()->user($By)->toString() : $rootUrl;
 		$For_url		= delve($For,'id') ? $rootUrl.$View->url()->user($For)->toString() : $rootUrl;
 		
-		# Prepare Params
-		$params				= is_array($data) ? $data : array();
-		$params['Message'] 	= $Message->toArray();
-		$params['by'] 		= delve($By,'fullname','System');
-		$params['for'] 		= delve($For,'fullname','System');
-		
 		# Apply URLs
 		$params['rootUrl'] 		= $rootUrl;
 		$params['baseUrl'] 		= $baseUrl;
@@ -47,15 +59,13 @@ class Bal_Message extends Base_Bal_Message
 		$params['By_url'] 		= $By_url;
 		$params['For_url'] 		= $For_url;
 		
-		# Handle
-		$function = '_template'.magic_function($template);
-		if ( method_exists($this, $function) ) {
-			$this->$function($params,$data);
-		}
+		# --------------------------
 		
 		# Render
 		$title = empty($this->title) ? $Locale->translate('message-'.$template.'-title', $params) : $Locale->translate_default('message-'.$template.'-title', $params, $this->title);
 		$description = empty($this->description) ? $Locale->translate('message-'.$template.'-description', $params) : $Locale->translate_default('message-'.$template.'-description', $params, $this->description);
+		
+		# --------------------------
 		
 		# Apply
 		$this->title = $title;
