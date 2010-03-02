@@ -23,21 +23,29 @@ class Bal_Message extends Base_Bal_Message
 		$View = Bal_App::getView(false);
 		$Message = $this;
 		
+		# Prepare Relations
+		$By		= delve($Message,'By');
+		$For	= delve($Message,'For');
+		
 		# Prepare Urls
-		$rootUrl = $View->app()->getRootUrl();
-		$baseUrl = $View->app()->getBaseUrl(true);
+		$rootUrl		= $View->app()->getRootUrl();
+		$baseUrl		= $View->app()->getBaseUrl(true);
+		$Message_url	= $rootUrl.$View->url()->message($Message)->toString();
+		$By_url			= delve($By,'id') ? $rootUrl.$View->url()->user($By)->toString() : $rootUrl;
+		$For_url		= delve($For,'id') ? $rootUrl.$View->url()->user($For)->toString() : $rootUrl;
 		
 		# Prepare Params
-		$params = is_array($data) ? $data : array();
-		$params['Message'] = $Message->toArray();
-		$params['by'] = delve($Message,'By.fullname','System');
-		$params['for'] = delve($Message,'For.fullname','System');
+		$params				= is_array($data) ? $data : array();
+		$params['Message'] 	= $Message->toArray();
+		$params['by'] 		= delve($By,'fullname','System');
+		$params['for'] 		= delve($For,'fullname','System');
 		
 		# Apply URLs
-		$messageUrl = $rootUrl.$View->url()->message($Message)->toString();
-		$params['rootUrl'] = $rootUrl;
-		$params['baseUrl'] = $baseUrl;
-		$params['Message_url'] = $messageUrl;
+		$params['rootUrl'] 		= $rootUrl;
+		$params['baseUrl'] 		= $baseUrl;
+		$params['Message_url'] 	= $Message_url;
+		$params['By_url'] 		= $By_url;
+		$params['For_url'] 		= $For_url;
 		
 		# Handle
 		$function = '_template'.magic_function($template);
