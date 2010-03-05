@@ -446,7 +446,7 @@ class Bal_User extends Base_Bal_User {
 	 * @param Bal_Model_User $User
 	 * @return Zend_Form
 	 */
-	public static function fetchForm ( Bal_Model_User $User ) {
+	public static function fetchForm ( Bal_User $User ) {
 		# Prepare
 		$Form = Bal_Form_Doctrine::createForm('User');
 		
