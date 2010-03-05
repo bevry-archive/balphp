@@ -3,6 +3,8 @@
 # BAL MESSAGE
 
 Bal_Message:
+    options:
+        orderBy: send_on DESC
     columns:
         id:
             type: integer(3)

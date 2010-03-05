@@ -16,8 +16,8 @@ Bal_InvoiceItem:
             notblank: true
         cost:
             type: decimal(8)
-            notblank: true
             scale: 2
+            notblank: true
             extra:
                 currency: true
         template:
@@ -61,20 +61,20 @@ Bal_Invoice:
                 auto: true
         cost:
             type: decimal(8)
-            notnull: true
             scale: 2
+            notnull: true
             extra:
                 currency: true
         subtotal:
             type: decimal(8)
-            notnull: true
             scale: 2
+            notnull: true
             extra:
                 currency: true
         tax:
             type: decimal(8)
-            notnull: true
             scale: 2
+            notnull: true
             extra:
                 currency: true
         config:
