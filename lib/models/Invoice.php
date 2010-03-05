@@ -303,7 +303,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 */
 	public function ensureCache($Event,$Event_type){
 		# Check
-		if ( !in_array($Event_type,array('preInsert')) ) {
+		if ( !in_array($Event_type,array('preInsert','postInsert')) ) {
 			# Not designed for these events
 			return null;
 		}
