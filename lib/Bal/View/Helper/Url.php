@@ -84,7 +84,9 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		
 		# Handle Request
 		if ( empty($urlOptions) && empty($name) ) {
-			$this->clear();
+			if ( !$this->isCleared() ) {
+				throw new Zend_Exception('Url View Helper: You have forgotten to clear the old url before creating a new.');
+			}
 			$result = $this;
 		}
 		else {
@@ -94,6 +96,10 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		# Return result
 		return $result;
     }
+
+	public function isCleared ( ) {
+		return !($this->_params || $this->_route || !$this->_reset || !$this->_encode || $this->_url);
+	}
 
 	public function clear ( ) {
 		$this->_params = array();

@@ -57,10 +57,25 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	# ========================
 	# NAVIGATION
 	
-	public function getNavigationMenu ( $code ) {
+	public function getNavigation ( $code ) {
+		# Prepare
 		$NavigationMenu = delve($this->view,'Navigation.'.$code);
 		if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
-		return $this->view->navigation()->menu()->setContainer($NavigationMenu);
+		
+		# Return
+		return $NavigationMenu;
+	}
+	
+	public function getNavigationMenu ( $code) {
+		# Prepare
+		$NavigationMenu = $this->getNavigation($code);
+		if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+		
+		# Render
+		$result = $this->view->navigation()->menu()->setContainer($NavigationMenu);
+		
+		# Return
+		return $result;
 	}
 	
 	

@@ -220,7 +220,10 @@ class Bal_Controller_Router_Route_Map extends Zend_Controller_Router_Route_Regex
 			$url_path = $data['path'];
 		} elseif ( array_key_exists('Map', $data) ) {
 			$Map = $data['Map'];
-			$url_path = is_array($Map) ? $Map[$pathColumn] : $Map->get($pathColumn);
+			$url_path = delve($Map,$pathColumn);
+			if ( !$url_path ) {
+				throw new Zend_Controller_Router_Exception('Cannot assemble. Map was empty.');
+			}
 		}
 		
 		# Check

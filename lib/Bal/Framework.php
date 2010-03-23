@@ -29,6 +29,9 @@ class Bal_Framework {
 		} else {
 			throw new Zend_Exception ('Could not find balPHP: '.get_include_path());
 		}
+		
+		# Load the overrides
+		require_once BALPHP_PATH.DIRECTORY_SEPARATOR.'Zend/View/Helper/Navigation/Menu.php';
 	}
 	
 }
