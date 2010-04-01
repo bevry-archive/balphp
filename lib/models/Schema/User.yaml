@@ -66,8 +66,6 @@ Bal_User:
         subscriptions:
             # CSV generated from SubscriptionTags. Used for searchable.
             type: string(255)
-            notnull: true
-            default: ""
             extra:
                 csv: true
         code:
