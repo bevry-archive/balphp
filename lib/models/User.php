@@ -329,7 +329,7 @@ class Bal_User extends Base_Bal_User {
 	 */
 	public function ensureSubscriptionTags ( $Event, $Event_type ) {
 		# Check
-		if ( !in_array($Event_type,array('preSave')) ) {
+		if ( !in_array($Event_type,array('preSave','postSave')) ) {
 			# Not designed for these events
 			return null;
 		}
