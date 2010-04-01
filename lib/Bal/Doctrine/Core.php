@@ -89,8 +89,7 @@ abstract class Bal_Doctrine_Core {
 		
 		# TagField > TagField
 		if ( ($tagsDiffer || $tagsUserOrig != $tagsUser) && $tagsUserNewer ) {
-			# TagField is newer than TagRelation
-			//var_dump('TagField > TagField');
+			# TagField is newer than TagField
 			
 			# Save TagField
 			$Invoker->set($tagField, $tagsUser, false); // false at end to prevent comparison
@@ -102,7 +101,6 @@ abstract class Bal_Doctrine_Core {
 		# TagField > TagRelation
 		if ( $tagsDiffer && !$tagsSystemNewer ) {
 			# TagField is newer than TagRelation
-			//var_dump('TagField > TagRelation');
 			
 			# Check whether we can save
 			if ( $Invoker->id ) {
@@ -117,7 +115,6 @@ abstract class Bal_Doctrine_Core {
 		# TagRelation > $TagField
 		if ( $tagsDiffer && $tagsSystemNewer ) {
 			# TagRelation is newer than TagField
-			//var_dump('TagRelation > TagField');
 			
 			# Save TagField
 			$Invoker->set($tagField, $tagsSystem, false); // false at end to prevent comparison
