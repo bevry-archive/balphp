@@ -137,27 +137,53 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $this->view->headMeta();
 	}
 	
-	public function headLink ( $offset = 100 ) {
+	public function headLink ( array $options = array() ) {
+		# Options
+		$default = array(
+			'offset'=>100,
+			'csscaffold'=>false,
+			'locale'=>true,
+			'browser'=>true,
+			'style'=>true,
+			'theme'=>true,
+			'favicon'=>true
+		);
+		$options = handle_options($default,$options,true);
+		extract($options);
+		
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
 		
 		# Locale
-		$locale = $this->getLocaleStylesheetUrl();
-		if ( $locale )	$this->view->headLink()->offsetSetStylesheet($offset+0, $locale);
+		if ( $locale ) {
+			$url = $this->getLocaleStylesheetUrl();
+			if ( $url )	$this->view->headLink()->offsetSetStylesheet($offset+0, $url);
+		}
 		
 		# Browser
-		$browser = $this->getBrowserStylesheetUrl();
-		if ( $browser )	$this->view->headLink()->offsetSetStylesheet($offset+1, $browser);
-		
+		if ( $browser ) {
+			$url = $this->getBrowserStylesheetUrl();
+			if ( $url )	$this->view->headLink()->offsetSetStylesheet($offset+1, $url);
+		}
+	
 		# Style
-		$style = $this->getStylesheetUrl('style.css', 'public');
-		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+2, $style);
-		$style = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css', 'theme');
-		if ( $style )	$this->view->headLink()->offsetSetStylesheet($offset+3, $style);
+		if ( $style ) {
+			$url = $this->getStylesheetUrl('style.css', 'public');
+			if ( $url )	$this->view->headLink()->offsetSetStylesheet($offset+2, $url);
+		}
+		
+		# Theme
+		if ( $theme ) {
+			$url = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css', 'theme');
+			if ( $url )	$this->view->headLink()->offsetSetStylesheet($offset+3, $url);
+		}
 		
 		# Favicon
-		$this->view->headLink(array('rel' => 'icon', 'href' => $App->getFileUrl('favicon.ico'), 'type' => 'image/x-icon'), 'PREPEND');
+		if ( $favicon ) {
+			$url = $App->getFileUrl('favicon.ico');
+			$this->view->headLink(array('rel' => 'icon', 'href' => $url, 'type' => 'image/x-icon'), 'PREPEND');
+		}
 		
 		# Done
 		return $this->view->headLink();

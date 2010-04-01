@@ -490,8 +490,20 @@ if ( function_compare('reallyempty', 1, true, __FILE__, __LINE__) ) {
 	 * @return    bool
 	 */
 	function reallyempty ( $haystack ) {
-		if ( empty($haystack) ) return true;
-		$haystack = preg_replace('/\s/', '', $haystack);
-		return empty($haystack);
+		$result = false;
+		if ( empty($haystack) ) {
+			$result = true;
+		} elseif ( is_string($haystack) ) {
+			$haystack = !preg_replace('/\s/', '', $haystack);
+			$result = empty($haystack);
+		}
+		elseif ( is_traversable($haystack) ) {
+			array_clean($haystack);
+			$result = empty($haystack);
+		}
+		else {
+			$result = empty($haystack);
+		}
+		return $result;
 	}
 }

@@ -16,7 +16,7 @@
  *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information, see
- * <http://www.phpdoctrine.org>.
+ * <http://www.doctrine-project.org>.
  */
 
 /**
@@ -27,7 +27,7 @@
  * @subpackage  Plugin
  * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version     $Revision$
- * @link        www.phpdoctrine.org
+ * @link        www.doctrine-project.org
  * @since       1.0
  */
 abstract class Doctrine_Record_Generator extends Doctrine_Record_Abstract
@@ -152,7 +152,7 @@ abstract class Doctrine_Record_Generator extends Doctrine_Record_Abstract
 
         $ownerClassName = $this->_options['table']->getComponentName();
         $className = $this->_options['className'];
-		$ownerClassName = str_replace('_', '', $ownerClassName); // balupton: fixes pear style models Bal_Something
+        $ownerClassName = str_replace('_', '', $ownerClassName); // balupton: fixes pear style models Bal_Something
         $this->_options['className'] = str_replace('%CLASS%', $ownerClassName, $className);
 
         if (isset($this->_options['tableName'])) {
@@ -163,6 +163,7 @@ abstract class Doctrine_Record_Generator extends Doctrine_Record_Abstract
 
         // check that class doesn't exist (otherwise we cannot create it)
         if ($this->_options['generateFiles'] === false && class_exists($this->_options['className'])) {
+            $this->_table = Doctrine_Core::getTable($this->_options['className']);
             return false;
         }
 
@@ -194,7 +195,12 @@ abstract class Doctrine_Record_Generator extends Doctrine_Record_Abstract
     {
         // Bind model 
         $conn = $this->_options['table']->getConnection();
-        $conn->getManager()->bindComponent($this->_options['className'], $conn->getName());
+        $bindConnName = $conn->getManager()->getConnectionForComponent($this->_options['table']->getComponentName())->getName();
+        if ($bindConnName) {
+            $conn->getManager()->bindComponent($this->_options['className'], $bindConnName);
+        } else {
+            $conn->getManager()->bindComponent($this->_options['className'], $conn->getName());
+        }
 
         // Create table
         $tableClass = $conn->getAttribute(Doctrine_Core::ATTR_TABLE_CLASS);
@@ -440,6 +446,10 @@ abstract class Doctrine_Record_Generator extends Doctrine_Record_Abstract
     public function generateClass(array $definition = array())
     {
         $definition['className'] = $this->_options['className'];
+        $definition['toString'] = isset($this->_options['toString']) ? $this->_options['toString'] : false;
+        if (isset($this->_options['listeners'])) {
+            $definition['listeners'] = $this->_options['listeners'];
+        }
 
         $builder = new Doctrine_Import_Builder();
         $builderOptions = isset($this->_options['builderOptions']) ? (array) $this->_options['builderOptions']:array();

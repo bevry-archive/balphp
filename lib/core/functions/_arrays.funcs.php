@@ -1177,8 +1177,13 @@ if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 			}
 		}
 		
-		# Sort
+		# Unique
 		array_unique($csv);
+		
+		# Clean
+		array_clean($csv);
+		
+		# Sort
 		sort($csv);
 	
 		# Return csv
@@ -1227,5 +1232,28 @@ if ( function_compare('prepare_csv_content', 1, true, __FILE__, __LINE__) ) {
 		
 		# Return csv
 		return $csv;
+	}
+}
+
+
+if ( function_compare('handle_options', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Grabs the options, merges with default, and ensures only keys are present (if applicable)
+	 * @version 1, April 01, 2010
+	 * @param array $default
+	 * @param array $options
+	 * @param bool $only [optional]
+	 * @return string
+	 */
+	function handle_options ( array $default, array $options, $only = true ) {
+		# Prepare
+		$options = array_merge($default,$options);
+		
+		# Only
+		$keys = array_keys($default);
+		array_keys_keep($options,$keys);
+		
+		# Return csv
+		return $options;
 	}
 }
