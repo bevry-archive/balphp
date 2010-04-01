@@ -220,7 +220,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		$url = false;
 		
 		# Handle
-		if ( !empty($this->_url) )
+		if ( $this->_url !== null )
 			$url = $this->_url;
 		else {
 			$Router = $this->_getRouter();
@@ -264,7 +264,8 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function media ( $Item ) {
-		return $this->hard(delve($Item,'url'));
+		$url = delve($Item,'url',false);
+		return $this->hard($url);
 	}
 	
 	public function user ( $Item ) {
