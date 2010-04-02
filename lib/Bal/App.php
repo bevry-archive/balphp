@@ -190,7 +190,7 @@ class Bal_App {
 			$commands = array(
 				"mkdir -p ".
 					"$cwd/application/models/Base $cwd/application/data/dump ".
-					"$cwd/scripts/paypal/logs ",
+					"$cwd/application/data/logs $cwd/application/data/logs/paypal ",
 				// Standard Files
 				"sudo chmod -R 755 ".
 					"$cwd ",
@@ -199,7 +199,7 @@ class Bal_App {
 					"$cwd/application/data/dump $cwd/application/data/schema ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
-					"$cwd/scripts/paypal/logs ".
+					"$cwd/application/data/logs $cwd/application/data/logs/paypal ".
 					"$cwd/application/config/application.ini ",
 				// Executable Files
 				"sudo chmod +x ".
