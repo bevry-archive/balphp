@@ -163,28 +163,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	}
 	
 	/**
-	 * Initialise our balcms module
-	 * @return
-	 */
-	protected function _initBalcms ( ) {
-		# Prepare
-		$this->bootstrap('presentation');
-		$View = $this->getResource('view');
-		$applicationConfig = Zend_Registry::get('applicationConfig');
-		
-		# View Helpers
-		$View->addHelperPath(APPLICATION_PATH . '/modules/balcms/views/helpers', 'Balcms_View_Helper');
-		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
-		
-		# Widgets
-		if ( array_key_exists('widget', $applicationConfig['bal']) )
-		$View->getHelper('widget')->addWidgets($applicationConfig['bal']['widget']);
-		
-		# Done
-		return true;
-	}
-
-	/**
 	 * Initialise our routes/routing/router
 	 * @return
 	 */
@@ -492,6 +470,40 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# balPHP
 		Bal_Framework::import();
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Initialise our balcms module
+	 * @return
+	 */
+	protected function _initBalcms ( ) {
+		# Prepare
+		$this->bootstrap('presentation');
+		$View = $this->getResource('view');
+		$applicationConfig = Zend_Registry::get('applicationConfig');
+		
+		# View Helpers
+		$View->addHelperPath(APPLICATION_PATH . '/modules/balcms/views/helpers', 'Balcms_View_Helper');
+		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
+		
+		# Widgets
+		if ( array_key_exists('widget', $applicationConfig['bal']) )
+		$View->getHelper('widget')->addWidgets($applicationConfig['bal']['widget']);
+		
+		# Done
+		return true;
+	}
+
+	/**
+	 * Initialise our modules
+	 * @return
+	 */
+	protected function _initModules ( ) {
+		# Bootstrap
+		$this->bootstrap('balcms');
 		
 		# Done
 		return true;
