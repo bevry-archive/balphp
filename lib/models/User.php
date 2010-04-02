@@ -417,7 +417,6 @@ class Bal_User extends Base_Bal_User {
 		
 		# Ensure
 		$save = self::ensure($Event, __FUNCTION__);
-		baldump('-postSave: ', $save);
 		if ( $save ) {
 			$Invoker->save();
 		}
