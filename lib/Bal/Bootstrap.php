@@ -496,6 +496,55 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Done
 		return true;
 	}
-
+	
+	/**
+	 * Initialise our setup script
+	 * @return
+	 */
+	protected function _initScriptSetup ( ) {
+		# Bootstrap
+		$this->bootstrap('modules');
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Initialise our cron script
+	 * @return
+	 */
+	protected function _initScriptCron ( ) {
+		# Bootstrap
+		$this->bootstrap('modules');
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Initialise our doctrine script
+	 * @return
+	 */
+	protected function _initScriptDoctrine ( ) {
+		# Bootstrap
+		$this->bootstrap('modules');
+		
+		# Done
+		return true;
+	}
+	
+	/**
+	 * Initialise our paypal script
+	 * @return
+	 */
+	protected function _initScriptPaypal ( ) {
+		# Bootstrap
+		$this->bootstrap('data');
+		
+		# Done
+		return true;
+	}
+	
+	
 }
 
