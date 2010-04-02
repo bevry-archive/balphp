@@ -335,7 +335,10 @@ class Bal_User extends Base_Bal_User {
 		}
 		
 		# Handle
-		return Bal_Doctrine_Core::ensureTags($Event,'SubscriptionTags','subscriptions');
+		$save = Bal_Doctrine_Core::ensureTags($Event,'SubscriptionTags','subscriptions');
+		
+		# Return save
+		return $save;
 	}
 	
 	/**
@@ -413,7 +416,9 @@ class Bal_User extends Base_Bal_User {
 		$result = true;
 		
 		# Ensure
-		if ( self::ensure($Event, __FUNCTION__) ) {
+		$save = self::ensure($Event, __FUNCTION__);
+		baldump('-postSave: ', $save);
+		if ( $save ) {
 			$Invoker->save();
 		}
 		
