@@ -46,8 +46,8 @@ class Bal_Invoice extends Base_Bal_Invoice
 			# Save Invoice
 			$Invoice->save();
 			
-			# Generate Media
-			$Invoice->generateMedia();
+			# Generate File
+			$Invoice->generateFile();
 			$Invoice->save();
 			
 			# Done
@@ -139,7 +139,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return $template_path;
 	}
 	
-	public function generateMedia ( ) {
+	public function generateFile ( ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$Invoice = $this;
@@ -211,20 +211,20 @@ class Bal_Invoice extends Base_Bal_Invoice
 		# Save PDF
 		$Pdf->save($Invoice_path);
 		
-		# Prepare Media
-		$Media = new Media();
-		$Media->file = $Invoice_path;
-		$Media->url = Bal_App::getConfig('invoices_url') . DIRECTORY_SEPARATOR . $Media->name;
+		# Prepare File
+		$File = new File();
+		$File->file = $Invoice_path;
+		$File->url = Bal_App::getConfig('invoices_url') . DIRECTORY_SEPARATOR . $File->name;
 		
-		# Reset Media
+		# Reset File
 		Doctrine_Query::create()
-			->delete('Media m')
-			->where('m.name = ?', $Media->name)
+			->delete('File m')
+			->where('m.name = ?', $File->name)
 			->execute();
 		
-		# Save Media
-		$Media->save();
-		$this->Media = $Media;
+		# Save File
+		$File->save();
+		$this->File = $File;
 		
 		# Chain
 		return $this;
