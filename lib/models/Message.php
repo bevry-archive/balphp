@@ -154,7 +154,7 @@ class Bal_Message extends Base_Bal_Message
 		$View = Bal_App::getView(false);
 		$View->url()->renege('route','app');
 		$Message = $this;
-		$For = delve($Message,'For');
+		$UserFor = delve($Message,'UserFor');
 		
 		# Prepare Urls
 		$rootUrl = $View->app()->getRootUrl();
@@ -163,7 +163,7 @@ class Bal_Message extends Base_Bal_Message
 		# --------------------------
 		
 		# Prepare URL
-		$activateUrl = $rootUrl.$View->url()->userActivate($For)->toString();
+		$activateUrl = $rootUrl.$View->url()->userActivate($UserFor)->toString();
 		$params['User_url_activate'] = $activateUrl;
 
 		# --------------------------
@@ -178,7 +178,7 @@ class Bal_Message extends Base_Bal_Message
 	public function send ( ) {
 		# Prepare
 		$Message = $this;
-		$For = delve($Message,'For');
+		$UserFor = delve($Message,'UserFor');
 		$mail = Bal_App::getConfig('mail');
 		
 		# Prepare Mail
@@ -194,9 +194,9 @@ class Bal_Message extends Base_Bal_Message
 		$Mail->setBodyHtml($mail['html']);
 		
 		# Add Receipient
-		if ( delve($For,'id') ) {
-			$email = $For->email;
-			$fullname = $For->fullname;
+		if ( delve($UserFor,'id') ) {
+			$email = $UserFor->email;
+			$fullname = $UserFor->fullname;
 		} else {
 			$email = $mail['from']['address'];
 			$fullname = $mail['from']['name'];
@@ -248,11 +248,11 @@ class Bal_Message extends Base_Bal_Message
 			}
 			
 			# Prepare
-			$For = delve($Message,'For');
-			$For_id = delve($For,'id');
+			$UserFor = delve($Message,'UserFor');
+			$UserFor_id = delve($UserFor,'id');
 			
 			# Hash
-			$hash = md5($Message->send_on.$Message->title.$Message->description.$For_id);
+			$hash = md5($Message->send_on.$Message->title.$Message->description.$UserFor_id);
 			if ( $Message->hash != $hash ) {
 				$Message->set('hash', $hash, false);
 				$save = true;
