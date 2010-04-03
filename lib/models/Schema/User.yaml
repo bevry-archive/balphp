@@ -103,7 +103,7 @@ Bal_User:
             unsigned: true
     relations:
         Avatar:
-            class: Media
+            class: File
             local: Avatar_id
             foreign: id
             foreignAlias: UserList
