@@ -26,7 +26,8 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
     	$Table = $Record->getTable();
 		$columns = $Table->getColumns();
 		foreach ( $columns as $column => $properties ) {
-			$orig = $value = $Record->get($column);
+			$field = $Table->getFieldName($column);
+			$orig = $value = $Record->get($field);
 			if ( empty($value) || $properties['type'] !== 'string' || !is_string($value) ) continue;
 			$html = isset($properties['extra']['html']) ? $properties['extra']['html'] : $this->_default;
 			if ( !$html )
@@ -51,9 +52,9 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 					$value = strip_tags($value);
 					break;
 			}
-			//baldump($column,$html,$value);
+			//baldump($field,$html,$value);
 			if ( $value !== $orig ) // only call the setter if the value has actually changed, prevents special setters form overloading
-				$Record->set($column, $value);
+				$Record->set($field, $value);
 		}
 			//baldump($Event->getCode(),$Table->getTableName(),get_class($Record));
 		
