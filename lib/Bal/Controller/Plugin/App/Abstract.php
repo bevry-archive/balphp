@@ -1034,4 +1034,36 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	
+	# ========================
+	# GETTERS
+	
+	/**
+	 * Fetch the Messages
+	 * @return array
+	 */
+	public function getMessagesFor ( $for = null, $limit = null ) {
+		# Query
+		$Query = Doctrine_Query::create()
+			->select('m.*, ms.fullname, mr.fullname')
+			->from('Message m, m.UserFrom ms, m.UserFor mr')
+			->orderBy('m.send_on DESC')
+			->andWhere('m.sent_on <= ?', doctrine_timestamp())
+			->setHydrationMode(Doctrine::HYDRATE_ARRAY);
+		
+		# Criteria
+		if ( $for ) {
+			$for = is_numeric($for) ? $for : delve($for, 'id');
+			$Query->andWhere('ms.id = ? OR mr.id = ?', array($for, $for));
+		}
+		if ( $limit ) {
+			$Query->limit($limit);
+		}
+		
+		# Fetch
+		$Messages = $Query->execute();
+		
+		# Done
+		return $Messages;
+	}
+	
 }

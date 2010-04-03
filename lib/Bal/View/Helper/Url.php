@@ -264,6 +264,9 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function media ( $Item ) {
+		return $this->file($Item);
+	}
+	public function file ( $Item ) {
 		$url = delve($Item,'url',false);
 		return $this->hard($url);
 	}
