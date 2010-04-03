@@ -26,16 +26,16 @@ class Bal_User extends Base_Bal_User {
 	 * Set the User's Avatar
 	 * @return string
 	 */
-	protected function setMediaAttachment ( $what, $media ) {
+	protected function setFileAttachment ( $what, $file ) {
 		# Prepare
-		$Media = Media::fetch($media);
+		$File = File::fetch($file);
 		
-		# Apply Media
-		if ( $Media === null || $Media ) {
+		# Apply File
+		if ( $File === null || $File ) {
 			if ( isset($this->$what) ) {
 				$this->$what->delete();
 			}
-			$this->_set($what, $Media ? $Media : null, false);
+			$this->_set($what, $File ? $File : null, false);
 		}
 		
 		# Done
@@ -47,7 +47,7 @@ class Bal_User extends Base_Bal_User {
 	 * @return string
 	 */
 	public function setAvatar ( $value ) {
-		return $this->setMediaAttachment('Avatar', $value);
+		return $this->setFileAttachment('Avatar', $value);
 	}
 	
 	/**
@@ -70,7 +70,7 @@ class Bal_User extends Base_Bal_User {
 		
 		# Create Welcome Message
 		$Message = new Message();
-		$Message->For = $this;
+		$Message->UserFor = $this;
 		$Message->useTemplate('user-password-reset',compact('password'));
 		$Message->save();
 		
@@ -362,7 +362,7 @@ class Bal_User extends Base_Bal_User {
 		
 		# Create Welcome Message
 		$Message = new Message();
-		$Message->For = $User;
+		$Message->UserFor = $User;
 		$Message->useTemplate('user-insert');
 		$Message->save();
 		

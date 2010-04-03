@@ -78,26 +78,26 @@ class Bal_Message extends Base_Bal_Message
 		$Message = $this;
 		
 		# Prepare Relations
-		$By		= delve($Message,'By');
-		$For	= delve($Message,'For');
+		$UserFrom	= delve($Message,'UserFrom');
+		$UserFor	= delve($Message,'UserFor');
 		
 		# Apply Relations
-		$params['by'] 		= delve($By,'fullname','System');
-		$params['for'] 		= delve($For,'fullname','System');
+		$params['from']	= delve($UserFrom,'fullname','System');
+		$params['for'] 	= delve($UserFor, 'fullname','System');
 		
 		# Prepare Urls
-		$rootUrl		= $View->app()->getRootUrl();
-		$baseUrl		= $View->app()->getBaseUrl(true);
-		$Message_url	= $rootUrl.$View->url()->message($Message)->toString();
-		$By_url			= delve($By,'id') ? $rootUrl.$View->url()->user($By)->toString() : $rootUrl;
-		$For_url		= delve($For,'id') ? $rootUrl.$View->url()->user($For)->toString() : $rootUrl;
+		$root_url		= $View->app()->getRootUrl();
+		$base_url		= $View->app()->getBaseUrl(true);
+		$Message_url	= $root_url.$View->url()->message($Message)->toString();
+		$UserFrom_url	= delve($UserFrom,'id')	? $root_url.$View->url()->user($UserFrom)->toString()	: $root_url;
+		$UserFor_url	= delve($UserFor,'id')	? $root_url.$View->url()->user($UserFor)->toString()	: $root_url;
 		
 		# Apply URLs
-		$params['rootUrl'] 		= $rootUrl;
-		$params['baseUrl'] 		= $baseUrl;
+		$params['root_url'] 	= $root_url;
+		$params['base_url'] 	= $base_url;
 		$params['Message_url'] 	= $Message_url;
-		$params['By_url'] 		= $By_url;
-		$params['For_url'] 		= $For_url;
+		$params['UserFrom_url']	= $UserFrom_url;
+		$params['UserFor_url'] 	= $UserFor_url;
 		
 		# Chain
 		return $this;

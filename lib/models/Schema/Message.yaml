@@ -51,7 +51,7 @@ Bal_Message:
             extra:
                 auto: true
         MessageReplyTo_id:
-            type: integer(2)
+            type: integer(3)
             unsigned: true
         UserFor_id:
             type: integer(2)
@@ -72,7 +72,7 @@ Bal_Message:
             foreignAlias: MessagesFor
         UserFrom:
             class: User
-            local: UserBy_id
+            local: UserFrom_id
             foreign: id
             foreignAlias: MessagesFrom
     
