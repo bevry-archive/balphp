@@ -41,6 +41,8 @@ Bal_User:
             type: string(85)
             extra:
                 auto: true
+        website:
+            type: string(255)
             
         email:
             type: string(255)
@@ -53,6 +55,7 @@ Bal_User:
                 formGroup: "other"
             
         description:
+            # Bio
             type: string
         
         level:
@@ -95,26 +98,26 @@ Bal_User:
             notblank: true
             default: pending
             
-        avatar_id:
+        Avatar_id:
             type: integer(2)
             unsigned: true
     relations:
         Avatar:
             class: Media
-            local: avatar_id
+            local: Avatar_id
             foreign: id
             foreignAlias: UserList
             onDelete: "SET NULL"
         Permissions:
             class: Permission
-            local: user_id
-            foreign: permission_id
+            local: User_id
+            foreign: Permission_id
             foreignAlias: Users
             refClass: PermissionAndUser
         Roles:
             class: Role
-            local: user_id
-            foreign: role_id
+            local: User_id
+            foreign: Role_id
             foreignAlias: Users
             refClass: RoleAndUser
 
@@ -141,8 +144,8 @@ Bal_Role:
     relations:
         Permissions:
             class: Permission
-            local: role_id
-            foreign: permission_id
+            local: Role_id
+            foreign: Permission_id
             foreignAlias: Roles
             refClass: PermissionAndRole
 
@@ -153,20 +156,20 @@ Bal_PermissionAndRole:
             primary: true
             unsigned: true
             autoincrement: true
-        role_id:
+        Role_id:
             type: integer(2)
             unsigned: true
             notnull: true
-        permission_id:
+        Permission_id:
             type: integer(2)
             unsigned: true
             notnull: true
     relations:
         Role:
-            local: role_id
+            local: Role_id
             foreign: id
         Permission:
-            local: permission_id
+            local: Permission_id
             foreign: id
         
 Bal_Permission:
@@ -191,28 +194,29 @@ Bal_RoleAndUser:
         assigned_date:
             type: timestamp
             notnull: false
-        assignee_user_id:
+            
+        UserFrom_id:
             type: integer(2)
             notnull: false
             unsigned: true
-        user_id:
+        User_id:
             type: integer(2)
             notnull: true
             unsigned: true
-        role_id:
+        Role_id:
             type: integer(2)
             notnull: true
             unsigned: true
     relations:
-        Assignee:
+        UserFrom:
             class: User
-            local: assignee_user_id
+            local: UserFrom_id
             foreign: id
         User:
-            local: user_id
+            local: User_id
             foreign: id
         Role:
-            local: role_id
+            local: Role_id
             foreign: id
 
 Bal_PermissionAndUser:
@@ -225,26 +229,27 @@ Bal_PermissionAndUser:
         assigned_date:
             type: timestamp
             notnull: false
-        assignee_user_id:
+            
+        UserFrom_id:
             type: integer(2)
             notnull: false
             unsigned: true
-        user_id:
+        User_id:
             type: integer(2)
             notnull: true
             unsigned: true
-        permission_id:
+        Permission_id:
             type: integer(2)
             notnull: true
             unsigned: true
     relations:
-        Assignee:
+        UserFrom:
             class: User
-            local: assignee_user_id
+            local: UserFrom_id
             foreign: id
         User:
-            local: user_id
+            local: User_id
             foreign: id
         Permission:
-            local: permission_id
+            local: Permission_id
             foreign: id

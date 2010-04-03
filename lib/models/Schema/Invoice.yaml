@@ -85,20 +85,20 @@ Bal_Invoice:
             type: array
             notnull: true
 
-        for_id:
+        UserFor_id:
             type: integer(2)
             unsigned: true
-        by_id:
+        UserFrom_id:
             type: integer(2)
             unsigned: true
     relations:
-        For:
+        UserFor:
             class: User
-            local: for_id
+            local: UserFor_id
             foreign: id
             foreignAlias: InvoicesFor
-        By:
+        UserFrom:
             class: User
-            local: by_id
+            local: UserFrom_id
             foreign: id
-            foreignAlias: InvoicesBy
+            foreignAlias: InvoicesFrom

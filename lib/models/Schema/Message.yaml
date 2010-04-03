@@ -50,21 +50,29 @@ Bal_Message:
             default: "user_message"
             extra:
                 auto: true
-        for_id:
+        MessageReplyTo_id:
             type: integer(2)
             unsigned: true
-        by_id:
+        UserFor_id:
+            type: integer(2)
+            unsigned: true
+        UserFrom_id:
             type: integer(2)
             unsigned: true
     relations:
-        For:
+        MessageReplyTo:
+            class: Message
+            local: MessageReplyTo_id
+            foreign: id
+            foreignAlias: MessagesResponseTo
+        UserFor:
             class: User
-            local: for_id
+            local: UserFor_id
             foreign: id
             foreignAlias: MessagesFor
-        By:
+        UserFrom:
             class: User
-            local: by_id
+            local: UserBy_id
             foreign: id
-            foreignAlias: MessagesBy
+            foreignAlias: MessagesFrom
     
