@@ -85,6 +85,9 @@ Bal_Invoice:
             type: array
             notnull: true
 
+        File_id:
+            type: integer(2)
+            unsigned: true
         UserFor_id:
             type: integer(2)
             unsigned: true
@@ -92,6 +95,13 @@ Bal_Invoice:
             type: integer(2)
             unsigned: true
     relations:
+        File:
+            class: File
+            local: File_id
+            foreign: id
+            foreignAlias: Invoices
+            foreignType: many
+            onDelete: "CASCADE"
         UserFor:
             class: User
             local: UserFor_id
