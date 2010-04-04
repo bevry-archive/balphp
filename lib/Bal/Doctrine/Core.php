@@ -150,4 +150,25 @@ abstract class Bal_Doctrine_Core {
 		return $result;
 	}
 	
+	/**
+	 * Set a File Attachment for a Record
+	 * @return string
+	 */
+	public static function presetFileAttachment ( Doctrine_Record $Record, $what, $file ) {
+		# Prepare
+		$File = File::fetch($file);
+		$result = false;
+		
+		# Apply File
+		if ( $File === null || $File ) {
+			if ( isset($Record->$what) ) {
+				$Record->$what->delete();
+			}
+			$result = $File ? $File : null;
+		}
+		
+		# Done
+		return $result;
+	}
+	
 }

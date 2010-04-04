@@ -466,13 +466,20 @@ if ( function_compare('image_memory_adjust', 1.1, true, __FILE__, __LINE__) ) {
 		// http://www.php.net/manual/en/function.imagecreatefromjpeg.php#64155
 		
 		# Prepare
-	    $imageInfo = getimagesize($filename);
+		if ( is_string($filename) && is_file($filename) ) {
+	    	$imageInfo = getimagesize($filename);
+		} else {
+			rigger_error('image_memory_adjust only accepts files not objects.', E_USER_WARNING);
+			return false;
+		}
+	
+		# Prepare Memory
+		$pixels = $imageInfo[0]*$imageInfo[1];
 	    $MB = pow(1024,2);		// number of bytes in 1M
 	    $K64 = pow(2,16);		// number of bytes in 64K
 	    $TWEAKFACTOR = 1.8;		// Or whatever works for you
 	    
-	    # Calculate
-	    $pixels = $imageInfo[0]*$imageInfo[1];
+	    # Calculate Memory
 	    $memory = $pixels * $imageInfo['bits'] * ($imageInfo['channels'] / 8) + $K64;
 	    $memoryExtra = round($memory * $TWEAKFACTOR);
 	    
@@ -756,11 +763,15 @@ if ( function_compare('image_write', 1.1, true, __FILE__, __LINE__) ) {
 		}
 		
 		// Read the image
-		ob_start();
+		if ( empty($location) ) {
+			$location = tempnam('/tmp', 'image_write');
+		}
 		$image = call_user_func($image_write_function, $image, $location, $quality);
-		$result = ob_get_contents();
+		if ( !($result = file_get_contents($location)) ) { // Error
+			trigger_error('Failed to read the written image file: ' . var_export(compact('location'), true), E_USER_WARNING);
+			return false;
+		}
 		$error = strstr($result, '</b>:');
-		ob_end_clean();
 		if ( !$image || $error ) { // Error
 			trigger_error('Failed to the write the image: ' . var_export(compact('image','error'), true), E_USER_WARNING);
 			return false;

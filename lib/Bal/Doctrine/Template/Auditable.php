@@ -140,19 +140,20 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 	public function ensureAuthorstr ( Doctrine_Event $Event ) {
 		# Prepare
 		$Record = $Event->getInvoker();
+		$author = null;
 		
 		# Default
 		if ( $this->optionEnabled('Author') ) {
 			if ( isset($Record->Author) && $Record->Author->exists() ) {
 				$author = $Record->Author->displayname;
 			}
-		}
-		
-		# Has changed?
-		if ( $this->optionEnabled('authorstr') ) {
-			if ( $Record->authorstr != $author ) {
-				$Record->set('authorstr', $author, false);
-				return true;
+			
+			# Has changed?
+			if ( $this->optionEnabled('authorstr') ) {
+				if ( $Record->authorstr != $author ) {
+					$Record->set('authorstr', $author, false);
+					return true;
+				}
 			}
 		}
 		
