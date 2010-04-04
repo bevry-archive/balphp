@@ -23,23 +23,12 @@ class Bal_User extends Base_Bal_User {
 	}
 	
 	/**
-	 * Set the User's Avatar
+	 * Set a File Attachment
 	 * @return string
 	 */
 	protected function setFileAttachment ( $what, $file ) {
-		# Prepare
-		$File = File::fetch($file);
-		
-		# Apply File
-		if ( $File === null || $File ) {
-			if ( isset($this->$what) ) {
-				$this->$what->delete();
-			}
-			$this->_set($what, $File ? $File : null, false);
-		}
-		
-		# Done
-		return true;
+		$value = Bal_Doctrine_Core::presetFileAttachment($this,$what,$file);
+		return $value === false ? null : $this->_set('Avatar',$value,false);
 	}
 	
 	/**

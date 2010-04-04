@@ -291,7 +291,7 @@ class Bal_File extends Base_Bal_File {
 	}
 	
 	/**
-	 * Fetch the Media
+	 * Fetch the File
 	 * @param mixed $file
 	 * @return mixed null to delete, false means none
 	 */
@@ -299,15 +299,15 @@ class Bal_File extends Base_Bal_File {
 		# Prepare
 		$File = false;
 		
-		# Create Media
+		# Create File
 		if ( is_array($file) ) {
 			if ( delve($file,'_delete_') ) {
-				# Delete Media
+				# Delete File
 				$File = null;
 			}
 			elseif ( delve($file,'id') ) {
-				# Database Media
-				$File = Doctrine::getTable('Media')->find(delve($file,'id'));
+				# Database File
+				$File = Doctrine::getTable('File')->find(delve($file,'id'));
 				if ( !delve($File,'id') ) {
 					$File = null;
 				}
@@ -316,24 +316,24 @@ class Bal_File extends Base_Bal_File {
 				# File Upload
 				if ( !delve($file,'error') ) {
 					#  File Upload
-					$File = new Media();
+					$File = new File();
 					$File->file = $file;
 				}
 			}
 			elseif ( delve($file,'file') ) {
 				if ( !delve($file,'error') && !delve($file,'file.error') ) {
 					# File Upload or Actual File
-					$File = new Media();
+					$File = new File();
 					$File->file = delve($file,'file');
 				}
 			}
 		}
-		elseif ( is_object($file) && $file instanceOf Media ) {
+		elseif ( is_object($file) && $file instanceOf File ) {
 			$File = $file;
 		}
 		elseif ( is_string($file) || is_numeric($file) ) {
-			# Database Media
-			$File = Doctrine::getTable('Media')->findOneByIdOrCode($file,$file);
+			# Database File
+			$File = Doctrine::getTable('File')->findOneByIdOrCode($file,$file);
 			if ( !delve($File,'id') ) {
 				$File = null;
 			}
@@ -342,7 +342,7 @@ class Bal_File extends Base_Bal_File {
 			$File = null;
 		}
 		
-		# Return Media
+		# Return File
 		return $File;
 	}
 	
