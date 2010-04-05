@@ -137,17 +137,17 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		switch ( $type ) {
 			case 'relation':
 				# Determine
-				$text_column = Bal_Form_Doctrine::getTableLabelColumnName($RelationTable);
+				$text_field = Bal_Form_Doctrine::getTableLabelFieldName($RelationTable);
 				
 				# Fetch
 				try {
-					$relations = $RelationTable->createQuery()->select('id, '.$text_column.' as text')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
+					$relations = $RelationTable->createQuery()->select('id, '.$text_field.' as text')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
 				}
 				catch ( Exception $Exception ) {
 					$relations = array();
 					$Relations = delve($Table,$field);
 					if ( $Relations ) foreach ( $Relations as $relation ) {
-						$relations[] = array('id'=>$relation['id'],'text'=>$relation[$text_column]);
+						$relations[] = array('id'=>$relation['id'],'text'=>$relation[$text_field]);
 					}
 				}
 				

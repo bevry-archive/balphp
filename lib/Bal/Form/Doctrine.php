@@ -292,8 +292,9 @@ class Bal_Form_Doctrine
 		
 		# Add Fields as Elements
 		$fields = array_merge($columns,$Relations);
-		foreach ( $fields as $fieldName => $properties ) {
+		foreach ( $fields as $columnName => $properties ) {
 			# Create Element
+			$fieldName = $Table->getFieldName($columnName);
 			$Element = self::generateElement($Form,$table,$fieldName,$Record);
 			$Form->addElement($Element);
 		}
@@ -383,22 +384,22 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
-	public static function fetchListingColumns ( $table ) {
+	public static function fetchListingFields ( $table ) {
 		# Prepare
 		$tableName = self::getTableName($table);
-		$columns = null;
+		$fields = null;
 		
 		# Check to see if table has form
-		if ( method_exists($tableName, 'fetchListingColumns') ) {
-			$columns = call_user_func_array($tableName.'::fetchListingColumns', array());
+		if ( method_exists($tableName, 'fetchListingFields') ) {
+			$fields = call_user_func_array($tableName.'::fetchListingFields', array());
 			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
 		} else {
-			$labelColumnName = self::getTableLabelColumnName($table);
-			$columns = array($labelColumnName);
+			$labelColumnName = self::getTableLabelFieldName($table);
+			$fields = array($labelColumnName);
 		}
 		
 		# Return columns
-		return $columns;
+		return $fields;
 	}
 	
 	public static function fetchForm ( $table, $Record = null ) {
@@ -417,18 +418,18 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
-	public static function getLabelColumnNames ( ) {
+	public static function getLabelFieldNames ( ) {
 		return array('label','displayname','fullname','username','name','title','code','id');
 	}
 	
 	public static function getRecordLabel ( $Record ) {
 		# Prepare
 		$label = null;
-		$labelColumnNames = self::getLabelColumnNames();
+		$labelFieldNames = self::getLabelFieldNames();
 		
 		# Handle
-		foreach ( $labelColumnNames as $labelColumnName ) {
-			$value = delve($Record,$labelColumnName);
+		foreach ( $labelFieldNames as $labelFieldName ) {
+			$value = delve($Record,$labelFieldName);
 			if ( $value ) {
 				$label = $value;
 				break;
@@ -439,22 +440,22 @@ class Bal_Form_Doctrine
 		return $label;
 	}
 	
-	public static function getTableLabelColumnName ( $table ) {
+	public static function getTableLabelFieldName ( $table ) {
 		# Prepare
 		$Table = self::getTable($table);
-		$titleColumnName = null;
-		$labelColumnNames = self::getLabelColumnNames();
+		$result = null;
+		$labelFieldNames = self::getLabelFieldNames();
 		
 		# Handle
-		foreach ( $labelColumnNames as $labelColumnName ) {
-			if ( $Table->hasField($labelColumnName) ) {
-				$titleColumnName = $labelColumnName;
+		foreach ( $labelFieldNames as $labelFieldName ) {
+			if ( $Table->hasField($labelFieldName) ) {
+				$result = $labelFieldName;
 				break;
 			}
 		}
 		
 		# Return titleColumn
-		return $titleColumnName;
+		return $result;
 	}
 	
 	
