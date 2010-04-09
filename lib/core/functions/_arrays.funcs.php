@@ -838,7 +838,7 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 				}
 			} elseif ( is_traversable($value) ) {
 				array_clean($value);
-			} else {
+			} elseif ( is_string($value) ) {
 				$value = trim($value);
 			}
 		}

@@ -1051,5 +1051,101 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	# ========================
 	# GETTERS
 	
+	/**
+	 * Fetch the Resources of a User
+	 * @return array
+	 */
+	public function resolveId ( $value ) {
+		$id = is_numeric($value) ? $value : delve($value, 'id');
+		return $id;
+	}
+	
+	/**
+	 * Fetch the Resources of a User
+	 * @return array
+	 */
+	protected function prepareGetParams( array &$params, array $keep ) {
+		# Prepare
+		$keep = array_merge($keep,array('limit','where','search','orderBy','hydrationMode','returnQuery','paging'));
+		array_keys_keep_ensure($params,$keep);
+		
+		# Prepare
+		if ( $params['hydrationMode'] === null )
+			 $params['hydrationMode'] = Doctrine::HYDRATE_ARRAY;
+		if ( $params['returnQuery'] === null )
+			 $params['returnQuery'] = false;
+		
+		# Return
+		return $params;
+	}
+	
+	/**
+	 * Fetch the Resources of a User
+	 * @return array
+	 */
+	protected function prepareGetResult( array $params, Doctrine_Query $Query, $tableName = null ) {
+		# Prepare
+		extract($params);
+		
+		# Criteria
+		if ( $orderBy ) {
+			$Query->orderBy($orderBy);
+		}
+		if ( $hydrationMode ) {
+			$Query->setHydrationMode($hydrationMode);
+		}
+		if ( $limit ) {
+			$Query->limit($limit);
+		}
+		if ( $where && is_array($where) ) {
+			foreach ( $where as $_key => $_value ) {
+				if ( is_array($_value) ) {
+					$Query->andWhereIn($_key, $_value);
+				} else {
+					$Query->andWhere($_key.' = ?', $_value);
+				}
+			}
+		}
+		if ( $search ) {
+			$Query = Doctrine::getTable($tableName)->search($search, $Query);
+		}
+		
+		# Handle
+		if ( $limit === 1 && !$returnQuery ) {
+			$result = $Query->execute();
+			if ( !empty($result) ) {
+				$result = $result[0];
+			}
+		}
+		else {
+			if ( $returnQuery ) {
+				# Just Query
+				$result = $Query;
+			} elseif ( $paging ) {
+				# With Paging
+				$_paging = array(
+					'page' => get_param('page', 1),
+					'items' => $this->getConfig('bal.paging.items'),
+					'chunk' => $this->getConfig('bal.paging.chunk')
+				);
+				if ( $paging === true ) {
+					$paging = $_paging;
+				} elseif ( is_array($paging) ) {
+					$paging = array_merge($_paging, $paging);
+				} else {
+					throw new Zend_Exception('Unkown $paging type');
+				}
+				# Fetch
+				$result = $this->getPaging($Query, $paging['page'], $paging['items'], $paging['chunk']);
+			} else {
+				# Just Results
+				$result = $Query->execute();
+			}
+		}
+		
+		# Return
+		return $result;
+	}
+	
 	
 }

@@ -134,7 +134,7 @@ if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
 				$value = $default;
 		}
 		
-		if ( $convert )
+		if ( $hydrate )
 			$value = real_value($value);
 		
 		return $value;
