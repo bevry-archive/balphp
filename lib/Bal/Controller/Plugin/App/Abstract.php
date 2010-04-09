@@ -51,6 +51,9 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$this->getAuth()->clearIdentity();
 		Zend_Session::forgetMe();
 		
+		# Reset User
+		$this->resetUser();
+		
 		# Create Log Message
 		//$log_details = array();
 		//$Log->log(array('log-user_logout',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
@@ -189,6 +192,17 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	public function hasUser ( ) {
 		# Check
 		return !empty($this->_User);
+	}
+	
+	/**
+	 * Reset User
+	 * @return bool
+	 */
+	public function resetUser ( ) {
+		# Reset
+		$this->_User = null;
+		# Fetch
+		return $this->getUser();
 	}
 	
 	/**
