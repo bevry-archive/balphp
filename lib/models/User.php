@@ -12,8 +12,14 @@
  */
 class Bal_User extends Base_Bal_User {
 
+
+	# ========================
+	# CONSTRUCTORS
+	
+	
 	/**
 	 * Apply accessors and modifiers
+	 * @version 1.1, April 12, 2010
 	 * @return
 	 */
 	public function setUp ( ) {
@@ -22,8 +28,14 @@ class Bal_User extends Base_Bal_User {
 		return parent::setUp();
 	}
 	
+	
+	# ========================
+	# MISC
+	
+	
 	/**
 	 * Set a File Attachment
+	 * @version 1.1, April 12, 2010
 	 * @return string
 	 */
 	protected function setFileAttachment ( $what, $file ) {
@@ -33,6 +45,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Set the User's Avatar
+	 * @version 1.1, April 12, 2010
 	 * @return string
 	 */
 	public function setAvatar ( $value ) {
@@ -41,6 +54,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Prepare a User's Password
+	 * @version 1.1, April 12, 2010
 	 * @return
 	 */
 	public function preparePassword ( $value ) {
@@ -50,6 +64,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Reset the User's Password
+	 * @version 1.1, April 12, 2010
 	 * @return
 	 */
 	public function resetPassword ( ) {
@@ -69,6 +84,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Set the User's Password
+	 * @version 1.1, April 12, 2010
 	 * @return
 	 */
 	public function setPassword ( $value ) {
@@ -78,6 +94,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Compare the User's Credentials with passed
+	 * @version 1.1, April 12, 2010
 	 * @return boolean
 	 */
 	public function compareCredentials ( $username, $password ) {
@@ -86,6 +103,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Set the Role(s) for a User (clear others)
+	 * @version 1.1, April 12, 2010
 	 * @param mixed $role
 	 */
 	public function setRole ( $role ) {
@@ -96,6 +114,7 @@ class Bal_User extends Base_Bal_User {
 
 	/**
 	 * Add a Role(s) to the User
+	 * @version 1.1, April 12, 2010
 	 * @param mixed $role
 	 */
 	public function addRole ( $role ) {
@@ -105,6 +124,7 @@ class Bal_User extends Base_Bal_User {
 
 	/**
 	 * Does user have Role?
+	 * @version 1.1, April 12, 2010
 	 * @param mixed $permission
 	 */
 	public function hasRole ( $role ) {
@@ -128,6 +148,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Does user have Permission?
+	 * @version 1.1, April 12, 2010
 	 * @param mixed $permission
 	 */
 	public function hasPermission ( $permission ) {
@@ -151,6 +172,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Activate this User
+	 * @version 1.1, April 12, 2010
 	 * @return string
 	 */
 	public function activate ( ) {
@@ -163,14 +185,21 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Has the user been activated?
+	 * @version 1.1, April 12, 2010
 	 * @return string
 	 */
 	public function isActive ( ) {
 		return $this->status === 'published';
 	}
 	
+	
+	# ========================
+	# ENSURES
+	
+	
 	/**
 	 * Ensure Uid
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
@@ -200,6 +229,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Fullname
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
@@ -229,6 +259,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Code
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
@@ -257,6 +288,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Displayname
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
@@ -285,6 +317,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Username
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
@@ -313,6 +346,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Tags
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return bool
 	 */
@@ -332,6 +366,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Messages
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $Event_type
 	 * @return boolean	wheter or not to save
@@ -361,6 +396,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Ensure Consistency
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
@@ -376,8 +412,63 @@ class Bal_User extends Base_Bal_User {
 		));
 	}
 	
+	
+	# ========================
+	# CHECKS
+	
+	
+	/**
+	 * Ensure the current Identity has sufficient access to perform the operation
+	 * @version 1.0, April 12, 2010
+	 * @param User $Identity
+	 * @param string $action [optional]
+	 * @param bool $throw [optional]
+	 * @return bool	whether or not the check passed
+	 */
+	public static function checkAccess ( User $Identity, $action = null, $throw = true ) {
+		# Check
+		if ( !in_array($Event_type,array('postInsert')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Prepare result
+		$result = true;
+		
+		# Prepare action
+		if ( !$action ) {
+			# Default
+			$action = !delve($User,'id') ? 'create' : 'update';
+		}
+		
+		# Check Permission
+		if ( !$Identity->hasPermission('user') ) {
+			# Does not have CRUD permissions
+			# Fallback Checks
+		
+			# Check Ownership
+			if ( $action === 'update' && delve($this,'id') !== $Identity->id ) {
+				if ( $throw ) {
+					# Throw Exception
+					throw new Doctrine_Exception('error-user-access');
+				}
+				# Fail result
+				$result = false;
+			}
+		}
+		
+		# Return result
+		return $result;
+	}
+	
+	
+	# ========================
+	# EVENTS
+	
+	
 	/**
 	 * preSave Event
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return
 	 */
@@ -396,6 +487,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * postSave Event
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return
 	 */
@@ -416,6 +508,7 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Post Insert Event
+	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @return string
 	 */
@@ -433,9 +526,52 @@ class Bal_User extends Base_Bal_User {
 	}
 	
 	
+	# ========================
+	# CRUD HELPERS
+	
+	
+	/**
+	 * Fetch all the records for public access
+	 * @version 1.0, April 12, 2010
+	 * @return mixed
+	 */
+	public static function fetch ( array $params = array() ) {
+		# Prepare
+		Bal_Doctrine_Core::prepareFetchParams($params,array('Identity','User','UserFor','UserFrom'));
+		extract($params);
+		
+		# Prare Identity
+		if ( !$Identity ) {
+			$Identity = Bal_Doctrine_Core::getIdentity();
+		}
+		
+		# Query
+		$Query = Doctrine_Query::create()
+			->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+			->from('User, User.Avatar Avatar')
+			->orderBy('User.username ASC');
+		
+		# Criteria
+		if ( $Identity ) {
+			# Ensure returned users are below our level - pawns should be unaware of kings
+			$Query->andWhere('User.level <= ?', $Identity->level);
+		}
+		
+		if ( $User ) {
+			$User = Bal_Doctrine_Core::resolveId($User);
+			$Query->andWhere('User.id = ?', $User);
+		}
+		
+		# Fetch
+		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query);
+		
+		# Done
+		return $result;
+	}
 	
 	/**
 	 * Fetch a form for a User
+	 * @version 1.1, April 12, 2010
 	 * @param Bal_Model_User $User
 	 * @return Zend_Form
 	 */

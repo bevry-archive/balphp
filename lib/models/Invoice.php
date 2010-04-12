@@ -461,4 +461,48 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	/**
+	 * Fetch the Invoices For
+	 * @return array
+	 */
+	public static function fetch ( array $params = array() ) {
+		# Prepare
+		Bal_Dontrine_Core::prepareFetchParams($params,array('Invoice','Booking','User','UserFor','UserFrom'));
+		extract($params);
+		
+		# Query
+		$Query = Doctrine_Query::create()
+			->select('Invoice.*, InvoiceItem.*, Booking.*, Media.*')
+			->from('Invoice, Invoice.InvoiceItems InvoiceItem, Invoice.Booking Booking, Invoice.Media Media')
+			->orderBy('Invoice.created_at ASC');
+		
+		# Criteria
+		if ( $User ) {
+			$User = Bal_Dontrine_Core::resolveId($User);
+			$Query->andWhere('UserFor.id = ? OR i.UserFrom.id = ?', array($User,$User));
+		}
+		if ( $UserFor ) {
+			$UserFor = Bal_Dontrine_Core::resolveId($UserFor);
+			$Query->andWhere('UserFor.id = ?', $UserFor);
+		}
+		if ( $UserFrom ) {
+			$UserFrom = Bal_Dontrine_Core::resolveId($UserFrom);
+			$Query->andWhere('UserFrom.id = ?', $UserFrom);
+		}
+		if ( $Booking ) {
+			$Booking = Bal_Dontrine_Core::resolveId($Booking);
+			$Query->andWhere('Booking.id = ?', $Booking);
+		}
+		if ( $Invoice ) {
+			$Invoice = Bal_Dontrine_Core::resolveId($Invoice);
+			$Query->andWhere('Invoice.id = ?', $Invoice);
+		}
+		
+		# Fetch
+		$result = Bal_Dontrine_Core::prepareFetchResult($params,$Query);
+		
+		# Done
+		return $result;
+	}
+	
 }

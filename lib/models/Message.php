@@ -340,4 +340,49 @@ class Bal_Message extends Base_Bal_Message
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	/**
+	 * Fetch the Messages
+	 * @return array
+	 */
+	public static function fetchMessages ( array $params = array() ) {
+		# Prepare
+		Bal_Dontrine_Core::prepareFetchParams($params,array('Message','Booking','User','UserFrom','UserFor'));
+		extract($params);
+		
+		# Query
+		$Query = Doctrine_Query::create()
+			->select('Message.*, UserFrom.fullname, UserFor.fullname')
+			->from('Message, Message.UserFrom UserFrom, Message.UserFor UserFor')
+			->orderBy('Message.send_on DESC')
+			->andWhere('Message.sent_on <= ?', doctrine_timestamp());
+		
+		# Criteria
+		if ( $User ) {
+			$User = Bal_Dontrine_Core::resolveId($User);
+			$Query->andWhere('UserFor.id = ? OR UserFrom.id = ?', array($User,$User));
+		}
+		if ( $UserFor ) {
+			$UserFor = Bal_Dontrine_Core::resolveId($UserFor);
+			$Query->andWhere('UserFor.id = ?', $UserFor);
+		}
+		if ( $UserFrom ) {
+			$UserFrom = Bal_Dontrine_Core::resolveId($UserFrom);
+			$Query->andWhere('UserFrom.id = ?', $UserFrom);
+		}
+		if ( $Message ) {
+			$Message = Bal_Dontrine_Core::resolveId($Message);
+			$Query->andWhere('Message.id = ?', $Message);
+		}
+		if ( $Booking ) {
+			$Booking = Bal_Dontrine_Core::resolveId($Booking);
+			$Query->andWhere('Booking.id = ?', $Booking);
+		}
+		
+		# Fetch
+		$result = Bal_Dontrine_Core::prepareFetchResult($params,$Query);
+		
+		# Done
+		return $result;
+	}
+	
 }
