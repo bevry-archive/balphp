@@ -364,44 +364,24 @@ class Bal_File extends Base_Bal_File {
 		# Query
 		$Query = Doctrine_Query::create();
 		
-		# Prepare
-		$ListQuery = Doctrine_Query::create()->select('m.*, ma.*')->from('File m, m.Author')->orderBy('m.code ASC')->setHydrationMode(Doctrine::HYDRATE_ARRAY);
-		
 		# Handle
 		if ( $fetch === 'list' ) {
 			$Query
 				->select('File.id, File.type, File.humantype, File.code, File.size, Author.id, Author.code, Author.displayname')
-				->from('File,Content.Author Author')
+				->from('File')
 				->orderBy('File.code ASC')
 				;
 		}
 		else {
 			$Query
-				->select('File.*, Author.id, Author.code, Author.displayname')
-				->from('File,Content.Author Author')
+				->select('File.*')
+				->from('File')
 				->orderBy('File.code ASC')
 				;
 		}
 		
-		# Criteria
-		if ( $User ) {
-			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('Author.id = ?', $User);
-		}
-		if ( $Author ) {
-			$Author = Bal_Doctrine_Core::resolveId($Author);
-			$Query->andWhere('Author.id = ?', $Author);
-		}
-		if ( $Parent ) {
-			$Parent = Bal_Doctrine_Core::resolveId($Parent);
-			$Query->andWhere('Parent.id = ?', $Parent);
-		}
-		if ( $Root ) {
-			$Query->andWhere('NOT EXISTS (SELECT ContentOrphan.id FROM Content ContentOrphan WHERE ContentOrphan.id = Content.Parent_id)');
-		}
-		
 		# Fetch
-		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query);
+		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,'File');
 		
 		# Done
 		return $result;

@@ -573,7 +573,7 @@ class Bal_User extends Base_Bal_User {
 		}
 		
 		# Fetch
-		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query);
+		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,'User');
 		
 		# Done
 		return $result;

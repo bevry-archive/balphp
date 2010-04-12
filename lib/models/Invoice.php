@@ -467,7 +467,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Dontrine_Core::prepareFetchParams($params,array('Invoice','Booking','User','UserFor','UserFrom'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('Invoice','Booking','User','UserFor','UserFrom'));
 		extract($params);
 		
 		# Query
@@ -499,7 +499,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 		}
 		
 		# Fetch
-		$result = Bal_Dontrine_Core::prepareFetchResult($params,$Query);
+		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,'Invoice');
 		
 		# Done
 		return $result;

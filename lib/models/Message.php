@@ -344,9 +344,9 @@ class Bal_Message extends Base_Bal_Message
 	 * Fetch the Messages
 	 * @return array
 	 */
-	public static function fetchMessages ( array $params = array() ) {
+	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Dontrine_Core::prepareFetchParams($params,array('Message','Booking','User','UserFrom','UserFor'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('Message','Booking','User','UserFrom','UserFor'));
 		extract($params);
 		
 		# Query
@@ -379,7 +379,7 @@ class Bal_Message extends Base_Bal_Message
 		}
 		
 		# Fetch
-		$result = Bal_Dontrine_Core::prepareFetchResult($params,$Query);
+		$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,'Message');
 		
 		# Done
 		return $result;
