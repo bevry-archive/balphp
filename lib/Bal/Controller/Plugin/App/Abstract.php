@@ -178,11 +178,16 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return Doctrine_Record
 	 */
 	public function getUser ( ) {
+		# Fetch
+		$User = $this->_User;
+		
 		# Return
-		if ( $this->_User === null ) {
+		if ( $User === null ) {
 			$User = $this->setUser();
 		}
-		return $this->_User;
+		
+		# Return result
+		return $User;
 	}
 	
 	/**
@@ -190,8 +195,25 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return bool
 	 */
 	public function hasUser ( ) {
-		# Check
-		return !empty($this->_User);
+		# Fetch
+		$User = $this->getUser();
+		
+		# Determine
+		$result = $User ? true : false;
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Clear User
+	 * @return bool
+	 */
+	public function resetUser ( ) {
+		# Clear
+		$this->_User = null;
+		# chain
+		return $this;
 	}
 	
 	/**
@@ -199,10 +221,12 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return bool
 	 */
 	public function resetUser ( ) {
-		# Reset
-		$this->_User = null;
+		# Clear
+		$this->clearUser();
 		# Fetch
-		return $this->getUser();
+		$User = $this->getUser();
+		# Return User
+		return $User;
 	}
 	
 	/**
@@ -215,7 +239,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Fetch
 		$User = $Auth->hasIdentity() ? Doctrine::getTable('User')->find($Auth->getIdentity()) : false;
 		# Apply
-		Bal_App::setIdentity($User);
+		$this->_User = $User;
 		# Return User
 		return $User;
 	}

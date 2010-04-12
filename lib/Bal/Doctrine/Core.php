@@ -329,23 +329,45 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
-	protected function prepareFetchResult( array $params, Doctrine_Query $Query, $tableName = null ) {
+	protected function prepareFetchResult( array $params, Doctrine_Query $Query, $table = null ) {
 		# Prepare
-		$keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging');
+		$keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging','relations','select','from');
 		array_keys_keep_ensure($params,$keep);
 		extract($params);
 		
+		# Prepare
+		$Table = self::getTable($table);
+		$tableName = self::getTableName($Table);
+		$labelFieldName = self::getTableLabelFieldName($Table);
+		$listingFields = self::fetchListingFields($Table);
+		
 		# Criteria
+		if ( $select ) {
+			# Replace Select
+			$Query->select($select);
+		}
+		if ( $from ) {
+			# Replace From
+			$Query->from($from);
+		}
 		if ( $orderBy ) {
+			# Replace Order
 			$Query->orderBy($orderBy);
 		}
+		elseif ( $orderBy === null ) {
+			# Add Default Order
+			$Query->addOrderBy($labelFieldName.' ASC');
+		}
 		if ( $hydrationMode ) {
+			# Add HydrationMode
 			$Query->setHydrationMode($hydrationMode);
 		}
 		if ( $limit ) {
+			# Add Limit
 			$Query->limit($limit);
 		}
 		if ( $where && is_array($where) ) {
+			# Add Wheres
 			foreach ( $where as $_key => $_value ) {
 				if ( is_array($_value) ) {
 					$Query->andWhereIn($_key, $_value);
@@ -355,17 +377,35 @@ abstract class Bal_Doctrine_Core {
 			}
 		}
 		if ( $search ) {
-			$Query = Doctrine::getTable($tableName)->search($search, $Query);
+			# Add Search
+			if ( method_exists($Table,'search') ) {
+				$Query = Doctrine::getTable($tableName)->search($search, $Query);
+			} else {
+				$Query = $Query->andWhere($labelFieldName.' LIKE ?', '%'.$search.'%');
+			}
+		}
+		if ( $relations ) {
+			# Add Relations
+			foreach ( $listingFields as $field ) {
+				if ( $Table->hasRelation($field) ) {
+					$Query
+						->addSelect($field.'.*')
+						->addFrom($tableName.'.'.$field.' '.$field)
+						;
+				}
+			}
 		}
 		
 		# Handle
 		if ( $limit === 1 && !$returnQuery ) {
+			# Return only one
 			$result = $Query->execute();
 			if ( !empty($result) ) {
 				$result = $result[0];
 			}
 		}
 		else {
+			# Return many
 			if ( $returnQuery ) {
 				# Just Query
 				$result = $Query;
@@ -1017,7 +1057,7 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function presetFileAttachment ( Doctrine_Record $Record, $what, $file ) {
 		# Prepare
-		$File = File::fetch($file);
+		$File = File::fetchFile($file);
 		$result = false;
 		
 		# Apply File

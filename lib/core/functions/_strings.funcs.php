@@ -221,57 +221,48 @@ if ( function_compare('ends_with', 3, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('trim_value', 1, true, __FILE__, __LINE__) ) {
-
+if ( function_compare('strip', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Trim the haystack left and right from the needle
-	 *
+	 * - formally trim_value
 	 * @version 1, April 21, 2008
-	 *
 	 * @param	string	$haystack
 	 * @param	string	$needle
-	 *
 	 * @return    bool
 	 */
-	function trim_value ( $haystack, $needle ) {
-		$haystack = ltrim_value($haystack, $needle);
-		$haystack = rtrim_value($haystack, $needle);
+	function strip ( $haystack, $needle ) {
+		$haystack = lstrip($haystack, $needle);
+		$haystack = rstrip($haystack, $needle);
 		return $haystack;
 	}
 }
 
-if ( function_compare('ltrim_value', 1, true, __FILE__, __LINE__) ) {
-
+if ( function_compare('lstrip', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Trim the haystack left from the needle
-	 *
+	 * - formally ltrim_value
 	 * @version 1, April 21, 2008
-	 *
 	 * @param	string	$haystack
 	 * @param	string	$needle
-	 *
 	 * @return    bool
 	 */
-	function ltrim_value ( $haystack, $needle ) {
+	function lstrip ( $haystack, $needle ) {
 		if ( begins_with($haystack, $needle) )
 			$haystack = substr($haystack, strlen($needle));
 		return $haystack;
 	}
 }
 
-if ( function_compare('rtrim_value', 1, true, __FILE__, __LINE__) ) {
-
+if ( function_compare('rstrip', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Trim the haystack right from the needle
-	 *
+	 * - formally rtrim_value
 	 * @version 1, April 21, 2008
-	 *
 	 * @param	string	$haystack
 	 * @param	string	$needle
-	 *
 	 * @return    bool
 	 */
-	function rtrim_value ( $haystack, $needle ) {
+	function rstrip ( $haystack, $needle ) {
 		if ( ends_with($haystack, $needle) )
 			$haystack = substr($haystack, 0, strlen($haystack) - strlen($needle));
 		return $haystack;
