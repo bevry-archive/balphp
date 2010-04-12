@@ -76,6 +76,31 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$Locale = Bal_App::getLocale();
 		$result = '';
 		
+		# Custom
+		if ( is_array($name) && func_num_args() === 1 ) {
+			# Apply
+			$custom = $name;
+			# Extract
+			$name = $target = $source = null;
+			extract($custom);
+			# Target
+			if ( !empty($target) ) {
+				# Name <- Target
+				if ( empty($name) ) {
+					$name = make_field_name($target);
+				}
+				# Value <- Target, Source
+				if ( !empty($source)) {
+					$value = delve($source,$target);
+				}
+				# Table, Field <- Target
+				if ( empty($table) && empty($field) && count($target) === 2 ) {
+					$table = $target[0];
+					$field = $target[1];
+				}
+			}
+		}
+		
 		# Fetch Info
         $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, id, value, attribs, options, listsep, disable

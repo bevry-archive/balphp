@@ -1138,6 +1138,38 @@ if ( function_compare('check_flow', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('make_array', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * If value is not an array, make it one
+	 * @version 1, April 11, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function make_array ( $array ) {
+		return is_array($array) ? $array : array($array);
+	}
+}
+
+if ( function_compare('make_field_name', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * If value is not a field name, make it one
+	 * @version 1, April 11, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function make_field_name ( $name ) {
+		# Check
+		if ( is_array($name) ) {
+			$parts = $name;
+			$name = array_shift($parts);
+			foreach ( $parts as $part ) {
+				$name .= '['.$part.']';
+			}
+		}
+		# Return name
+		return $name;
+	}
+}
 
 if ( function_compare('prepare_csv_array', 1, true, __FILE__, __LINE__) ) {
 	/**

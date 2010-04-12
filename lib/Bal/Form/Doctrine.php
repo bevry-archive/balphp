@@ -33,43 +33,16 @@ require_once 'Zend/Form.php';
 class Bal_Form_Doctrine
 {
 	
-	public static function getTable ( $table ) {
-		# Prepare
-		$Table = null;
-		
-		# Fetch
-		if ( is_object($table) && $table instanceOf Doctrine_Table ) 
-			$Table = $table;
-		else {
-			$tableName = self::getTableName($table);
-			$Table = Doctrine::getTable($table);
-		}
-		
-		# Return Table
-		return $Table;
-	}
 	
-	public static function getTableName ( $table ) {
-		# Prepare
-		$tableName = null;
-		
-		# Handle
-		if ( is_string($table) ) {
-			$tableName = $table;
-		}
-		elseif ( is_object($table) ) {
-			if ( $table instanceOf Doctrine_Table ) {
-				$tableName = $table->getTableName();
-			}
-			elseif ( $table instanceOf Doctrine_Record ) {
-				$tableName = $table->getTable()->getTableName();
-			}
-		}
-		
-		# Return table name
-		return $tableName;
-	}
+	# ========================
+	# NAMES
 	
+	/**
+	 * Determine and return a form name based upon the $table
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table The table/type of the record
+	 * @return string
+	 */
 	public static function getFormName ( $table ) {
 		# Prepare
 		$tableName = self::getTableName($table);
@@ -81,30 +54,37 @@ class Bal_Form_Doctrine
 		return $tableName;
 	}
 	
-	public static function getElementName ( $table, $fieldName ) {
-		# Prepare
+	/**
+	 * Determine and return a element name based upon the $table $field
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table The table/type of the record
+	 * @return string
+	 */
+	public static function getElementName ( $table, $field ) {
+		# Fetch
+		$elementName = Bal_Doctrine_Core::getFieldName($table,$field);
 		
-		# Handle
-		$elementName = $fieldName;
-		
-		# Return
+		# Return elementName
 		return $elementName;
 	}
 	
-	public static function getGroupName ( $table, $group ) {
-		# Prepare
-		
-		# Handle
-		$groupName = $group;
-		
-		# Return
-		return $groupName;
-	}
+	# ========================
+	# ELEMENT
 	
-	public static function applyElementRelationProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+	/**
+	 * Apply relation properties of $table $fieldName to $Element
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form_Element &$Element - The form element to apply to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $field - The field to use
+	 * @param mixed $Record [optional] - The record to use to set the current value of the element
+	 * @return Zend_Form_Element
+	 */
+	public static function applyElementRelationProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$Table = Bal_Doctrine_Core::getTable($table);
+		$tableName = Bal_Doctrine_Core::getTableName($table);
+		$fieldName = Bal_Doctrine_Core::getFieldName($field);
 		
 		# Prepare
 		$Relation = $Table->getRelation($fieldName);
@@ -148,10 +128,20 @@ class Bal_Form_Doctrine
 		return $Element;
 	}
 	
-	public static function applyElementFieldProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+	/**
+	 * Apply field properties of $table $fieldName to $Element
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form_Element &$Element - The form element to apply to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $field - The field to use
+	 * @param mixed $Record [optional] - The record to use to set the current value of the element
+	 * @return Zend_Form_Element
+	 */
+	public static function applyElementFieldProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$Table = Bal_Doctrine_Core::getTable($table);
+		$tableName = Bal_Doctrine_Core::getTableName($table);
+		$fieldName = Bal_Doctrine_Core::getFieldName($field);
 		
 		# Prepare
 		$properties = $Table->getDefinitionOf($fieldName);
@@ -184,12 +174,22 @@ class Bal_Form_Doctrine
 		return $Element;
 	}
 	
-	public static function applyElementProperties ( Zend_Form_Element &$Element, $table, $fieldName, $Record = null ) {
+	/**
+	 * Apply element properties of $table $fieldName to $Element
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form_Element &$Element - The form element to apply to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $field - The field to use
+	 * @param mixed $Record [optional] - The record to use to set the current value of the element
+	 * @return Zend_Form_Element
+	 */
+	public static function applyElementProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$Table = Bal_Form_Doctrine::getTable($table);
 		$tableName = Bal_Form_Doctrine::getTableName($table);
 		$tableNameLower = strtolower($tableName);
+		$fieldName = Bal_Doctrine_Core::getFieldName($field);
 	
 		# Handle
 		$hasRelation = $Table->hasRelation($fieldName);
@@ -221,17 +221,27 @@ class Bal_Form_Doctrine
 		return $Element;
 	}
 	
-	public static function generateElement ( Zend_Form $Form, $table, $fieldName, $Record = null, array $options = array() ) {
+	/**
+	 * Generate a element  of $table $fieldName to $Element
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form_Element &$Element - The form element to apply to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $field - The field to use
+	 * @param mixed $Record [optional] - The record to use to set the current value of the element
+	 * @param array $options [optional] - Options that can be applied to the element
+	 * @return Zend_Form_Element
+	 */
+	public static function generateElement ( Zend_Form $Form, $table, $field, $Record = null, array $options = array() ) {
 		# Prepare Element
-		$elementName = self::getElementName($table, $fieldName);
+		$elementName = self::getElementName($table, $field);
 		$elementType = 'doctrine'; //delve($options,'type','doctrine');
 		
 		# Create Element
 		$Element = $Form->createElement($elementType, $elementName, $options);
 		if ( $elementType === 'doctrine' ) {
-			$Element->setTableAndField($table,$fieldName,$Record);
+			$Element->setTableAndField($table,$field,$Record);
 		} else {
-			self::applyElementProperties($Element,$table,$fieldName,$Record);
+			self::applyElementProperties($Element,$table,$field,$Record);
 		}
 		
 		# Options
@@ -241,6 +251,15 @@ class Bal_Form_Doctrine
 		return $Element;
 	}
 	
+	# ========================
+	# FORM
+	
+	/**
+	 * Create the skeleton form for the $table
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table - The table/type to use
+	 * @return Zend_Form
+	 */
 	public static function createForm ( $table ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
@@ -263,6 +282,14 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
+	/**
+	 * Generate a complete form for the $table
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $Record [optional] - The record to use to set the current values of the elements
+	 * @return Zend_Form
+	 * @see self::createForm
+	 */
 	public static function generateForm ( $table, $Record = null ) {
 		# Prepare
 		$Form = self::createForm($table);
@@ -303,6 +330,14 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
+	/**
+	 * Add the ID field element to the $Form of $table
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form &$Form - The Form to add the element to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $Record [optional] - The record to use to set the current values of the elements
+	 * @return Zend_Form_Element
+	 */
 	public static function addIdElement ( Zend_Form &$Form, $table, $Record = null ) {
 		# Id Value
 		$idValue = delve($Record,'id');
@@ -326,6 +361,14 @@ class Bal_Form_Doctrine
 		return $Element;
 	}
 	
+	/**
+	 * Add the field elements to the $Form of $table
+	 * @version 1.1, April 12, 2010
+	 * @param Zend_Form &$Form - The Form to add the element to
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $Record [optional] - The record to use to set the current values of the elements
+	 * @return Zend_Form
+	 */
 	public static function addElements ( Zend_Form &$Form, $table, $elements, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
@@ -384,80 +427,29 @@ class Bal_Form_Doctrine
 		return $Form;
 	}
 	
-	public static function fetchListingFields ( $table ) {
-		# Prepare
-		$tableName = self::getTableName($table);
-		$fields = null;
-		
-		# Check to see if table has form
-		if ( method_exists($tableName, 'fetchListingFields') ) {
-			$fields = call_user_func_array($tableName.'::fetchListingFields', array());
-			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
-		} else {
-			$labelColumnName = self::getTableLabelFieldName($table);
-			$fields = array($labelColumnName);
-		}
-		
-		# Return columns
-		return $fields;
-	}
-	
+	/**
+	 * Fetch a custom or fallback and generate a standard form for $table. Using $Record for current values
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table - The table/type to use
+	 * @param mixed $Record [optional] - The record to use to set the current values of the elements
+	 * @return Zend_Form
+	 */
 	public static function fetchForm ( $table, $Record = null ) {
 		# Prepare
 		$tableName = self::getTableName($table);
 		$Form = null;
 		
 		# Check to see if table has form
-		if ( method_exists($tableName, 'fetchForm') )
+		if ( method_exists($tableName, 'fetchForm') ) {
 			$Form = call_user_func_array($tableName.'::fetchForm', array($Record));
 			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
-		else
+		} else {
 			$Form = self::generateForm($table, $Record);
+		}
 		
 		# Return Form
 		return $Form;
 	}
-	
-	public static function getLabelFieldNames ( ) {
-		return array('label','displayname','fullname','username','name','title','code','id');
-	}
-	
-	public static function getRecordLabel ( $Record ) {
-		# Prepare
-		$label = null;
-		$labelFieldNames = self::getLabelFieldNames();
-		
-		# Handle
-		foreach ( $labelFieldNames as $labelFieldName ) {
-			$value = delve($Record,$labelFieldName);
-			if ( $value ) {
-				$label = $value;
-				break;
-			}
-		}
-		
-		# Return label
-		return $label;
-	}
-	
-	public static function getTableLabelFieldName ( $table ) {
-		# Prepare
-		$Table = self::getTable($table);
-		$result = null;
-		$labelFieldNames = self::getLabelFieldNames();
-		
-		# Handle
-		foreach ( $labelFieldNames as $labelFieldName ) {
-			if ( $Table->hasField($labelFieldName) ) {
-				$result = $labelFieldName;
-				break;
-			}
-		}
-		
-		# Return titleColumn
-		return $result;
-	}
-	
 	
 	
 }

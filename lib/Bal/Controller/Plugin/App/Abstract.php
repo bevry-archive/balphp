@@ -210,9 +210,14 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return Doctrine_Record
 	 */
 	public function setUser ( ) {
+		# Prepare
 		$Auth = $this->getAuth();
-		$this->_User = $Auth->hasIdentity() ? Doctrine::getTable('User')->find($Auth->getIdentity()) : false;
-		return $this->_User;
+		# Fetch
+		$User = $Auth->hasIdentity() ? Doctrine::getTable('User')->find($Auth->getIdentity()) : false;
+		# Apply
+		Bal_App::setIdentity($User);
+		# Return User
+		return $User;
 	}
 	
 	
@@ -702,7 +707,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	
 	# ========================
-	# PAGING
+	# DOCTINRE: PAGING
 	
 	
 	/**
@@ -811,145 +816,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	}
 	
 	
-	# ========================
-	# GETTERS: ITEMS
-	
-	public function getItemLabel ( $Object ) {
-		return Bal_Form_Doctrine::getRecordLabel($Object);
-	}
-	
-	public function fetchParam ( $param = null, $default = false ) {
-		return fetch_param($param, $this->getRequest()->getParam($param, $default));
-	}
-	
-	public function fetchItemParams ( $param ) {
-		# Prepare
-		$item = false;
-		
-		# Check
-		if ( !$param ) return $item;
-		
-		# Fetch item
-		$item = $this->fetchParam($param, $this->fetchParam(strtolower($param), false));
-		
-		# Return item
-		return $item;
-	}
-	
-	public function fetchItemParam ( $param, $only = false ) {
-		# Fetch item
-		$item = $this->fetchItemParams($param);
-		
-		# Handle Array
-		if ( is_array($item) ) {
-			# Fetch Id from Array
-			$item = delve($item,'id');
-		}
-		
-		# Handle Empty
-		if ( !$item && !$only ) {
-			# Try Generic Params
-			$item = $this->fetchParam('code', false);
-			if ( !$item ) $item = $this->fetchParam('id', false);
-		}
-		
-		# Return item
-		return $item;
-	}
-	
-	public function fetchItem ( $table, $record = null, $Query = null, $create = true ) {
-		# Prepare
-		$item = $Item = false;
-		$tableName = Bal_Form_Doctrine::getTableName($table);
-		
-		# Check
-		if ( is_object($record) && $record instanceOf $tableName ) {
-			return $record;
-		}
-		
-		# Fetch Param
-		$item = $this->fetchItemParam($tableName);
-		
-		# Load
-		if ( $item ) {
-			# Prepare Query
-			if ( $Query === null ) {
-				$Query = Doctrine_Query::create()->select('i.*')->from($tableName.' i');
-			}
-			
-			# Search Query
-			$fetch = false;
-			if ( is_numeric($item) ) {
-				$Query->andWhere('i.id = ?', $item);
-				$fetch = true;
-			}
-			elseif ( is_string($item) ) {
-				$Query->andWhere('i.code = ?', $item);
-				$fetch = true;
-			}
-			
-			# Fetch
-			if ( $fetch ) 
-				$Item = $Query->fetchOne();
-		}
-		
-		# Create if empty?
-		if ( $create && !delve($Item,'id') && $tableName ) {
-			$Item = new $tableName();
-		}
-		
-		# Return Media
-		return $Item;
-	}
-	
-	
-	/**
-	 * Determine and return a Record of $type using in
-	 * @param string $table The table/type of the record
-	 * @param mixed ... [optional] The input used to determine the record
-	 * @return
-	 */
-	public function getRecord ( $table ) {
-		# Prepare
-		$Record = null;
-		$args = func_get_args(); array_shift($args); // pop first (type)
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = $Table->getComponentName();
-		
-		# Handle
-		foreach ( $args as $in ) {
-			if ( $in instanceof $tableName ) {
-				$Record = $in;
-			} elseif ( is_object($in) ) {
-				if ( !empty($in->id) )
-					$Record = $this->getRecord($tableName, $in->id);
-			} elseif ( is_numeric($in) ) {
-				$Record = Doctrine::getTable($tableName)->find($in);
-			} elseif ( is_string($in) ) {
-				if ( Doctrine::getTable($tableName)->hasColumn($in) )
-					$Record = Doctrine::getTable($tableName)->findByCode($in);
-			} elseif ( is_array($in) ) {
-				if ( !empty($in['id']) ) {
-					$Record = $this->getRecord($tableName, $in['id']);
-				} elseif ( !empty($in['code']) ) {
-					$Record = $this->getRecord($tableName, $in['code']);
-				}
-			}
-			
-			if ( !empty($Record->id) ) {
-				break;
-			}
-		}
-		
-		# Check
-		if ( empty($Record) ) {
-			$Record = new $tableName;
-		}
-		
-		# Done
-		return $Record;
-	}
-	
 	
 	# ========================
 	# GETTERS: SEARCH
@@ -1050,102 +916,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	# ========================
 	# GETTERS
-	
-	/**
-	 * Fetch the Resources of a User
-	 * @return array
-	 */
-	public function resolveId ( $value ) {
-		$id = is_numeric($value) ? $value : delve($value, 'id');
-		return $id;
-	}
-	
-	/**
-	 * Fetch the Resources of a User
-	 * @return array
-	 */
-	protected function prepareGetParams( array &$params, array $keep ) {
-		# Prepare
-		$keep = array_merge($keep,array('limit','where','search','orderBy','hydrationMode','returnQuery','paging'));
-		array_keys_keep_ensure($params,$keep);
-		
-		# Prepare
-		if ( $params['hydrationMode'] === null )
-			 $params['hydrationMode'] = Doctrine::HYDRATE_ARRAY;
-		if ( $params['returnQuery'] === null )
-			 $params['returnQuery'] = false;
-		
-		# Return
-		return $params;
-	}
-	
-	/**
-	 * Fetch the Resources of a User
-	 * @return array
-	 */
-	protected function prepareGetResult( array $params, Doctrine_Query $Query, $tableName = null ) {
-		# Prepare
-		extract($params);
-		
-		# Criteria
-		if ( $orderBy ) {
-			$Query->orderBy($orderBy);
-		}
-		if ( $hydrationMode ) {
-			$Query->setHydrationMode($hydrationMode);
-		}
-		if ( $limit ) {
-			$Query->limit($limit);
-		}
-		if ( $where && is_array($where) ) {
-			foreach ( $where as $_key => $_value ) {
-				if ( is_array($_value) ) {
-					$Query->andWhereIn($_key, $_value);
-				} else {
-					$Query->andWhere($_key.' = ?', $_value);
-				}
-			}
-		}
-		if ( $search ) {
-			$Query = Doctrine::getTable($tableName)->search($search, $Query);
-		}
-		
-		# Handle
-		if ( $limit === 1 && !$returnQuery ) {
-			$result = $Query->execute();
-			if ( !empty($result) ) {
-				$result = $result[0];
-			}
-		}
-		else {
-			if ( $returnQuery ) {
-				# Just Query
-				$result = $Query;
-			} elseif ( $paging ) {
-				# With Paging
-				$_paging = array(
-					'page' => get_param('page', 1),
-					'items' => $this->getConfig('bal.paging.items'),
-					'chunk' => $this->getConfig('bal.paging.chunk')
-				);
-				if ( $paging === true ) {
-					$paging = $_paging;
-				} elseif ( is_array($paging) ) {
-					$paging = array_merge($_paging, $paging);
-				} else {
-					throw new Zend_Exception('Unkown $paging type');
-				}
-				# Fetch
-				$result = $this->getPaging($Query, $paging['page'], $paging['items'], $paging['chunk']);
-			} else {
-				# Just Results
-				$result = $Query->execute();
-			}
-		}
-		
-		# Return
-		return $result;
-	}
 	
 	
 }
