@@ -501,6 +501,20 @@ class Bal_App {
 	}
 	
 	/**
+	 * Get the Request
+	 */
+	static public function getRequest ( ) {
+		return self::getFrontController()->getRequest();
+	}
+	
+	/**
+	 * Get the Response
+	 */
+	static public function getResponse ( ) {
+		return self::getFrontController()->getResponse();
+	}
+	
+	/**
 	 * Get the Front Controller's Router
 	 */
 	static public function getRouter ( ) {

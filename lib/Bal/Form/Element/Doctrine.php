@@ -43,10 +43,10 @@ class Bal_Form_Element_Doctrine extends Zend_Form_Element_Xhtml
 	public function setTableAndField ( $table, $fieldName, $Record = null ) {
 		# Prepare
 		$Element = $this;
-		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
 		
 		# Apply Options
-		$options = array('table'=>$tableName,'field'=>$fieldName);
+		$options = array('table'=>$tableComponentName,'field'=>$fieldName);
 		$Element->setOptions($options);
 		
 		# Apply Doctrine Options

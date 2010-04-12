@@ -363,8 +363,33 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		}
 		
 		# Autoload Models
-		$Autoloader->pushAutoloader(array('Doctrine', 'modelsAutoload'));
-		$Autoloader->registerNamespace('Base_');
+		if ( true ) {
+			# Autoload Models
+			$Autoloader->pushAutoloader(array('Doctrine', 'modelsAutoload'));
+			# Autoload Namespaces
+			//$model_dirs = scan_dir($models_path, array('skip_files'=>true,'recurse'=>false));
+			//foreach ( $model_dirs as $model_dir_path => $model_dir_filename ) {
+			//	$Autoloader->registerNamespace($model_dir_filename.'_');
+			//}
+		}
+		else {
+			# Autoload PEAR Models
+			$model_dirs = scan_dir($models_path, array('skip_files'=>true,'recurse'=>false));
+			foreach ( $model_dirs as $model_dir_path => $model_dir_filename ) {
+				baldump($model_dir_path, $model_dir_filename);
+				
+				$resourceLoader = new Zend_Loader_Autoloader_Resource(array(
+					'basePath'  => $model_dir_path,
+					'namespace' => $model_dir_filename,
+				));
+				$Autoloader->pushAutoloader($resourceLoader);
+			}
+			# Load Standard Models
+			$model_files = scan_dir($models_path, array('skip_dirs'=>true,'recurse'=>false));
+			foreach ( $model_files as $model_file_path => $model_file_filename ) {
+				require_once($model_file_path);
+			}
+		}
 		
 		# Autoload Extensions
 		$Autoloader->pushAutoloader(array('Doctrine', 'extensionsAutoload'));
@@ -439,21 +464,34 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		$models_path = $applicationConfig['data']['models_path'];
+		$base_path = MODELS_PATH.DIRECTORY_SEPARATOR.'Base';
 		
 		# Apply Listener To Tables - Ensure it will run
-		$base_path = MODELS_PATH.DIRECTORY_SEPARATOR.'Base';
-		$models = scan_dir($base_path, array('return_dirs'=>false));
-		foreach ( $models as $model_path => $model_filename ) {
-			$class_name =
-				str_replace(DIRECTORY_SEPARATOR,'_',substr(substr($model_path,strlen($base_path)+1),0,-4));
-			Doctrine_Core::getTable($class_name)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		if ( true  ) {
+			$models = scan_dir($base_path, array('return_dirs'=>false,'skip_dirs'=>true));
+			foreach ( $models as $model_path => $model_filename ) {
+				$class_name = rstrip($model_filename,'.php');
+				Doctrine_Core::getTable($class_name)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+			}
 		}
-		//Doctrine_Core::loadModels($models_path);
-		//$Models = Doctrine_Core::getLoadedModelFiles();
-		//foreach ( $Models as $tableName => $modelPath ) {
-		//	Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
-		//}
-		//$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		elseif ( false ) {
+			$Manager = Bal_App::getDataManager();
+			Doctrine_Core::loadModels($base_path);
+			$models = Doctrine_Core::getLoadedModelFiles();
+			foreach ( $models as $tableName => $modelPath ) {
+				Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+			}
+			$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		}
+		elseif ( false ) {
+			$Manager = Bal_App::getDataManager();
+			$models = Doctrine_Core::getLoadedModelFiles();
+			baldump($models);
+			foreach ( $models as $tableName => $modelPath ) {
+				Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+			}
+			$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
+		}
 		
 		# Done
 		return true;

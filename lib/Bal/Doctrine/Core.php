@@ -56,16 +56,6 @@ abstract class Bal_Doctrine_Core {
 	}
 	
 	/**
-	 * Determines and returns the label value for the passed $Record
-	 * @version 1.1, April 12, 2010
-	 * @param mixed $Record
-	 * @return string
-	 */
-	public function getItemLabel ( $Object ) {
-		return Bal_Form_Doctrine::getRecordLabel($Object);
-	}
-	
-	/**
 	 * Determines and returns the label field name for the passed $table
 	 * @version 1.1, April 12, 2010
 	 * @param mixed $Record
@@ -107,7 +97,7 @@ abstract class Bal_Doctrine_Core {
 		if ( is_object($table) && $table instanceOf Doctrine_Table ) 
 			$Table = $table;
 		else {
-			$tableName = self::getTableName($table);
+			$tableComponentName = self::getTableComponentName($table);
 			$Table = Doctrine::getTable($table);
 		}
 		
@@ -134,7 +124,7 @@ abstract class Bal_Doctrine_Core {
 	
 	
 	/**
-	 * Determine and return the Table's tableName for the desired $table
+	 * Determine and return the Table's tableComponentName for the desired $table
 	 * @version 1.1, April 12, 2010
 	 * @param mixed $table
 	 * @return string
@@ -168,23 +158,23 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function getTableComponentName ( $table ) {
 		# Prepare
-		$tableName = null;
+		$tableComponentName = null;
 		
 		# Handle
 		if ( is_string($table) ) {
-			$tableName = $table;
+			$tableComponentName = $table;
 		}
 		elseif ( is_object($table) ) {
 			if ( $table instanceOf Doctrine_Table ) {
-				$tableName = $table->getComponentName();
+				$tableComponentName = $table->getComponentName();
 			}
 			elseif ( $table instanceOf Doctrine_Record ) {
-				$tableName = $table->getTable()->getComponentName();
+				$tableComponentName = $table->getTable()->getComponentName();
 			}
 		}
 		
 		# Return table name
-		return $tableName;
+		return $tableComponentName;
 	}
 	
 	# ========================
@@ -198,13 +188,13 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function fetchListingFields ( $table ) {
 		# Prepare
-		$tableName = self::getTableName($table);
+		$tableComponentName = self::getTableComponentName($table);
 		$fields = null;
 		
 		# Check to see if table has form
-		if ( method_exists($tableName, 'fetchListingFields') ) {
-			$fields = call_user_func_array($tableName.'::fetchListingFields', array());
-			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
+		if ( method_exists($tableComponentName, 'fetchListingFields') ) {
+			$fields = call_user_func_array($tableComponentName.'::fetchListingFields', array());
+			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableComponentName::fetchForm
 		} else {
 			$labelColumnName = self::getTableLabelFieldName($table);
 			$fields = array($labelColumnName);
@@ -239,36 +229,36 @@ abstract class Bal_Doctrine_Core {
 	
 	
 	/**
-	 * Determine and return the value of the param associated with the item $tableName
+	 * Determine and return the value of the param associated with the item $tableComponentName
 	 * @version 1.1, April 12, 2010
-	 * @param string $tableName
+	 * @param string $tableComponentName
 	 * @return mixed
 	 */
-	public function fetchItemParam ( $tableName ) {
+	public static function fetchItemParam ( $tableComponentName ) {
 		# Prepare
 		$item = false;
 		
 		# Check
-		if ( !$tableName ) return $item;
+		if ( !$tableComponentName ) return $item;
 		
 		# Fetch item
-		$item = self::fetchParam($tableName, self::fetchParam(strtolower($tableName), false));
+		$item = self::fetchParam($tableComponentName, self::fetchParam(strtolower($tableComponentName), false));
 		
 		# Return item
 		return $item;
 	}
 	
 	/**
-	 * Determine and return the value of the param associated with the item $tableName
+	 * Determine and return the value of the param associated with the item $tableComponentName
 	 * We also check the code and id params by default ($only=false)
 	 * @version 1.1, April 12, 2010
-	 * @param string $tableName
+	 * @param string $tableComponentName
 	 * @param bool $only [optional]
 	 * @return mixed
 	 */
-	public function fetchItemIdentifier ( $tableName, $only = false ) {
+	public static function fetchItemIdentifier ( $tableComponentName, $only = false ) {
 		# Fetch item
-		$item = self::fetchItemParams($tableName);
+		$item = self::fetchItemParam($tableComponentName);
 		
 		# Handle Array
 		if ( is_array($item) ) {
@@ -298,8 +288,9 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
-	public function resolveId ( $value ) {
+	public static function resolveId ( $value ) {
 		$id = is_numeric($value) ? $value : delve($value, 'id');
+		$id = real_value($id);
 		return $id;
 	}
 	
@@ -308,11 +299,11 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
-	protected function prepareFetchParams( array &$params, array $keep ) {
+	public static function prepareFetchParams( array &$params, array $keep ) {
 		# Prepare
 		$_keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging');
 		$keep = array_merge($keep,$_keep);
-		array_keys_keep_ensure($params,$keep);
+		array_keys_ensure($params,$keep);
 		
 		# Prepare
 		if ( $params['hydrationMode'] === null )
@@ -329,7 +320,7 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
-	protected function prepareFetchResult( array $params, Doctrine_Query $Query, $table = null ) {
+	public static function prepareFetchResult( array $params, Doctrine_Query $Query, $table ) {
 		# Prepare
 		$keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging','relations','select','from');
 		array_keys_keep_ensure($params,$keep);
@@ -337,7 +328,7 @@ abstract class Bal_Doctrine_Core {
 		
 		# Prepare
 		$Table = self::getTable($table);
-		$tableName = self::getTableName($Table);
+		$tableComponentName = self::getTableComponentName($Table);
 		$labelFieldName = self::getTableLabelFieldName($Table);
 		$listingFields = self::fetchListingFields($Table);
 		
@@ -379,7 +370,7 @@ abstract class Bal_Doctrine_Core {
 		if ( $search ) {
 			# Add Search
 			if ( method_exists($Table,'search') ) {
-				$Query = Doctrine::getTable($tableName)->search($search, $Query);
+				$Query = Doctrine::getTable($tableComponentName)->search($search, $Query);
 			} else {
 				$Query = $Query->andWhere($labelFieldName.' LIKE ?', '%'.$search.'%');
 			}
@@ -390,7 +381,7 @@ abstract class Bal_Doctrine_Core {
 				if ( $Table->hasRelation($field) ) {
 					$Query
 						->addSelect($field.'.*')
-						->addFrom($tableName.'.'.$field.' '.$field)
+						->addFrom($tableComponentName.'.'.$field.' '.$field)
 						;
 				}
 			}
@@ -447,7 +438,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $params [optional]
 	 * @return mixed
 	 */
-	public function fetchRecord ( $table, array $params = array() ) {
+	public static function fetchRecord ( $table, array $params = array() ) {
 		# Prepare
 		$componentName = self::getTableComponentName($table);
 		
@@ -468,7 +459,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $params [optional]
 	 * @return mixed
 	 */
-	public function fetchRecords ( $table, array $params = array() ) {
+	public static function fetchRecords ( $table, array $params = array() ) {
 		# Prepare
 		$componentName = self::getTableComponentName($table);
 		
@@ -486,7 +477,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $params [optional]
 	 * @return Doctrine_Query
 	 */
-	public function fetchQuery ( $table, array $params = array() ) {
+	public static function fetchQuery ( $table, array $params = array() ) {
 		# Prepare
 		$componentName = self::getTableComponentName($table);
 		
@@ -511,39 +502,39 @@ abstract class Bal_Doctrine_Core {
 	 * @param mixed ... [optional] The input used to determine the record
 	 * @return Doctrine_Record
 	 */
-	public function getRecord ( $table ) {
+	public static function getRecord ( $table ) {
 		# Prepare
 		$Record = null;
 		$args = func_get_args(); array_shift($args); // pop first (type)
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = $Table->getComponentName();
+		$Table = self::getTable($table);
+		$tableComponentName = $Table->getComponentName();
 		
 		# Cycle through Arguments
 		foreach ( $args as $in ) {
 			
 			# Handle
-			if ( $in instanceof $tableName ) {
+			if ( $in instanceof $tableComponentName ) {
 				# Is our Record
 				$Record = $in;
 			} elseif ( is_object($in) ) {
 				# Is some Record
 				if ( !empty($in->id) )
-					$Record = self::getRecord($tableName, $in->id);
+					$Record = self::getRecord($tableComponentName, $in->id);
 			} elseif ( is_numeric($in) ) {
 				# Is a Record ID
-				$Record = Doctrine::getTable($tableName)->find($in);
+				$Record = Doctrine::getTable($tableComponentName)->find($in);
 			} elseif ( is_string($in) ) {
 				# Is a Record Code
-				if ( Doctrine::getTable($tableName)->hasColumn($in) )
-					$Record = Doctrine::getTable($tableName)->findByCode($in);
+				if ( Doctrine::getTable($tableComponentName)->hasColumn($in) )
+					$Record = Doctrine::getTable($tableComponentName)->findByCode($in);
 			} elseif ( is_array($in) ) {
 				# Is a Array
 				if ( !empty($in['id']) ) {
 					# Which has a Record ID
-					$Record = self::getRecord($tableName, $in['id']);
+					$Record = self::getRecord($tableComponentName, $in['id']);
 				} elseif ( !empty($in['code']) ) {
 					# Which has a Record Code
-					$Record = self::getRecord($tableName, $in['code']);
+					$Record = self::getRecord($tableComponentName, $in['code']);
 				}
 			}
 			
@@ -556,7 +547,7 @@ abstract class Bal_Doctrine_Core {
 		
 		# Create if Empty
 		if ( empty($Record) ) {
-			$Record = new $tableName;
+			$Record = new $tableComponentName;
 		}
 		
 		# Return Record
@@ -571,7 +562,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $options [optional] - keep, remove, empty
 	 * @return Doctrine_Record
 	 */
-	public function applyRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
+	public static function applyRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
 		# Prepare
 		$Table = $Record->getTable();
 		
@@ -688,7 +679,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $options [optional] - keep, remove, empty
 	 * @return Doctrine_Record
 	 */
-	public function saveRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
+	public static function saveRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
 		# Apply
 		self::applyRecord($Record, $data, $options);
 		
@@ -714,38 +705,38 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $options [optional] - Query, create, only
 	 * @return Doctrine_Record
 	 */
-	public function fetchItem ( $table, $Record = null, array $options = array() ) {
+	public static function fetchItem ( $table, $Record = null, array $options = array() ) {
 		# Prepare
 		$item = $Item = false;
-		$tableName = Bal_Form_Doctrine::getTableName($table);
+		$tableComponentName = self::getTableComponentName($table);
 		
 		# Prepare Options
 		array_keys_keep_ensure($options,array('Query','create','only'));
 		extract($options);
 		
 		# Check
-		if ( is_object($Record) && ($Record instanceOf $tableName) ) {
+		if ( is_object($Record) && ($Record instanceOf $tableComponentName) ) {
 			return $Record;
 		}
 		
 		# Fetch Param
-		$item = self::fetchItemIdentifier($tableName, $only);
+		$item = self::fetchItemIdentifier($tableComponentName, $only);
 		
 		# Load
 		if ( $item ) {
 			# Prepare Query
 			if ( $Query === null ) {
-				$Query = self::fetchQuery($tableName);
+				$Query = self::fetchQuery($tableComponentName);
 			}
 			
 			# Search Query
 			$fetch = false;
 			if ( is_numeric($item) ) {
-				$Query->andWhere($tableName.'.id = ?', $item);
+				$Query->andWhere($tableComponentName.'.id = ?', $item);
 				$fetch = true;
 			}
 			elseif ( is_string($item) ) {
-				$Query->andWhere($tableName.'.code = ?', $item);
+				$Query->andWhere($tableComponentName.'.code = ?', $item);
 				$fetch = true;
 			}
 			
@@ -756,8 +747,8 @@ abstract class Bal_Doctrine_Core {
 		}
 		
 		# Create if empty?
-		if ( $create && !delve($Item,'id') && $tableName ) {
-			$Item = new $tableName();
+		if ( $create && !delve($Item,'id') && $tableComponentName ) {
+			$Item = new $tableComponentName();
 		}
 		
 		# Return Item
@@ -772,19 +763,19 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $options [optional] - keep, remove, empty | Query, create, only
 	 * @return Doctrine_Record
 	 */
-	public function saveItem ( $table, Doctrine_Record $Record = null, array $options = array() ) {
+	public static function saveItem ( $table, Doctrine_Record $Record = null, array $options = array() ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
-		$Request = self::getRequest();
+		$Request = Bal_App::getRequest();
 		$Log = Bal_App::getLog();
 		$item = $Item = null;
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = Bal_Form_Doctrine::getTableName($table);
-		$tableNameLower = strtolower($tableName);
+		$Table = self::getTable($table);
+		$tableComponentName = self::getTableComponentName($table);
+		$tableComponentNameLower = strtolower($tableComponentName);
 		
 		# Fetch
 		$Item = self::fetchItem($table,$Record,$options);
-		$item = self::fetchItemParam($tableName);
+		$item = self::fetchItemParam($tableComponentName);
 		
 		# Handle
 		try {
@@ -801,17 +792,17 @@ abstract class Bal_Doctrine_Core {
 			self::saveRecord($Item, $item, $options);
 			
 			# Stop Duplicates
-			$Request->setPost($tableName, $Item->id);
+			$Request->setPost($tableComponentName, $Item->id);
 			
 			# Finish
 			$Connection->commit();
 			
 			# Log
 			$log_details = array(
-				$tableName			=> $Item->toArray(),
-				$tableName.'_url'	=> self::getActionControllerView()->url()->item($Item)->toString()
+				$tableComponentName			=> $Item->toArray(),
+				$tableComponentName.'_url'	=> self::getActionControllerView()->url()->item($Item)->toString()
 			);
-			$Log->log(array('log-'.$tableNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+			$Log->log(array('log-'.$tableComponentNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		}
 		catch ( Exception $Exception ) {
 			# Rollback
@@ -833,18 +824,18 @@ abstract class Bal_Doctrine_Core {
 	 * @param Doctrine_Record $Record
 	 * @return Doctrine_Record
 	 */
-	public function deleteItem ( $table, Doctrine_Record $Record = null ) {
+	public static function deleteItem ( $table, Doctrine_Record $Record = null ) {
 		# Prepare
 		$Connection = Bal_App::getDataConnection();
 		$Log = Bal_App::getLog();
 		$result = true;
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = Bal_Form_Doctrine::getTableName($table);
-		$tableNameLower = strtolower($tableName);
+		$Table = self::getTable($table);
+		$tableComponentName = self::getTableComponentName($table);
+		$tableComponentNameLower = strtolower($tableComponentName);
 		
 		# Fetch
 		$Item = self::fetchItem($table, $Record);
-		$item = self::fetchItemParams($tableName);
+		$item = self::fetchItemParam($tableComponentName);
 		
 		# Handle
 		try {
@@ -864,12 +855,12 @@ abstract class Bal_Doctrine_Core {
 		
 				# Log
 				$log_details = array(
-					$tableName	=> $ItemArray
+					$tableComponentName	=> $ItemArray
 				);
-				$Log->log(array('log-'.$tableNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+				$Log->log(array('log-'.$tableComponentNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 			}
 			else {
-				throw new Zend_Exception('error-'.$tableNameLower.'-missing');
+				throw new Zend_Exception('error-'.$tableComponentNameLower.'-missing');
 			}
 		}
 		catch ( Exception $Exception ) {

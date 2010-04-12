@@ -209,7 +209,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * Clear User
 	 * @return bool
 	 */
-	public function resetUser ( ) {
+	public function clearUser ( ) {
 		# Clear
 		$this->_User = null;
 		# chain
@@ -941,5 +941,15 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	# ========================
 	# GETTERS
 	
+	
+	/**
+	 * Determines and returns the label value for the passed $Record
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $Item
+	 * @return string
+	 */
+	public static function getItemLabel ( $Item ) {
+		return Bal_Doctrine_Core::getRecordLabel($Item);
+	}
 	
 }

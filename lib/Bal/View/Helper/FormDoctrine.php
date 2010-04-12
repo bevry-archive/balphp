@@ -112,7 +112,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$type = delve($attribs,'type');
 		
 		# Fetch Table Information
-		$Table = Bal_Form_Doctrine::getTable($table);
+		$Table = Bal_Doctrine_Core::getTable($table);
 		$properties = array();
 		if ( $Table->hasRelation($field) ) {
 			# Relation
@@ -162,7 +162,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		switch ( $type ) {
 			case 'relation':
 				# Determine
-				$text_field = Bal_Form_Doctrine::getTableLabelFieldName($RelationTable);
+				$text_field = Bal_Doctrine_Core::getTableLabelFieldName($RelationTable);
 				
 				# Fetch
 				try {

@@ -45,13 +45,13 @@ class Bal_Form_Doctrine
 	 */
 	public static function getFormName ( $table ) {
 		# Prepare
-		$tableName = self::getTableName($table);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
 		
 		# Handle
-		$formName = $tableName;
+		$formName = $tableComponentName;
 		
 		# Return
-		return $tableName;
+		return $tableComponentName;
 	}
 	
 	/**
@@ -83,8 +83,8 @@ class Bal_Form_Doctrine
 	public static function applyElementRelationProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
 		$Table = Bal_Doctrine_Core::getTable($table);
-		$tableName = Bal_Doctrine_Core::getTableName($table);
-		$fieldName = Bal_Doctrine_Core::getFieldName($field);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
+		$fieldName = Bal_Doctrine_Core::getFieldName($Table,$field);
 		
 		# Prepare
 		$Relation = $Table->getRelation($fieldName);
@@ -137,11 +137,11 @@ class Bal_Form_Doctrine
 	 * @param mixed $Record [optional] - The record to use to set the current value of the element
 	 * @return Zend_Form_Element
 	 */
-	public static function applyElementFieldProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {Form_Element &$Element, $table, $field, $Record = null ) {
+	public static function applyElementFieldProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
 		$Table = Bal_Doctrine_Core::getTable($table);
-		$tableName = Bal_Doctrine_Core::getTableName($table);
-		$fieldName = Bal_Doctrine_Core::getFieldName($field);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
+		$fieldName = Bal_Doctrine_Core::getFieldName($Table,$field);
 		
 		# Prepare
 		$properties = $Table->getDefinitionOf($fieldName);
@@ -186,10 +186,10 @@ class Bal_Form_Doctrine
 	public static function applyElementProperties ( Zend_Form_Element &$Element, $table, $field, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
-		$Table = Bal_Form_Doctrine::getTable($table);
-		$tableName = Bal_Form_Doctrine::getTableName($table);
-		$tableNameLower = strtolower($tableName);
-		$fieldName = Bal_Doctrine_Core::getFieldName($field);
+		$Table = Bal_Doctrine_Core::getTable($table);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
+		$tableComponentNameLower = strtolower($tableComponentName);
+		$fieldName = Bal_Doctrine_Core::getFieldName($Table,$field);
 	
 		# Handle
 		$hasRelation = $Table->hasRelation($fieldName);
@@ -199,8 +199,8 @@ class Bal_Form_Doctrine
 			$fieldNameLower = strtolower($fieldName);
 			
 			# Prepare Attributes
-			$label = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
-			$description = $Locale->translate_default($tableNameLower.'-'.$fieldNameLower.'-description', array(), '');
+			$label = $Locale->translate_default($tableComponentNameLower.'-'.$fieldNameLower.'-title', array(), ucwords(str_replace('_', ' ',$fieldName)));
+			$description = $Locale->translate_default($tableComponentNameLower.'-'.$fieldNameLower.'-description', array(), '');
 			
 			# Apply Attributes
 			$Element->setName($fieldName);
@@ -263,18 +263,18 @@ class Bal_Form_Doctrine
 	public static function createForm ( $table ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
-		$tableName = self::getTableName($table);
-		$tableNameLower = strtolower($tableName);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
+		$tableComponentNameLower = strtolower($tableComponentName);
 		$Form = new Zend_Form();
-		$Form->setElementsBelongTo($tableName);
+		$Form->setElementsBelongTo($tableComponentName);
 		$formName = self::getFormName($table);
 		
 		# Path
 		$Form->addPrefixPath('Bal_Form', 'Bal/Form');
 		
 		# Apply Labels
-		$formLabel = $Locale->translate_default($tableNameLower.'-form-title', array(), ucwords($formName));
-		$formDescription = $Locale->translate_default($tableNameLower.'-form-description', array(), false);
+		$formLabel = $Locale->translate_default($tableComponentNameLower.'-form-title', array(), ucwords($formName));
+		$formDescription = $Locale->translate_default($tableComponentNameLower.'-form-description', array(), false);
 		if ( $formLabel ) $Form->setLegend($formLabel);
 		if ( is_string($formDescription) ) $Form->setDescription($formDescription);
 		
@@ -293,7 +293,7 @@ class Bal_Form_Doctrine
 	public static function generateForm ( $table, $Record = null ) {
 		# Prepare
 		$Form = self::createForm($table);
-		$Table = self::getTable($table);
+		$Table = Bal_Doctrine_Core::getTable($table);
 		
 		# Fetch Field
 		$columns = $Table->getColumns();
@@ -372,8 +372,8 @@ class Bal_Form_Doctrine
 	public static function addElements ( Zend_Form &$Form, $table, $elements, $Record = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
-		$tableName = self::getTableName($table);
-		$Table = self::getTable($table);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
+		$Table = Bal_Doctrine_Core::getTable($table);
 		
 		# Cycle through Elements
 		if ( is_simple_array($elements) ) {
@@ -413,8 +413,8 @@ class Bal_Form_Doctrine
 				
 				# Prepare Labels
 				$groupAttribs = array();
-				$groupLabel = $Locale->translate_default($tableName.'-form-group-'.$groupName.'-title', array(), ucwords($groupName));
-				$groupDescription = $Locale->translate_default($tableName.'-form-group-'.$groupName.'-description', array(), '');
+				$groupLabel = $Locale->translate_default($tableComponentName.'-form-group-'.$groupName.'-title', array(), ucwords($groupName));
+				$groupDescription = $Locale->translate_default($tableComponentName.'-form-group-'.$groupName.'-description', array(), '');
 				if ( $groupLabel ) $groupAttribs['legend'] = $groupLabel;
 				if ( $groupDescription ) $groupAttribs['description'] = $groupDescription;
 				
@@ -436,13 +436,13 @@ class Bal_Form_Doctrine
 	 */
 	public static function fetchForm ( $table, $Record = null ) {
 		# Prepare
-		$tableName = self::getTableName($table);
+		$tableComponentName = Bal_Doctrine_Core::getTableComponentName($table);
 		$Form = null;
 		
 		# Check to see if table has form
-		if ( method_exists($tableName, 'fetchForm') ) {
-			$Form = call_user_func_array($tableName.'::fetchForm', array($Record));
-			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableName::fetchForm
+		if ( method_exists($tableComponentName, 'fetchForm') ) {
+			$Form = call_user_func_array($tableComponentName.'::fetchForm', array($Record));
+			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableComponentName::fetchForm
 		} else {
 			$Form = self::generateForm($table, $Record);
 		}
