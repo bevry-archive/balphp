@@ -537,26 +537,36 @@ class Bal_User extends Base_Bal_User {
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('Identity','User','UserFor','UserFrom'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('fetch','Identity','User','UserFor','UserFrom'));
 		extract($params);
 		
-		# Prare Identity
-		if ( !$Identity ) {
-			$Identity = Bal_Doctrine_Core::getIdentity();
-		}
-		
 		# Query
-		$Query = Doctrine_Query::create()
-			->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
-			->from('User, User.Avatar Avatar')
-			->orderBy('User.username ASC');
+		$Query = Doctrine_Query::create();
+		
+		# Handle
+		if ( $fetch === 'Subscribers' ) {
+			$Query
+				->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+				->addSelect('User.subscriptions, SubscriptionTag.name, COUNT(MessagesPublishedFor.id) as subscription_published_count')
+				->from('User.SubscriptionTags SubscriptionTag')
+				->where('User.status = ?', 'published')
+				->andWhere('User.subscriptions != ?', '')
+				->orderBy('User.email ASC')
+				->leftJoin('User.MessagesFor MessagesPublishedFor WITH MessagesPublishedFor.template = ? AND MessagesPublishedFor.status = ?', array('content-subscription','published'))
+				->groupBy('User.id')
+				;
+		} else {
+			$Query
+				->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+				->from('User, User.Avatar Avatar')
+				->orderBy('User.username ASC')
+				;
+		}
 		
 		# Criteria
-		if ( $Identity ) {
-			# Ensure returned users are below our level - pawns should be unaware of kings
+		if ( $Identity ) { // Ensure returned users are below our level - pawns should be unaware of kings
 			$Query->andWhere('User.level <= ?', $Identity->level);
 		}
-		
 		if ( $User ) {
 			$User = Bal_Doctrine_Core::resolveId($User);
 			$Query->andWhere('User.id = ?', $User);
