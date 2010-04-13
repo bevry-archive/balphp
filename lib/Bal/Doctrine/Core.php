@@ -208,25 +208,6 @@ abstract class Bal_Doctrine_Core {
 	# ========================
 	# PARAMS
 	
-	/**
-	 * Determine and return the result of the desired param of $param
-	 * If we could not find the param, then return $default
-	 * @version 1.1, April 12, 2010
-	 * @param string $param
-	 * @param mixed $default
-	 * @return mixed
-	 */
-	public static function fetchParam ( $param = null, $default = false ) {
-		# Prepare
-		$Request = Bal_App::getRequest();
-		
-		# Fetch result
-		$result = fetch_param($param, $Request->getParam($param, $default));
-		
-		# Return result
-		return $result;
-	}
-	
 	
 	/**
 	 * Determine and return the value of the param associated with the item $tableComponentName
@@ -242,7 +223,7 @@ abstract class Bal_Doctrine_Core {
 		if ( !$tableComponentName ) return $item;
 		
 		# Fetch item
-		$item = self::fetchParam($tableComponentName, self::fetchParam(strtolower($tableComponentName), false));
+		$item = Bal_App::fetchParam($tableComponentName, Bal_App::fetchParam(strtolower($tableComponentName), false));
 		
 		# Return item
 		return $item;
@@ -269,8 +250,8 @@ abstract class Bal_Doctrine_Core {
 		# Handle Empty
 		if ( !$item && !$only ) {
 			# Try Generic Params
-			$item = self::fetchParam('code', false);
-			if ( !$item ) $item = self::fetchParam('id', false);
+			$item = Bal_App::fetchParam('code', false);
+			if ( !$item ) $item = Bal_App::fetchParam('id', false);
 		}
 		
 		# Return item

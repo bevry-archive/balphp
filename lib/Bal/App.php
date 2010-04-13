@@ -515,6 +515,25 @@ class Bal_App {
 	}
 	
 	/**
+	 * Determine and return the result of the desired param of $param
+	 * If we could not find the param, then return $default
+	 * @version 1.1, April 12, 2010
+	 * @param string $param
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public static function fetchParam ( $param = null, $default = false ) {
+		# Prepare
+		$Request = self::getRequest();
+		
+		# Fetch result
+		$result = fetch_param($param, $Request->getParam($param, $default));
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
 	 * Get the Front Controller's Router
 	 */
 	static public function getRouter ( ) {
