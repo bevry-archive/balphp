@@ -194,7 +194,6 @@ abstract class Bal_Doctrine_Core {
 		# Check to see if table has form
 		if ( method_exists($tableComponentName, 'fetchListingFields') ) {
 			$fields = call_user_func_array($tableComponentName.'::fetchListingFields', array());
-			// in call_user_func_array to prevent issue on older php version, rather than just doing $tableComponentName::fetchForm
 		} else {
 			$labelColumnName = self::getTableLabelFieldName($table);
 			$fields = array($labelColumnName);
