@@ -151,7 +151,7 @@ abstract class Bal_Doctrine_Core {
 	}
 	
 	/**
-	 * Determine and return the Table's componentName for the desired $table
+	 * Determine and return the Table's tableComponentName for the desired $table
 	 * @version 1.1, April 12, 2010
 	 * @param mixed $table
 	 * @return string
@@ -421,13 +421,13 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function fetchRecord ( $table, array $params = array() ) {
 		# Prepare
-		$componentName = self::getTableComponentName($table);
+		$tableComponentName = self::getTableComponentName($table);
 		
 		# Apply
 		$params['limit'] = 1;
 		
 		# Fetch
-		$result = $componentName::fetch($params);
+		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
 		
 		# Return result
 		return $result;
@@ -442,10 +442,10 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function fetchRecords ( $table, array $params = array() ) {
 		# Prepare
-		$componentName = self::getTableComponentName($table);
+		$tableComponentName = self::getTableComponentName($table);
 		
 		# Fetch
-		$result = $componentName::fetch($params);
+		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
 		
 		# Return result
 		return $result;
@@ -460,13 +460,13 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function fetchQuery ( $table, array $params = array() ) {
 		# Prepare
-		$componentName = self::getTableComponentName($table);
+		$tableComponentName = self::getTableComponentName($table);
 		
 		# Apply
 		$params['returnQuery'] = true;
 		
 		# Fetch
-		$result = $componentName::fetch($params);
+		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
 		
 		# Return result
 		return $result;
