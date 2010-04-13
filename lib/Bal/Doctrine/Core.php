@@ -465,7 +465,7 @@ abstract class Bal_Doctrine_Core {
 		$params['returnQuery'] = true;
 		
 		# Fetch
-		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
+		$result = call_user_func(array($tableComponentName,'fetch'),$params);
 		
 		# Return result
 		return $result;
@@ -519,7 +519,7 @@ abstract class Bal_Doctrine_Core {
 			}
 			
 			# Check Find
-			if ( !delve($Record,'id') ) {
+			if ( delve($Record,'id') ) {
 				# We found a Record, Stop cycling
 				break;
 			}
