@@ -461,40 +461,42 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	
+	# ========================
+	# CRUD HELPERS
+	
+	
 	/**
-	 * Fetch the Invoices For
-	 * @return array
+	 * Fetch all the records for public access
+	 * @version 1.0, April 12, 2010
+	 * @return mixed
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('Invoice','Booking','User','UserFor','UserFrom'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('Invoice','User','UserFor','UserFrom'));
 		extract($params);
 		
 		# Query
 		$Query = Doctrine_Query::create()
 			->select('Invoice.*, InvoiceItem.*, Booking.*, Media.*')
-			->from('Invoice, Invoice.InvoiceItems InvoiceItem, Invoice.Booking Booking, Invoice.Media Media')
+			->from('Invoice, Invoice.InvoiceItems InvoiceItem')
 			->orderBy('Invoice.created_at ASC');
 		
 		# Criteria
 		if ( $User ) {
-			$User = Bal_Dontrine_Core::resolveId($User);
+			$User = Bal_Doctrine_Core::resolveId($User);
 			$Query->andWhere('UserFor.id = ? OR i.UserFrom.id = ?', array($User,$User));
 		}
 		if ( $UserFor ) {
-			$UserFor = Bal_Dontrine_Core::resolveId($UserFor);
+			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
 			$Query->andWhere('UserFor.id = ?', $UserFor);
 		}
 		if ( $UserFrom ) {
-			$UserFrom = Bal_Dontrine_Core::resolveId($UserFrom);
+			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
 			$Query->andWhere('UserFrom.id = ?', $UserFrom);
 		}
-		if ( $Booking ) {
-			$Booking = Bal_Dontrine_Core::resolveId($Booking);
-			$Query->andWhere('Booking.id = ?', $Booking);
-		}
 		if ( $Invoice ) {
-			$Invoice = Bal_Dontrine_Core::resolveId($Invoice);
+			$Invoice = Bal_Doctrine_Core::resolveId($Invoice);
 			$Query->andWhere('Invoice.id = ?', $Invoice);
 		}
 		

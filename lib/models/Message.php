@@ -340,13 +340,18 @@ class Bal_Message extends Base_Bal_Message
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	# ========================
+	# CRUD HELPERS
+	
+	
 	/**
-	 * Fetch the Messages
-	 * @return array
+	 * Fetch all the records for public access
+	 * @version 1.0, April 12, 2010
+	 * @return mixed
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('Message','Booking','User','UserFrom','UserFor'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('Message','User','UserFrom','UserFor'));
 		extract($params);
 		
 		# Query
@@ -358,24 +363,20 @@ class Bal_Message extends Base_Bal_Message
 		
 		# Criteria
 		if ( $User ) {
-			$User = Bal_Dontrine_Core::resolveId($User);
+			$User = Bal_Doctrine_Core::resolveId($User);
 			$Query->andWhere('UserFor.id = ? OR UserFrom.id = ?', array($User,$User));
 		}
 		if ( $UserFor ) {
-			$UserFor = Bal_Dontrine_Core::resolveId($UserFor);
+			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
 			$Query->andWhere('UserFor.id = ?', $UserFor);
 		}
 		if ( $UserFrom ) {
-			$UserFrom = Bal_Dontrine_Core::resolveId($UserFrom);
+			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
 			$Query->andWhere('UserFrom.id = ?', $UserFrom);
 		}
 		if ( $Message ) {
-			$Message = Bal_Dontrine_Core::resolveId($Message);
+			$Message = Bal_Doctrine_Core::resolveId($Message);
 			$Query->andWhere('Message.id = ?', $Message);
-		}
-		if ( $Booking ) {
-			$Booking = Bal_Dontrine_Core::resolveId($Booking);
-			$Query->andWhere('Booking.id = ?', $Booking);
 		}
 		
 		# Fetch
