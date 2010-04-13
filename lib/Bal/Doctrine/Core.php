@@ -694,6 +694,10 @@ abstract class Bal_Doctrine_Core {
 		array_keys_keep_ensure($options,array('Query','create','only'));
 		extract($options);
 		
+		# Default
+		if ( $only === null ) $only = false;
+		if ( $create === null )  $create = true;
+		
 		# Check
 		if ( is_object($Record) && ($Record instanceOf $tableComponentName) ) {
 			return $Record;
