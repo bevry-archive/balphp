@@ -385,8 +385,8 @@ abstract class Bal_Doctrine_Core {
 				# With Paging
 				$_paging = array(
 					'page' => get_param('page', 1),
-					'items' => self::getConfig('bal.paging.items'),
-					'chunk' => self::getConfig('bal.paging.chunk')
+					'items' => Bal_App::getConfig('bal.paging.items'),
+					'chunk' => Bal_App::getConfig('bal.paging.chunk')
 				);
 				if ( $paging === true ) {
 					$paging = $_paging;
@@ -1042,6 +1042,116 @@ abstract class Bal_Doctrine_Core {
 		
 		# Done
 		return $result;
+	}
+	
+	
+	# ========================
+	# PAGING
+	
+	
+	/**
+	 * Get the Pager
+	 * @param integer $page_current [optional] Which page are we on?
+	 * @param integer $page_items [optional] How many items per page?
+	 * @return
+	 */
+	public static function getPager($DQ, $page_current = 1, $page_items = 10){
+		# Fetch
+		$Pager = new Doctrine_Pager(
+			$DQ,
+			$page_current,
+			$page_items
+		);
+		
+		# Return
+		return $Pager;
+	}
+	
+	/**
+	 * Get the Pages
+	 * @param unknown_type $Pager
+	 * @param unknown_type $PagerRange
+	 * @param unknown_type $page_current
+	 */
+	public static function getPages($Pager, $PagerRange, $page_current = 1){
+		# Paging
+		$page_first = $Pager->getFirstPage();
+		$page_last = $Pager->getLastPage();
+		$Pages = $PagerRange->rangeAroundPage();
+		foreach ( $Pages as &$Page ) {
+			$Page = array(
+				'number' => $Page,
+				'title' => $Page
+			);
+		}
+		$Pages[] = array('number' => $Pager->getPreviousPage(), 'title' => 'prev');
+		$Pages[] = array('number' => $Pager->getNextPage(), 'title' => 'next');
+		foreach ( $Pages as &$Page ) {
+			$page = $Page['number'];
+			$Page['selected'] = $page == $page_current;
+			if ( is_numeric($Page['title']) ) {
+				$Page['disabled'] = $page < $page_first || $page > $page_last;
+			} else {
+				$Page['disabled'] = $page < $page_first || $page > $page_last || $page == $page_current;
+			}
+		}
+		
+		# Done
+		return $Pages;
+	}
+	
+	/**
+	 * Get the Paging Details
+	 * @param unknown_type $DQ
+	 * @param unknown_type $page_current
+	 * @param unknown_type $page_items
+	 * @param unknown_type $pages_chunk
+	 */
+	public static function getPaging($DQ, $page_current = 1, $page_items = 5, $pages_chunk = 5){
+		# Prepare
+		$page_current = intval($page_current);
+		$page_items = intval($page_items);
+		$pages_chunk = intval($pages_chunk);
+		
+		# Fetch
+		$Pager = self::getPager($DQ, $page_current, $page_items);
+		
+		# Results
+		$PagerRange = new Doctrine_Pager_Range_Sliding(array(
+				'chunk' => $pages_chunk
+    		),
+			$Pager
+		);
+		$Items = $Pager->execute();
+		$Items_count = count($Items);
+		
+		# Get Pages
+		$Pages = self::getPages($Pager, $PagerRange, $page_current);
+		
+		# Check page current
+		$page_first = $Pager->getFirstPage();
+		$page_last = $Pager->getLastPage();
+		if ( $page_current > $page_last ) $page_current = $page_last;
+		elseif ( $page_current < $page_first ) $page_current = $page_first;
+		
+		# Totals
+		$total = $page_last*$page_items;
+		$finish = $page_last==$page_current ? $total : $page_current*$page_items;
+		$start = ($page_current-1)*$page_items+1;
+		
+		# Done
+		return array($Items, array(
+			'first' => $page_first,
+			'last' => $page_last,
+			'current' => $page_current,
+			'pages' => $Pages,
+			'items' => $page_items,
+			'count' => $Items_count,
+			'chunk' => $pages_chunk,
+			'start' => $start,
+			'finish' => $finish,
+			'total' => $total
+		));
 	}
 	
 }
