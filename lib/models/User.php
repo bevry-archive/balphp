@@ -544,23 +544,27 @@ class Bal_User extends Base_Bal_User {
 		$Query = Doctrine_Query::create();
 		
 		# Handle
-		if ( $fetch === 'Subscribers' ) {
-			$Query
-				->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
-				->addSelect('User.subscriptions, SubscriptionTag.name, COUNT(MessagesPublishedFor.id) as subscription_published_count')
-				->from('User.SubscriptionTags SubscriptionTag')
-				->where('User.status = ?', 'published')
-				->andWhere('User.subscriptions != ?', '')
-				->orderBy('User.email ASC')
-				->leftJoin('User.MessagesFor MessagesPublishedFor WITH MessagesPublishedFor.template = ? AND MessagesPublishedFor.status = ?', array('content-subscription','published'))
-				->groupBy('User.id')
-				;
-		} else {
-			$Query
-				->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
-				->from('User, User.Avatar Avatar')
-				->orderBy('User.username ASC')
-				;
+		switch ( $fetch ) {
+			case 'Subscribers':
+				$Query
+					->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+					->addSelect('User.subscriptions, SubscriptionTag.name, COUNT(MessagesPublishedFor.id) as subscription_published_count')
+					->from('User.SubscriptionTags SubscriptionTag')
+					->where('User.status = ?', 'published')
+					->andWhere('User.subscriptions != ?', '')
+					->orderBy('User.email ASC')
+					->leftJoin('User.MessagesFor MessagesPublishedFor WITH MessagesPublishedFor.template = ? AND MessagesPublishedFor.status = ?', array('content-subscription','published'))
+					->groupBy('User.id')
+					;
+				break;
+			
+			default:
+				$Query
+					->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+					->from('User, User.Avatar Avatar')
+					->orderBy('User.username ASC')
+					;
+				break;
 		}
 		
 		# Criteria
