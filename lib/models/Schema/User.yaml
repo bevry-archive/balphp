@@ -43,6 +43,8 @@ Bal_User:
                 auto: true
         website:
             type: string(255)
+        paypal:
+            type: string(255)
             
         email:
             type: string(255)
