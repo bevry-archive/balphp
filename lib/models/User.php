@@ -414,7 +414,7 @@ class Bal_User extends Base_Bal_User {
 	
 	
 	# ========================
-	# CHECKS
+	# Verify
 	
 	
 	/**
@@ -424,7 +424,7 @@ class Bal_User extends Base_Bal_User {
 	 * @param array $params - Identity
 	 * @return bool	whether or not the check passed
 	 */
-	public static function check ( array $params ) {
+	public function verify ( array $params ) {
 		# Check
 		if ( !in_array($Event_type,array('postInsert')) ) {
 			# Not designed for these events
