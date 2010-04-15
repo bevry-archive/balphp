@@ -418,36 +418,35 @@ class Bal_User extends Base_Bal_User {
 	
 	
 	/**
-	 * Ensure the current Identity has sufficient access to perform the operation
-	 * @version 1.0, April 12, 2010
-	 * @param User $Identity
-	 * @param string $action [optional]
-	 * @param bool $throw [optional]
+	 * Performs additional checks to ensure record validity
+	 * @version 1.1, April 14, 2010
+	 * @since 1.0, April 12, 2010
+	 * @param array $params - Identity
 	 * @return bool	whether or not the check passed
 	 */
-	public static function checkAccess ( User $Identity, $action = null, $throw = true ) {
+	public static function check ( array $params ) {
 		# Check
 		if ( !in_array($Event_type,array('postInsert')) ) {
 			# Not designed for these events
 			return null;
 		}
 		
+		# Prepare params
+		array_keys_keep_ensure($params,array('Identity','access'));
+		
 		# Prepare result
 		$result = true;
 		
-		# Prepare action
-		if ( !$action ) {
-			# Default
-			$action = !delve($User,'id') ? 'create' : 'update';
-		}
+		# --------------------------
 		
 		# Check Permission
+		# Ensures the current Identity has sufficient access to perform the operation
 		if ( !$Identity->hasPermission('user') ) {
-			# Does not have CRUD permissions
-			# Fallback Checks
-		
+			// Does not have CRUD permissions
+		  	// Perform Fallback Checks
+			
 			# Check Ownership
-			if ( $action === 'update' && delve($this,'id') !== $Identity->id ) {
+			if ( delve($this,'id') && delve($this,'id') !== $Identity->id ) {
 				if ( $throw ) {
 					# Throw Exception
 					throw new Doctrine_Exception('error-user-access');
@@ -456,6 +455,8 @@ class Bal_User extends Base_Bal_User {
 				$result = false;
 			}
 		}
+		
+		# --------------------------
 		
 		# Return result
 		return $result;
