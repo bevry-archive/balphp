@@ -213,4 +213,43 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $url;
 	}
 	
+	
+	# ========================
+	# GETTERS
+	
+	
+	/**
+	 * Get a Record based upon fetch standards
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return mixed
+	 */
+	public function fetchRecord ( $table, array $params = array() ) {
+		# Force
+		$params = array_merge($params,array(
+			'hydrationMode' => Doctrine::HYDRATE_ARRAY,
+			'returnQuery' => false
+		));
+		# Forward
+		return $this->getApp()->fetchRecord($table,$params);
+	}
+	
+	/**
+	 * Get Records based upon fetch standards
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return mixed
+	 */
+	public function fetchRecords ( $table, array $params = array() ) {
+		# Force
+		$params = array_merge($params,array(
+			'hydrationMode' => Doctrine::HYDRATE_ARRAY,
+			'returnQuery' => false
+		));
+		# Forward
+		return $this->getApp()->fetchRecords($table,$params);
+	}
+	
 }

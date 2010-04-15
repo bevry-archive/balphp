@@ -279,7 +279,7 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
-	public static function prepareFetchParams( array &$params, array $keep ) {
+	public static function prepareFetchParams( array &$params, array $keep = array() ) {
 		# Prepare
 		$_keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging');
 		$keep = array_merge($keep,$_keep);
@@ -358,7 +358,7 @@ abstract class Bal_Doctrine_Core {
 		if ( $relations ) {
 			# Add Relations
 			foreach ( $listingFields as $field ) {
-				if ( $Table->hasRelation($field) ) {
+				if ( $Table->hasRelation($field) && !$Query->contains($tableComponentName.'.'.$field.' '.$field) ) {
 					$Query
 						->addSelect($field.'.*')
 						->addFrom($tableComponentName.'.'.$field.' '.$field)
@@ -410,6 +410,40 @@ abstract class Bal_Doctrine_Core {
 	# ========================
 	# FETCH RECORD
 	
+	/**
+	 * Trigger the Records fetch command, or emulate it
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return mixed
+	 */
+	public static function fetch ( $table, array $params = array() ) {
+		# Prepare
+		$tableComponentName = self::getTableComponentName($table);
+		$labelFieldName = self::getTableLabelFieldName($table);
+		
+		# Check
+		if ( method_exists($tableComponentName,'fetch') ) {
+			# Forward
+			$result = call_user_func(array($tableComponentName,'fetch'),$params);
+		}
+		else {
+			# Prepare
+			Bal_Doctrine_Core::prepareFetchParams($params);
+			
+			# Query
+			$Query = Doctrine_Query::create()
+				->select($tableComponentName.'.*')
+				->from($tableComponentName)
+				->orderBy($tableComponentName.'.'.$labelFieldName.' ASC');
+		
+			# Fetch
+			$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,$tableComponentName);
+		}
+		
+		# Return result
+		return $result;
+	}
 	
 	/**
 	 * Get a Record based upon fetch standards
@@ -419,14 +453,11 @@ abstract class Bal_Doctrine_Core {
 	 * @return mixed
 	 */
 	public static function fetchRecord ( $table, array $params = array() ) {
-		# Prepare
-		$tableComponentName = self::getTableComponentName($table);
-		
-		# Apply
+		# Force
 		$params['limit'] = 1;
 		
 		# Fetch
-		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
+		$result = self::fetch($table,$params);
 		
 		# Return result
 		return $result;
@@ -440,11 +471,8 @@ abstract class Bal_Doctrine_Core {
 	 * @return mixed
 	 */
 	public static function fetchRecords ( $table, array $params = array() ) {
-		# Prepare
-		$tableComponentName = self::getTableComponentName($table);
-		
 		# Fetch
-		$result = call_user_func(array($tableComponentName,'::fetch'),$params);
+		$result = self::fetch($table,$params);
 		
 		# Return result
 		return $result;
@@ -458,14 +486,11 @@ abstract class Bal_Doctrine_Core {
 	 * @return Doctrine_Query
 	 */
 	public static function fetchQuery ( $table, array $params = array() ) {
-		# Prepare
-		$tableComponentName = self::getTableComponentName($table);
-		
-		# Apply
+		# Force
 		$params['returnQuery'] = true;
 		
 		# Fetch
-		$result = call_user_func(array($tableComponentName,'fetch'),$params);
+		$result = self::fetch($table,$params);
 		
 		# Return result
 		return $result;

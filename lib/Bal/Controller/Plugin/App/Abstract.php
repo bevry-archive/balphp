@@ -877,8 +877,33 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @param mixed $Item
 	 * @return string
 	 */
-	public static function getItemLabel ( $Item ) {
+	public function getItemLabel ( $Item ) {
+		# Forward
 		return Bal_Doctrine_Core::getRecordLabel($Item);
+	}
+	
+	/**
+	 * Get a Record based upon fetch standards
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return mixed
+	 */
+	public function fetchRecord ( $table, array $params = array() ) {
+		# Forward
+		return Bal_Doctrine_Core::fetchRecord($table,$params);
+	}
+	
+	/**
+	 * Get Records based upon fetch standards
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return mixed
+	 */
+	public function fetchRecords ( $table, array $params = array() ) {
+		# Forward
+		return Bal_Doctrine_Core::fetchRecords($table,$params);
 	}
 	
 }
