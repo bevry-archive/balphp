@@ -370,12 +370,12 @@ class Bal_Invoice extends Base_Bal_Invoice
 		
 		# Create Invoice Insert Messages
 		$Receivers = array(
-			delve($Invoice,'For'),
-			delve($Invoice,'By')
+			delve($Invoice,'UserFor'),
+			delve($Invoice,'UserBy')
 		);
 		foreach ( $Receivers as $Receiver ) {
 			$Message = new Message();
-			$Message->For = $Receiver;
+			$Message->UserFor = $Receiver;
 			$Message->Booking = $Booking;
 			$Message->useTemplate('invoice-insert');
 			$Message->save();
