@@ -234,6 +234,17 @@ class Bal_Message extends Base_Bal_Message
 		
 		# preInsert
 		if ( $Event_type === 'preInsert' ) {
+			# Prepare
+			$UserFor = delve($Message,'UserFor');
+			$UserFor_id = delve($UserFor,'id');
+			
+			# Hash
+			$hash = md5($Message->send_on.$Message->title.$Message->description.$UserFor_id);
+			if ( $Message->hash != $hash ) {
+				$Message->set('hash', $hash, false);
+				$save = true;
+			}
+			
 			# Ensure Only One
 			Doctrine_Query::create()
 				->delete('Message m')
@@ -244,17 +255,6 @@ class Bal_Message extends Base_Bal_Message
 			# Send On
 			if ( !$Message->send_on ) {
 				$Message->set('send_on', doctrine_timestamp(), false);
-				$save = true;
-			}
-			
-			# Prepare
-			$UserFor = delve($Message,'UserFor');
-			$UserFor_id = delve($UserFor,'id');
-			
-			# Hash
-			$hash = md5($Message->send_on.$Message->title.$Message->description.$UserFor_id);
-			if ( $Message->hash != $hash ) {
-				$Message->set('hash', $hash, false);
 				$save = true;
 			}
 		}
