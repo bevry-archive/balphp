@@ -364,15 +364,15 @@ class Bal_Message extends Base_Bal_Message
 		# Criteria
 		if ( $User ) {
 			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('UserFor.id = ? OR UserFrom.id = ?', array($User,$User));
+			$Query->andWhere('Message.UserFor.id = ? OR Message.UserFrom.id = ?', array($User,$User));
 		}
 		if ( $UserFor ) {
 			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
-			$Query->andWhere('UserFor.id = ?', $UserFor);
+			$Query->andWhere('Message.UserFor.id = ?', $UserFor);
 		}
 		if ( $UserFrom ) {
 			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
-			$Query->andWhere('UserFrom.id = ?', $UserFrom);
+			$Query->andWhere('Message.UserFrom.id = ?', $UserFrom);
 		}
 		if ( $Message ) {
 			$Message = Bal_Doctrine_Core::resolveId($Message);

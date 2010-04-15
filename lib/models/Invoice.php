@@ -485,15 +485,15 @@ class Bal_Invoice extends Base_Bal_Invoice
 		# Criteria
 		if ( $User ) {
 			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('UserFor.id = ? OR i.UserFrom.id = ?', array($User,$User));
+			$Query->andWhere('Invoice.UserFor.id = ? OR Invoice.UserFrom.id = ?', array($User,$User));
 		}
 		if ( $UserFor ) {
 			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
-			$Query->andWhere('UserFor.id = ?', $UserFor);
+			$Query->andWhere('Invoice.UserFor.id = ?', $UserFor);
 		}
 		if ( $UserFrom ) {
 			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
-			$Query->andWhere('UserFrom.id = ?', $UserFrom);
+			$Query->andWhere('Invoice.UserFrom.id = ?', $UserFrom);
 		}
 		if ( $Invoice ) {
 			$Invoice = Bal_Doctrine_Core::resolveId($Invoice);
