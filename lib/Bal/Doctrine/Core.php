@@ -728,6 +728,11 @@ abstract class Bal_Doctrine_Core {
 			if ( $fetch ) {
 				$Item = $Query->fetchOne();
 			}
+			
+			# Check if we found what we were looking for
+			if ( !delve($Item,'id') ) {
+				throw new Zend_Exception('error-orm-404');
+			}
 		}
 		
 		# Create if empty?
