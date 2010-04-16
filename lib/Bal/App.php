@@ -478,6 +478,10 @@ class Bal_App {
 		return new Zend_Session_Namespace($name);
 	}
 	
+	static public function getActionControllerView ( ) {
+		return self::getView();
+	}
+	
 	static public function getView ( $clone = false ) {
 		# Prepare
 		$View = null;

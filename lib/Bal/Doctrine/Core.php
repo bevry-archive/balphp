@@ -264,15 +264,59 @@ abstract class Bal_Doctrine_Core {
 	
 	
 	/**
-	 * Fetch the Resources of a User
+	 * Resolve the ID of a Record
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
 	public static function resolveId ( $value ) {
-		$id = is_numeric($value) ? $value : delve($value, 'id');
-		$id = real_value($id);
-		return $id;
+		# Prepare
+		$result = null;
+		
+		# Handle
+		if ( is_numeric($value) ) {
+			# result
+			$result = $value;
+		}
+		else {
+			# other
+			$result = delve($value,'id',delve($value,'code'));
+		}
+		
+		# Postpare
+		$result = real_value($result);
+		
+		# Return result
+		return $result;
 	}
+	
+	/**
+	 * Resolve the ID or Code of a REcord
+	 * @version 1.1, April 12, 2010
+	 * @return array
+	 */
+	public static function resolveIdOrCode ( $value ) {
+		# Prepare
+		$result = null;
+		
+		# Handle
+		if ( is_numeric($value) ) {
+			# result
+			$result = $value;
+		} elseif ( is_string($value) ) {
+			# result
+			$result = $value;
+		} else {
+			# other
+			$result = delve($value,'id',delve($value,'code'));
+		}
+		
+		# Postpare
+		$result = real_value($result);
+		
+		# Return result
+		return $result;
+	}
+	
 	
 	/**
 	 * Fetch the Resources of a User
@@ -688,12 +732,17 @@ abstract class Bal_Doctrine_Core {
 		# Apply
 		self::applyRecord($Record, $data, $options);
 		
+		# Verify
+		$verify_options = delve($options,'verify',array());
+		self::verifyRecord($Record, $verify_options);
+		
 		# Save
 		$Record->save();
 		
 		# Return Record
 		return $Record;
 	}
+	
 	
 	
 	# ========================
@@ -814,7 +863,7 @@ abstract class Bal_Doctrine_Core {
 			# Log
 			$log_details = array(
 				$tableComponentName			=> $Item->toArray(),
-				$tableComponentName.'_url'	=> self::getActionControllerView()->url()->item($Item)->toString()
+				$tableComponentName.'_url'	=> Bal_App::getActionControllerView()->url()->item($Item)->toString()
 			);
 			$Log->log(array('log-'.$tableComponentNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		}
@@ -896,18 +945,67 @@ abstract class Bal_Doctrine_Core {
 	# ========================
 	# ENSURE HELPERS
 	
+	/**
+	 * Verify the Record by cycling through it's checks - Called from within the record
+	 * @version 1.0, April 16, 2010
+	 * @param Doctrine_Record $Record
+	 * @param array $params
+	 * @param array $checks
+	 * @return boolean	wheter or not to save / can also throw exceptions
+	 */
+	public static function verify ( Doctrine_Record $Record, array $params, array $checks ){
+		# Prepare
+		$verify = array();
+		
+		# Ensure
+		foreach ( $checks as $check ) {
+			$check_params = delve($params,$check,array());
+			$verify[] = $Record->$check($check_params);
+		}
+		
+		# Result
+		$result = in_array(true,$verify);
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Verify the Record meets it's requirements before we save
+	 * @version 1.1, April 12, 2010
+	 * @param Doctrine_Record $Record
+	 * @param array $options [optional] - Data to be passed to the verifier
+	 * @return boolean - is valid?
+	 */
+	public static function verifyRecord ( Doctrine_Record $Record, array $params = array() ) {
+		# Prepare
+		$result = true;
+		
+		# Check to see if table has form
+		if ( method_exists($Record, 'verify') ) {
+			# Has Verifier
+			$result = $Record->verify($params);
+		} else {
+			# No Verifier
+			# No Action
+		}
+		
+		# Return result
+		return $result;
+	}
 	
 	/**
 	 * Ensure Consistency
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $Event_type
+	 * @param array $checks
 	 * @return boolean	wheter or not to save
 	 */
-	public static function ensure ( $Event, $Event_type, array $checks ){
+	public static function ensure ( Doctrine_Event $Event, $Event_type, array $checks ){
 		# Prepare
-		$ensure = array();
 		$Invoker = $Event->getInvoker();
+		$ensure = array();
 		
 		# Ensure
 		foreach ( $checks as $check ) {
@@ -925,9 +1023,11 @@ abstract class Bal_Doctrine_Core {
 	/**
 	 * Ensure a One Relation that has a cache
 	 * @version 1.1, April 12, 2010
+	 * @param Doctrine_Event $Event
+	 * @param string $relation
 	 * @return bool
 	 */
-	public static function ensureOne ( $Event, $relation ) {
+	public static function ensureOne ( Doctrine_Event $Event, $relation ) {
 		# Prepare
 		$save = false;
 		
@@ -954,9 +1054,11 @@ abstract class Bal_Doctrine_Core {
 	/**
 	 * Ensure a Many Relation that has a cache
 	 * @version 1.1, April 12, 2010
+	 * @param Doctrine_Event $Event
+	 * @param string $relation
 	 * @return bool
 	 */
-	public static function ensureMany ( $Event, $relation ) {
+	public static function ensureMany ( Doctrine_Event $Event, $relation ) {
 		# Prepare
 		$save = false;
 		$result = array();
@@ -988,10 +1090,11 @@ abstract class Bal_Doctrine_Core {
 	 * Ensure Tags
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
-	 * @param string $Event_type
+	 * @param string $tagRelation
+	 * @param string $tagField
 	 * @return boolean	wheter or not to save
 	 */
-	public static function ensureTags ( $Event, $tagRelation, $tagField ) {
+	public static function ensureTags ( Doctrine_Event $Event, $tagRelation, $tagField ) {
 		# Prepare
 		$save = false;
 		
