@@ -815,18 +815,20 @@ abstract class Bal_Doctrine_Core {
 		}
 		
 		# Verify
-		try {
-			# Verify
-			if ( !is_array($verify) ) $verify = array();
-			self::verifyRecord($Item, $verify);
-		}
-		catch ( Exception $Exception ) {
-			# Reset
-			$Item = false;
+		if ( $Item ) {
+			try {
+				# Verify
+				if ( !is_array($verify) ) $verify = array();
+				self::verifyRecord($Item, $verify);
+			}
+			catch ( Exception $Exception ) {
+				# Reset
+				$Item = false;
 			
-			# Log the Event and Continue
-			$Exceptor = new Bal_Exceptor($Exception);
-			$Exceptor->log();
+				# Log the Event and Continue
+				$Exceptor = new Bal_Exceptor($Exception);
+				$Exceptor->log();
+			}
 		}
 		
 		# Return Item
