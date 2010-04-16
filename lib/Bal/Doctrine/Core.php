@@ -765,7 +765,7 @@ abstract class Bal_Doctrine_Core {
 		$tableComponentName = self::getTableComponentName($table);
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('Query','create','only'));
+		array_keys_keep_ensure($options,array('verify','Query','create','only'));
 		extract($options);
 		
 		# Default
@@ -814,6 +814,21 @@ abstract class Bal_Doctrine_Core {
 			$Item = new $tableComponentName();
 		}
 		
+		# Verify
+		try {
+			# Verify
+			if ( !is_array($verify) ) $verify = array();
+			self::verifyRecord($Item, $verify);
+		}
+		catch ( Exception $Exception ) {
+			# Reset
+			$Item = false;
+			
+			# Log the Event and Continue
+			$Exceptor = new Bal_Exceptor($Exception);
+			$Exceptor->log();
+		}
+		
 		# Return Item
 		return $Item;
 	}
@@ -835,21 +850,25 @@ abstract class Bal_Doctrine_Core {
 		$Table = self::getTable($table);
 		$tableComponentName = self::getTableComponentName($table);
 		$tableComponentNameLower = strtolower($tableComponentName);
-		
-		# Fetch
-		$Item = self::fetchItem($table,$Record,$options);
-		$item = self::fetchItemParam($tableComponentName);
+		$Item = false;
 		
 		# Handle
 		try {
+			# Start
+			$Connection->beginTransaction();
+			
+			# Fetch
+			$_Item = self::fetchItem($table,$Record,$options);
+			$item = self::fetchItemParam($tableComponentName);
+		
+			# Passed Verify
+			$Item = $_Item; // copy from temp
+			
 			# Check Existance of Save
 			if ( empty($item) || !is_array($item) ) {
 				# Return Found/New Content
 				return $Item;
 			}
-			
-			# Start
-			$Connection->beginTransaction();
 			
 			# Save
 			self::saveRecord($Item, $item, $options);
@@ -957,10 +976,23 @@ abstract class Bal_Doctrine_Core {
 		# Prepare
 		$verify = array();
 		
+		# Verify All
+		$verify_all = delve($params, 'all', true);
+		
 		# Ensure
 		foreach ( $checks as $check ) {
-			$check_params = delve($params,$check,array());
-			$verify[] = $Record->$check($check_params);
+			# Fetch
+			$check_params = delve($params,$check);
+			# Fire?
+			if ( $verify_all || $check_params ) {
+				# Prepare
+				if ( !is_array($check_params) ) {
+					// for instance if it was true, to signify the check should run
+					$check_params = array();
+				}
+				# Fire
+				$verify[] = $Record->$check($check_params);
+			}
 		}
 		
 		# Result
