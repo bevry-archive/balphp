@@ -58,17 +58,17 @@ class Bal_File extends Base_Bal_File {
 					$error = 'unknown';
 					break;
 			}
-			throw new Doctrine_Exception('error-application-file-' . $error);
+			throw new Doctrine_Exception('error-file-' . $error);
 			return false;
 		}
 		$tmp_name = delve($file,'tmp_name');
 		if ( !$tmp_name || !is_uploaded_file($tmp_name) ) {
-			throw new Doctrine_Exception('error-application-file-invalid');
+			throw new Doctrine_Exception('error-file-invalid');
 			return false;
 		}
 		
 		# Prepare file
-		$file_name = $file['name'];
+		$file_name = basename($file['name']);
 		if ( strpos($file_name, '.') === 0 ) $file_name = 'file'.$file_name; // prevent .htaccess uploads and other dogies
 		$file_title = $file_name;
 		$file_old_path = $file['tmp_name'];
