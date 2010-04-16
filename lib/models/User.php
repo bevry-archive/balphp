@@ -124,49 +124,55 @@ class Bal_User extends Base_Bal_User {
 
 	/**
 	 * Does user have Role?
-	 * @version 1.1, April 12, 2010
+	 * @version 1.2, April 16, 2010
+	 * @since 1.1, April 12, 2010
 	 * @param mixed $permission
+	 * @return bool
 	 */
 	public function hasRole ( $role ) {
-		// Prepare
-		if ( is_object($role) ) {
-			$role = $role->code;
-		} elseif ( is_array($role) ) {
-			$role = $role['code'];
-		}
-		// Search
+		# Prepare
+		$result = false;
+		
+		# Fetch
+		$Role_code = delve($role,'code');
+		
+		# Search
 		$List = $this->Roles;
 		foreach ( $List as $Role ) {
-			if ( $role === $Role->code ) {
+			if ( $Role_code === $Role->code ) {
 				$result = true;
 				break;
 			}
 		}
-		// Done
+		
+		# Return result
 		return $result;
 	}
 	
 	/**
 	 * Does user have Permission?
-	 * @version 1.1, April 12, 2010
+	 * @version 1.2, April 16, 2010
+	 * @since 1.1, April 12, 2010
 	 * @param mixed $permission
+	 * @return bool
 	 */
 	public function hasPermission ( $permission ) {
-		// Prepare
-		if ( is_object($permission) ) {
-			$permission = $permission->code;
-		} elseif ( is_array($permission) ) {
-			$permission = $permission['code'];
-		}
-		// Search
+		# Prepare
+		$result = false;
+		
+		# Fetch
+		$Permission_code = delve($permission,'code');
+		
+		# Search
 		$List = $this->Permissions;
 		foreach ( $List as $Permission ) {
-			if ( $permission === $Permission->code ) {
+			if ( $Permission_code === $Permission->code ) {
 				$result = true;
 				break;
 			}
 		}
-		// Done
+		
+		# Return result
 		return $result;
 	}
 	
@@ -425,34 +431,66 @@ class Bal_User extends Base_Bal_User {
 	 * @return bool	whether or not the check passed
 	 */
 	public function verify ( array $params ) {
-		# Check
-		if ( !in_array($Event_type,array('postInsert')) ) {
-			# Not designed for these events
-			return null;
-		}
-		
+		return Bal_Doctrine_Core::verify($this,$params,array(
+			'verifyAccess',
+		));
+	}
+	
+	/**
+	 *  Ensures the Identity has sufficient access to perform the operation
+	 * @version 1.1, April 14, 2010
+	 * @since 1.0, April 12, 2010
+	 * @param array $params - Identity
+	 * @return bool	whether or not the check passed
+	 */
+	public function verifyAccess ( array $params ) {
 		# Prepare params
-		array_keys_keep_ensure($params,array('Identity','access'));
+		array_keys_keep_ensure($params,array('action','Identity'));
+		extract($params);
 		
 		# Prepare result
 		$result = true;
 		
 		# --------------------------
 		
-		# Check Permission
-		# Ensures the current Identity has sufficient access to perform the operation
-		if ( !$Identity->hasPermission('user') ) {
-			// Does not have CRUD permissions
-		  	// Perform Fallback Checks
+		# Check Action
+		if ( !in_array($action,array('view','edit','delete')) ) {
+			# Fail
+			throw new Doctrine_Exception('error-user-verifyaccess-action-invalid');
+			$result = false;
+		}
+		else {
+			// We are a valid action
 			
-			# Check Ownership
-			if ( delve($this,'id') && delve($this,'id') !== $Identity->id ) {
-				if ( $throw ) {
-					# Throw Exception
-					throw new Doctrine_Exception('error-user-access');
+			# Check Action
+			if ( $action !== 'view' ) {
+				// Always allow view
+				// We must be a edit now
+				
+				# Check Type
+				if ( !$Identity || !($Identity instanceOf User) ) {
+					# Fail
+					throw new Doctrine_Exception('error-user-verifyaccess-identity-invalid');
+					$result = false;
 				}
-				# Fail result
-				$result = false;
+				else {
+					// We are a valid Identity
+		
+					# Check Permission
+					if ( !$Identity->hasPermission('user') ) {
+						// Does not have permission, will need to perform other checks
+		
+						# Prepare
+						$User_id = delve($this,'id');
+						
+						# Check Ownership
+						if ( $User_id && $User_id !== $Identity->id ) {
+							// this is not our brief to edit
+							throw new Doctrine_Exception('error-user-verifyaccess-indentity-ownership');
+							$result = false;
+						}
+					}
+				}
 			}
 		}
 		
