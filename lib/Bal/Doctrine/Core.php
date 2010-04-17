@@ -346,9 +346,14 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function prepareFetchResult( array $params, Doctrine_Query $Query, $table ) {
 		# Prepare
-		$keep = array('returnQuery','orderBy','hydrationMode','limit','where','search','paging','relations','select','from');
+		$keep = array('returnBaseQuery','returnQuery','orderBy','hydrationMode','limit','where','search','paging','relations','select','from');
 		array_keys_keep_ensure($params,$keep);
 		extract($params);
+		
+		# Check
+		if ( $returnBaseQuery ) {
+			return $Query;
+		}
 		
 		# Prepare
 		$Table = self::getTable($table);
@@ -532,6 +537,24 @@ abstract class Bal_Doctrine_Core {
 	public static function fetchQuery ( $table, array $params = array() ) {
 		# Force
 		$params['returnQuery'] = true;
+		
+		# Fetch
+		$result = self::fetch($table,$params);
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Get the Base Query used for fetch standards
+	 * @version 1.1, April 12, 2010
+	 * @param string $table The table/type of the record
+	 * @param array $params [optional]
+	 * @return Doctrine_Query
+	 */
+	public static function fetchBaseQuery ( $table, array $params = array() ) {
+		# Force
+		$params['returnBaseQuery'] = true;
 		
 		# Fetch
 		$result = self::fetch($table,$params);
