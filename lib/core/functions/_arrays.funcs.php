@@ -631,11 +631,12 @@ if ( function_compare('array_unset_empty', 1, true, __FILE__, __LINE__) ) {
 }
 
 
-if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_unset', 1.1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Unset the keys from the array
-	 * @version 1, August 09, 2009
+	 * @version 1.1, April 21, 2010
+	 * @since 1, August 09, 2009
 	 * @param array $array
 	 * @param mixed ... what to remove
 	 * @return mixed
@@ -646,28 +647,38 @@ if ( function_compare('array_unset', 1, true, __FILE__, __LINE__) ) {
 		$args = func_get_args(); array_shift($args);
 		if ( sizeof($args) === 1 && is_traversable($args[0]) ) $args = $args[0];
 		# Apply
-		foreach ( $args as $var ) {
+		$keys = $args;
+		array_keys_unset($array,$keys);
+		# Return array
+		return $array;
+	}
+}
+
+if ( function_compare('array_keys_unset', 1.1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Unset the keys from the array
+	 * @version 1.1, April 21, 2010
+	 * @since 1, February 01, 2010
+	 * @param array $array
+	 * @param array $keys
+	 * @return mixed
+	 */
+	function array_keys_unset ( &$array, array $keys ) {
+		# Prepare
+		if ( !is_traversable($array) ) $array = array($array);
+		$keys = array_flat($keys);
+		
+		# Unsets
+		foreach ( $keys as $var ) {
 			if ( is_object($array) )
 				unset($array->$var);
 			else
 				unset($array[$var]);
 		}
-		# Done
+		
+		# Return array
 		return $array;
-	}
-}
-
-if ( function_compare('array_keys_unset', 1, true, __FILE__, __LINE__) ) {
-
-	/**
-	 * Unset the keys from the array
-	 * @version 1, February 01, 2010
-	 * @param array $array
-	 * @param array $unset
-	 * @return mixed
-	 */
-	function array_keys_unset ( &$array, array $unset ) {
-		return array_unset($array, $unset);
 	}
 }
 
@@ -678,31 +689,35 @@ if ( function_compare('array_keys_unset_empty', 1, true, __FILE__, __LINE__) ) {
 	 * Unset the keys from the array if they are empty
 	 * @version 1, February 20, 2010
 	 * @param array $array
-	 * @param array $unset
+	 * @param array $keys
 	 * @return mixed
 	 */
-	function array_keys_unset_empty ( &$array, array $unset ) {
-		return array_unset_empty($array, $unset);
+	function array_keys_unset_empty ( &$array, array $keys ) {
+		return array_unset_empty($array, $keys);
 	}
 }
 
-if ( function_compare('array_keys_keep', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('array_keys_keep', 1.1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Keep the keys in the array
-	 * @version 1, November 9, 2009
+	 * @version 1.1, April 21, 2010
+	 * @since 1, November 9, 2009
 	 * @param array $array
-	 * @param mixed ... what to keep
-	 * @return array
+	 * @param array $keys
+	 * @return mixed
 	 */
-	function array_keys_keep ( &$array ) {
+	function array_keys_keep ( &$array, $keys ) {
 		# Prepare
-		if ( !is_array($array) ) $array = $array === null ? array() : array($array);
-		$args = func_get_args(); array_shift($args);
-		if ( sizeof($args) === 1 && is_array($args[0]) ) $args = $args[0];
-		# Apply
-		$keys = array_flip($args);
-		# Done
+		if ( !is_traversable($array) ) $array = array($array);
+		$keys = array_flat($keys);
+		
+		# Prepare Keys
+		$keys = array_flip($keys);
+		
+		# Perform Intersect
 		$array = array_intersect_key($array, $keys);
+		
+		# Done
 		return $array;
 	}
 }
@@ -750,19 +765,43 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	 * Ensure the keys exists in the array
 	 * @version 1, November 9, 2009
 	 * @param array $array
-	 * @param array $key
+	 * @param array $keys
 	 * @param mixed $value [optional]
 	 * @return mixed
 	 */
 	function array_keys_ensure ( &$array, $keys, $value = null ) {
 		# Prepare
 		if ( !is_traversable($array) ) $array = array($array);
+		$keys = array_flat($keys);
 		# Apply
 		foreach ( $keys as $key ) {
-			if ( is_traversable($key) ) {
-				array_keys_ensure($array, $key, $value);
-			} else {
-				array_key_ensure($array, $key, $value);
+			# Ensure
+			array_key_ensure($array, $key, $value);
+		}
+		# Done
+		return $array;
+	}
+}
+
+
+if ( function_compare('array_keys_clean', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Clean the specified keys of the array
+	 * @version 1, April 21, 2010
+	 * @param array $array
+	 * @param array $keys
+	 * @return mixed
+	 */
+	function array_keys_clean ( &$array, $keys ) {
+		# Prepare
+		if ( !is_traversable($array) ) $array = array($array);
+		$keys = array_flat($keys);
+		# Apply
+		foreach ( $keys as $key ) {
+			# Check
+			if ( array_key_exists($key,$array) ) {
+				# Clean
+				array_clean($array[$key]);
 			}
 		}
 		# Done
@@ -770,6 +809,32 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('array_flat', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Return a flat array
+	 * @version 1, April 21, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function array_flat ( $array ) {
+		# Prepare
+		if ( !is_traversable($array) ) $array = array($array);
+		$result = array();
+		# Apply
+		foreach ( $array as $key => $value ) {
+			if ( is_traversable($value) ) {
+				# Recurse
+				$result = array_merge($result,array_flat($value));
+			} else {
+				# Add
+				$result[$key] = $value;
+			}
+		}
+		# Done
+		return $array;
+	}
+}
 
 
 if ( function_compare('in_array_multi', 1.1, true, __FILE__, __LINE__) ) {

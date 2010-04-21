@@ -631,7 +631,7 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Record $Record
 	 * @param array $data
-	 * @param array $options [optional] - keep, remove, empty
+	 * @param array $options [optional] - keep, remove, empty, ensure, clean
 	 * @return Doctrine_Record
 	 */
 	public static function applyRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
@@ -639,16 +639,20 @@ abstract class Bal_Doctrine_Core {
 		$Table = $Record->getTable();
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('keep','remove','empty'));
+		array_keys_keep_ensure($options,array('keep','remove','empty','ensure','clean'));
 		extract($options);
 		
 		# Prepare
+		if ( !empty($clean) )
+			array_keys_clean($data, $clean);
 		if ( !empty($keep) )
 			array_keys_keep($data, $keep);
 		if ( !empty($remove) )
 			array_keys_unset($data, $remove);
 		if ( !empty($empty) )
 			array_keys_unset_empty($data, $empty);
+		if ( !empty($ensure) )
+			array_keys_ensure($data, $ensure);
 		
 		# Clean special values
 		array_clean_form($data);
@@ -748,12 +752,17 @@ abstract class Bal_Doctrine_Core {
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Record $Record
 	 * @param array $data
-	 * @param array $options [optional] - keep, remove, empty
+	 * @param array $options [optional] - apply, verify | keep, remove, empty
 	 * @return Doctrine_Record
 	 */
 	public static function saveRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
-		# Apply
+		# Apply Required Data
 		self::applyRecord($Record, $data, $options);
+		
+		# Apply Applicable Data
+		if ( array_key_exists('apply',$options) && is_array($options['apply']) ) {
+			self::applyRecord($Record, $options['apply'], $options);
+		}
 		
 		# Verify
 		$verify_options = delve($options,'verify',array());
@@ -884,7 +893,10 @@ abstract class Bal_Doctrine_Core {
 			
 			# Fetch
 			$_Item = self::fetchItem($table,$Record,$options);
-			$item = self::fetchItemParam($tableComponentName);
+			if ( array_key_exists('data',$options) && is_array($options['data']) )
+				$item = $options['data'];
+			else
+				$item = self::fetchItemParam($tableComponentName);
 		
 			# Passed Verify
 			$Item = $_Item; // copy from temp
