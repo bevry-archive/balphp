@@ -451,6 +451,9 @@ class Bal_User extends Base_Bal_User {
 		# Prepare result
 		$result = true;
 		
+		# Fetch
+		$User = $this;
+		
 		# --------------------------
 		
 		# Check Action
@@ -481,7 +484,7 @@ class Bal_User extends Base_Bal_User {
 						// Does not have permission, will need to perform other checks
 		
 						# Prepare
-						$User_id = delve($this,'id');
+						$User_id = delve($User,'id');
 						
 						# Check Ownership
 						if ( $User_id && $User_id !== $Identity->id ) {
