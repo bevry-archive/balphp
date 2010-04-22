@@ -158,6 +158,11 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$tableLower = strtolower($table);
 		$fieldLower = strtolower($field);
 		
+		# Prepare value
+		if ( is_object($value) ) {
+			$value = delve($value,'id',$value);
+		}
+		
 		# Discover
 		switch ( $type ) {
 			case 'relation':

@@ -759,11 +759,6 @@ abstract class Bal_Doctrine_Core {
 		# Apply Required Data
 		self::applyRecord($Record, $data, $options);
 		
-		# Apply Applicable Data
-		if ( array_key_exists('apply',$options) && is_array($options['apply']) ) {
-			self::applyRecord($Record, $options['apply'], $options);
-		}
-		
 		# Verify
 		$verify_options = delve($options,'verify',array());
 		self::verifyRecord($Record, $verify_options);
@@ -880,41 +875,66 @@ abstract class Bal_Doctrine_Core {
 		$Connection = Bal_App::getDataConnection();
 		$Request = Bal_App::getRequest();
 		$Log = Bal_App::getLog();
-		$item = $Item = null;
 		$Table = self::getTable($table);
 		$tableComponentName = self::getTableComponentName($table);
 		$tableComponentNameLower = strtolower($tableComponentName);
+		$result = false;
 		$Item = false;
+		$item = $data = $apply = array();
 		
 		# Handle
 		try {
 			# Start
 			$Connection->beginTransaction();
 			
-			# Fetch
-			$_Item = self::fetchItem($table,$Record,$options);
-			if ( array_key_exists('data',$options) && is_array($options['data']) )
-				$item = $options['data'];
-			else
-				$item = self::fetchItemParam($tableComponentName);
+			# --------------------------
 		
-			# Passed Verify
-			$Item = $_Item; // copy from temp
+			# Fetch Item
+			$Item = self::fetchItem($table,$Record,$options);
+			
+			# --------------------------
+			
+			# Fetch item data
+			$data = 
+				array_key_exists('data',$options) && is_array($options['data'])
+				?	$options['data']
+				:	self::fetchItemParam($tableComponentName);
+
+			# Prepare data
+			if ( !is_array($data) ) {
+				// Clear it, no longer needed, and assign empty array
+				$data = array();
+			}
+			
+			# Fetch extra item data
+			$apply = delve($options,'apply',array());
+			
+			# Fetch default item data
+			$default = delve($options,'default',array());
+			
+			# Merge
+			$item = array_merge($default,$data,$apply);
+			
+			# Apply
+			self::applyRecord($Item, $item, $options);
 			
 			# Check Existance of Save
-			if ( empty($item) || !is_array($item) ) {
+			if ( empty($data) ) {
 				# Return Found/New Content
 				return $Item;
 			}
 			
 			# Save
-			self::saveRecord($Item, $item, $options);
+			self::saveRecord($Item, array(), $options);
 			
 			# Stop Duplicates
 			$Request->setPost($tableComponentName, $Item->id);
 			
 			# Finish
 			$Connection->commit();
+			
+			# Result
+			$result = $Item;
 			
 			# Log
 			$log_details = array(
@@ -932,8 +952,8 @@ abstract class Bal_Doctrine_Core {
 			$Exceptor->log();
 		}
 		
-		# Done
-		return $Item;
+		# Return result
+		return $result;
 	}
 	
 	/**
