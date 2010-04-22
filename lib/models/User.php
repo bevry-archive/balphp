@@ -58,7 +58,14 @@ class Bal_User extends Base_Bal_User {
 	 * @return
 	 */
 	public function preparePassword ( $value ) {
-		$password = md5($value);
+		# Fetch Salt
+		// helps against rainbow attacks
+		$salt = Bal_App::getConfig('bal.setup.salt','');
+		
+		# Generate hash
+		$password = md5($salt.$value);
+		
+		# Return password
 		return $password;
 	}
 	
@@ -222,8 +229,12 @@ class Bal_User extends Base_Bal_User {
 		# Fetch
 		$User = $Event->getInvoker();
 		
+		# Fetch Salt
+		// helps against rainbow attacks
+		$salt = Bal_App::getConfig('bal.setup.salt','');
+		
 		# Is it different?
-		$uid = md5($this->username.$this->email);
+		$uid = md5($salt.$this->username.$this->email);
 		if ( $User->get('uid') != $uid ) {
 			$User->set('uid', $uid, false);
 			$save = true;
