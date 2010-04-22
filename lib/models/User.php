@@ -40,7 +40,7 @@ class Bal_User extends Base_Bal_User {
 	 */
 	protected function setFileAttachment ( $what, $file ) {
 		$value = Bal_Doctrine_Core::presetFileAttachment($this,$what,$file);
-		return $value === false ? null : $this->_set('Avatar',$value,false);
+		return $value === false ? null : $this->_set($what,$value,false);
 	}
 	
 	/**
