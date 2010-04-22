@@ -356,7 +356,7 @@ class Bal_Message extends Base_Bal_Message
 		
 		# Query
 		$Query = Doctrine_Query::create()
-			->select('Message.*, UserFrom.fullname, UserFor.fullname')
+			->select('Message.*, UserFrom.id, UserFrom.displayname, UserFrom.fullname, UserFor.id, UserFor.displayname, UserFor.fullname')
 			->from('Message, Message.UserFrom UserFrom, Message.UserFor UserFor')
 			->orderBy('Message.send_on DESC')
 			->andWhere('Message.sent_on <= ?', doctrine_timestamp());
