@@ -15,7 +15,7 @@ class Bal_Exceptor {
 		$this->setException($Exception);
 		
 		# Done
-		return true;
+		return $this;
 	}
 	
 	public function getLocale ( ) {
@@ -130,9 +130,11 @@ class Bal_Exceptor {
 				$this->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_OTHER;
 				$this->id = 'error-application';//'-'.$this->id; // error-application
 				$this->priority = Bal_Log::CRIT;
+				# Information
+				$information = method_exists($Exception,'getInformation') ? $Exception->getInformation() : array();
 				# Message
 				$message = $Exception->getMessage();
-				$this->addMessage($message, array(), null, array());
+				$this->addMessage($message, $information, null, array());
 				break;
 		}
 		
@@ -172,6 +174,11 @@ class Bal_Exceptor {
 	
 	public function getPriority ( ) {
 		return $this->priority;
+	}
+	
+	public function throwException ( ) {
+		$Exception = $this->Exception;
+		throw $Exception;
 	}
 	
 	public function log ( $Log = null ) {

@@ -67,6 +67,10 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		return $this;
 	}
 	
+	/**
+	 * The last backtrace so that we know who the offender may be in the is not cleared instance
+	 */
+	protected $last_backtrace;
 	
     /**
      * Generates an url given the name of a route.
@@ -85,9 +89,14 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		# Handle Request
 		if ( empty($urlOptions) && empty($name) ) {
 			if ( !$this->isCleared() ) {
-				throw new Zend_Exception('Url View Helper: You have forgotten to clear the old url before creating a new.');
+				throw new Bal_Exception(array(
+					'Url View Helper: You have forgotten to clear the old url before creating a new.',
+					'last_backtrace' => $this->last_backtrace
+				));
 			}
 			$result = $this;
+			# Save stacktrace
+			$this->last_backtrace = get_backtrace_slim();
 		}
 		else {
 			$result = $this->apply($urlOptions,$name,$reset,$encode)->toString();
@@ -98,7 +107,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
     }
 
 	public function isCleared ( ) {
-		return !($this->_params || $this->_route || !$this->_reset || !$this->_encode || $this->_url);
+		return !$this->_params && !$this->_route && $this->_reset && $this->_encode && !$this->_url;
 	}
 
 	public function clear ( ) {
@@ -240,17 +249,16 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function toString ( ) {
+		# Prepare
 		$url = '';
-		try {
-			$url = $this->assemble();
-			$this->clear();
-		}
-		catch ( Exception $Exception ) {
-			$blah = $this;
-			echo '<h1><pre>'.$Exception->getMessage().'</pre></h1>';
-			//$Exceptor = new Bal_Exceptor($Exception);
-			//$Exceptor->log();
-		}
+		
+		# Assemble
+		$url = $this->assemble();
+			
+		# Clear our URL for the next
+		$this->clear();
+		
+		# Return url
 		return $url;
 	}
 	
@@ -266,6 +274,7 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	public function media ( $Item ) {
 		return $this->file($Item);
 	}
+	
 	public function file ( $Item ) {
 		$url = delve($Item,'url',false);
 		return $this->hard($url);

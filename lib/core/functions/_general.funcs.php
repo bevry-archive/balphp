@@ -146,3 +146,37 @@ if ( function_compare('baltrace', 1, true, __FILE__, __LINE__) ) {
 	 	echo '</pre><br/>';
 	}
 }
+
+if ( function_compare('get_backtrace', 1, true, __FILE__, __LINE__) ) {
+	function get_backtrace ( ) {
+		ob_start();
+		debug_print_backtrace();
+		$backtrace = ob_get_contents();
+		ob_end_clean();
+		return $backtrace;
+	}
+}
+
+if ( function_compare('get_backtrace_slim', 1, true, __FILE__, __LINE__) ) {
+	function get_backtrace_slim ( ) {
+		$result = '';
+		$backtrace = debug_backtrace(false);
+		$i=0; foreach ( $backtrace as $bt ) {
+			# Extract
+			$file = array_key_exists('file',$bt) ? $bt['file'] : '';
+			$line = array_key_exists('line',$bt) ? '('.$bt['line'].'): ' : '';
+			$class = array_key_exists('class',$bt) ? $bt['class'] : '';
+			$type = array_key_exists('type',$bt) ? $bt['type'] : '';
+			$function = array_key_exists('function',$bt) ? $bt['function'] : '';
+			# Merge
+			$where = $file.$line;
+			$call = $class.$type.$function;
+			$position = '#'.$i.' ';
+			# Output
+			$result .= $position.$where.$call."\n";
+			# Increment
+			++$i;
+		}
+		return $result;
+	}
+}
