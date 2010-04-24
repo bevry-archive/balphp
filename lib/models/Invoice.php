@@ -333,19 +333,6 @@ class Bal_Invoice extends Base_Bal_Invoice
 	
 	
 	/**
-	 * Ensure Consistency
-	 * @param Doctrine_Event $Event
-	 * @return boolean	wheter or not to save
-	 */
-	public function ensure ( $Event, $Event_type ){
-		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
-			'ensureCache',
-			'ensureMessages'
-		));
-	}
-	
-	
-	/**
 	 * Ensure Messages
 	 * @param Doctrine_Event $Event
 	 * @return boolean	success
@@ -386,6 +373,19 @@ class Bal_Invoice extends Base_Bal_Invoice
 		# Return save
 		return $save;
 	}
+	
+	/**
+	 * Ensure Consistency
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureCache',
+			'ensureMessages'
+		));
+	}
+	
 	
 	/**
 	 * preSave Event
@@ -463,7 +463,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 	
 	
 	# ========================
-	# CRUD HELPERS
+	# CRUD Helpers
 	
 	
 	/**

@@ -23,6 +23,7 @@ class Bal_Payment_Cart extends Bal_Basic {
 		return $this->total;
 	}
 	
+	/** Will be called on $Cart->total thanks to Bal_Basic */
 	public function getTotal ( ) {
 		$total = 0.0;
 		foreach ( $this->Items as $Item ) {

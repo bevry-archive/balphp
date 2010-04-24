@@ -4,11 +4,12 @@ require_once 'Bal/Payment/Cart.php';
 class Bal_Payment_Order {
 	public $Cart;
 	public $Payer;
-	public $status;
-	public $id;
-	public $last_modified;
 	
-	public function __construct ( $Cart, $Payer, $id = null ) {
+	public $id;
+	public $status;
+	public $modified_at;
+	
+	public function __construct ( Bal_Payment_Cart $Cart, Bal_Payment_Payer $Payer, $id ) {
 		$this->Cart = $Cart;
 		$this->Payer = $Payer;
 		$this->id = $id;

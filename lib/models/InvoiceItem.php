@@ -12,4 +12,79 @@
  */
 class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 	
+	
+	# ========================
+	# Ensure Helpers
+	
+	/**
+	 * Ensure Total
+	 * @param Doctrine_Event $Event
+	 * @return boolean	success
+	 */
+	public function ensureTotal($Event, $Event_type){
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$Item = $Event->getInvoker();
+	
+		# --------------------------
+		# Ensure Total
+		
+		# Fetch
+		$total = $Item->shipping + $Item->quantity*$Item->amount + ($Item->quantity-1)*$Item->shipping_additional;
+		if ( $Item->tax_rate ) $total *= $Item->tax_rate;
+		$total += $Item->tax;
+		
+		# Apply
+		$this->_set('total',$total);
+		
+		# --------------------------
+		
+		# Return save
+		return $save;
+	}
+	
+	
+	/**
+	 * Ensure Consistency
+	 * @param Doctrine_Event $Event
+	 * @return boolean	wheter or not to save
+	 */
+	public function ensure ( $Event, $Event_type ){
+		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureTotal'
+		));
+	}
+	
+	
+	# ========================
+	# Events
+	
+	/**
+	 * preSave Event
+	 * @param Doctrine_Event $Event
+	 * @return
+	 */
+	public function preSave ( $Event ) {
+		# Prepare
+		$result = true;
+		
+		# Ensure
+		if ( self::ensure($Event, __FUNCTION__) ) {
+			// no need
+		}
+		
+		# Done
+		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
+	}
+	
+	
+	
 }

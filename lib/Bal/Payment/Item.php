@@ -3,7 +3,7 @@ require_once 'Bal/Basic.php';
 class Bal_Payment_Item extends Bal_Basic {
 	protected $id;
 	protected $amount;
-	protected $name;
+	protected $title;
 	
 	protected $quantity = 1.0;
 	protected $shipping = 0.0;
@@ -17,6 +17,7 @@ class Bal_Payment_Item extends Bal_Basic {
 	protected $discount_amount = 0.0;
 	protected $discount_rate = 0.0;
 	
+	/** Will be called on $Item->total thanks to Bal_Basic */
 	public function getTotal ( ) {
 		$total = $this->shipping + $this->quantity*$this->amount + ($this->quantity-1)*$this->shipping_additional;
 		if ( $this->tax_rate ) $total *= $this->tax_rate;

@@ -135,6 +135,10 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 					$value = null;
 					break;
 				
+				case real_value(delve($properties,'extra.rating')):
+					$type = 'rating';
+					$value = null;
+					break;
 				
 				case real_value(delve($properties,'extra.csv')):
 					$type = 'csv';
@@ -291,6 +295,10 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			
 			case 'csv':
 				$result .= $this->view->formCsv($name, $value, $attribs);
+				break;
+							
+			case 'rating':
+				$result .= $this->view->formRating($name, $value, $attribs);
 				break;
 				
 			case 'hidden':
