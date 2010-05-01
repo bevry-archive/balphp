@@ -2,28 +2,52 @@
 class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	
 	/**
+	 * Possible values for weight units
+	 * @var const WEIGHT_UNIT_LBS
+	 * @var const WEIGHT_UNIT_KGS
+	 */
+	const WEIGHT_UNIT_LBS = 'lbs';
+	const WEIGHT_UNIT_KGS = 'kgs';
+	
+	/**
 	 * Store of Model's data
 	 * @var array $_data
 	 */
 	protected $_data = array(
-		// required
-		'id' 				=> null,
-		'InvoiceItems' 		=> null,
-		'Payer' 			=> null,
+		// Required
+			// Standard
+			'id' 					=> null,
+			'InvoiceItems' 			=> null,
+			'Payer' 				=> null,
+			'currency_code' 		=> null,
+			'payment_status' 		=> null,
+			
+			'each_total'			=> null,
+			'price_each_total'		=> null,
+			'total'					=> null,
 		
-		// optional - the below fields are ALL totals
-		'amount' 			=> null,
-		'currency' 			=> null,
-		'handling' 			=> null,
-		'shipping' 			=> null,
-		'tax' 				=> null,
-		'weight' 			=> null,
-		'weight_unit' 		=> null,
-		'discount_amount' 	=> null,
-		'discount_rate' 	=> null,
+	 	// Optional
+			'paid_at'				=> null,
+			
+			'handling'				=> null,	// overall
+			'handling_each_total' 	=> null,
+			'handling_total'		=> null,
+			
+			'tax_each_total'		=> null,
+			'tax_total'				=> null,
+			
+			'weight_each_total'		=> null,
+			'weight_total'			=> null,	// overall
+			'weight_unit'			=> null,	// overall
+			
+			'discount'				=> null,	// overall
+			'discount_rate'			=> null,	// overall
+			'discount_each_total'	=> null,
+			'discount_total'		=> null,
 		
-		'paid_at'			=> null,
-		'payment_status' 	=> null,
+			'shipping' 				=> null,	// overall
+			'shipping_each_total'	=> null,
+			'shipping_total'		=> null,
 	);
 	
 	/**
@@ -38,7 +62,12 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		
 		# Fetch
 		$id = $Invoice->id;
+		$total = $Invoice->total;
+		$price_each_total = $Invoice->price_each_total;
+		$each_total = $Invoice->each_total;
+		$currency_code = $Invoice->currency_code;
 		$payment_status = $Invoice->payment_status;
+		$weight_unit = $Invoice->weight_unit;
 		$InvoiceItems = $Invoice->InvoiceItems;
 		$Payer = $Invoice->Payer;
 		
@@ -47,14 +76,33 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			$error = 'Invoice id must not be empty';
 		}
 		
-		# Check Amount
-		if ( $amount === null ) {
-			$error = 'Invoice amount must have a value';
+		# Check total
+		if ( !$total ) {
+			$error = 'Invoice total must not be empty';
+		}
+		# Check price_each_total
+		if ( !$price_each_total ) {
+			$error = 'Invoice price_each_total must not be empty';
+		}
+		# Check each_total
+		if ( !$each_total ) {
+			$error = 'Invoice each_total must not be empty';
+		}
+		
+		
+		# Check Currency
+		if ( !$currency_code ) {
+			$error = 'Invoice currency code must not be empty';
 		}
 		
 		# Check Payment Status
 		if ( !in_array($payment_status, array('created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')) ) {
 			$error = 'Invoice status is not a valid value';
+		}
+		
+		# Ensure Weight Unit
+		if ( !in_array($weight_unit, array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)) ) {
+			$error = 'Invoice weight unit is not a valid value';
 		}
 		
 		# Check Invoice Items
@@ -159,9 +207,66 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	}
 	
 	/**
+	 * Apply the totals of the Invoice Item to this
+	 * @return $this
+	 */
+	public function applyTotals ( ) {
+		# Prepare
+		$InvoiceItems = $this->InvoiceItems;
+		
+		# Overall Values
+		$handling					= until_numeric($InvoiceItem->handling, 0.00);
+		$tax						= until_numeric($InvoiceItem->tax, 0.00);
+		$tax_rate					= until_numeric($InvoiceItem->tax_rate, 1.00);
+		$discount					= until_numeric($InvoiceItem->discount, 0.00);
+		$discount_rate				= until_numeric($InvoiceItem->discount_rate, 1.00);
+		$shipping					= until_numeric($InvoiceItem->shipping, 0.00);
+		
+		# Calculate Each Totals
+		foreach ( $InvoiceItems as $InvoiceItem ) {
+			$price_each_total 		+= until_numeric($InvoiceItem->price_total, 0.00);
+			$handling_each_total	+= until_numeric($InvoiceItem->handling_total, 0.00);
+			$tax_each_total			+= until_numeric($InvoiceItem->tax_total, 0.00);
+			$weight_each_total		+= until_numeric($InvoiceItem->weight_total, 0.00);
+			$discount_each_total	+= until_numeric($InvoiceItem->discount_total, 0.00);
+			$shipping_each_total	+= until_numeric($InvoiceItem->shipping_total, 0.00);
+			$each_total				+= until_numeric($InvoiceItem->total, 0.00);
+		}
+		
+		# Add it all Together
+		$handling_total 	= $handling + $handling_each_total;
+		$tax_total 			= $tax_each_total;
+		$weight_total 		= $weight_each_total;
+		$shipping_total 	= $shipping + $shipping_each_total;
+		$total 				= $each_total + $handling_total + $tax_total + $weight_total + $shipping_total;
+		$discount_total 	= $discount + $total*$discount_rate;
+		$total				-= $discount_total;
+		
+		# Apply Each Totals
+		$InvoiceItem->price_each_total 		= $price_each_total;
+		$InvoiceItem->handling_each_total 	= $handling_each_total;
+		$InvoiceItem->tax_each_total 		= $tax_each_total;
+		$InvoiceItem->weight_each_total 	= $weight_each_total;
+		$InvoiceItem->discount_each_total 	= $discount_each_total;
+		$InvoiceItem->shipping_each_total 	= $shipping_each_total;
+		$InvoiceItem->each_total 			= $each_total;
+		
+		# Apply Totals
+		$InvoiceItem->handling_total 	= $handling_total;
+		$InvoiceItem->tax_total 		= $tax_total;
+		$InvoiceItem->weight_total 		= $weight_total;
+		$InvoiceItem->discount_total 	= $discount_total;
+		$InvoiceItem->shipping_total 	= $shipping_total;
+		$InvoiceItem->total 			= $total;
+		
+		# Return this
+		return $this;
+	}
+	
+	/**
 	 * Setter for Payer
 	 * @param array|object $payer
-	 * @return $this;
+	 * @return $this
 	 */
 	public function setPayer ( $payer ) {
 		# Prepare
@@ -177,7 +282,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	/**
 	 * Setter for InvoiceItems
 	 * @param array|object $invoiceitems
-	 * @return $this;
+	 * @return $this
 	 */
 	public function setInvoiceItems ( $invoiceitems ) {
 		# Prepare

@@ -3,19 +3,53 @@
 require_once(dirname(__FILE__).'/config.php');
 
 // Display
-$Cart = new Bal_Payment_Cart(array(
+$Invoice = new Bal_Payment_Model_Invoice(array(
 	'id' => intval(rand(50,200)),
-	'currency' => 'AUD',
-	'Items' => array(
-		new Bal_Payment_Item(array(
-			'id' => 1,
-			'name' => 'My New Item',
-			'amount' => 20.00
+	'currency_code' => 'AUD',
+	'payment_status' => 'awaiting',
+	'Payer' =>  new Bal_Payment_Model_Payer(array(
+		'id' => intval(rand(50,200)),
+		'firstname' => 'Benjamin',
+		'lastname' => 'Lupton'
+	)),
+	'InvoiceItems' => array(
+		new Bal_Payment_Model_InvoiceItem(array(
+			'id' 					=> 2,
+			'title' 				=> 'My First Item',
+			'price_each'			=> 10000.00,
+			'quantity'				=> 3,
+			
+			'handling_each' 		=> 00000.01,
+			
+			'tax_each'				=> 00000.10,
+			
+			'weight_each'			=> 00001.00,
+			'weight_unit'			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
+			
+			'discount_each'			=> 00010.00,
+			
+			'shipping_first' 		=> 00100.00,
+			'shipping_additional'	=> 01000.00
 		)),
-		new Bal_Payment_Item(array(
-			'id' => 2,
-			'name' => 'My Second New Item',
-			'amount' => 40.00
+		new Bal_Payment_Model_InvoiceItem(array(
+			'id' 					=> 2,
+			'title' 				=> 'My Second Item',
+			'price_each'			=> 10000.00,
+			'quantity'				=> 3,
+			
+			'handling_each' 		=> 00000.01,
+			
+			'tax_each'				=> 00000.10,
+			'tax_rate'				=> 00000.10,
+			
+			'weight_each'			=> 00001.00,
+			'weight_unit'			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
+			
+			'discount_each'			=> 00010.00,
+			'discount_rate'			=> 00000.10,
+			
+			'shipping_first' 		=> 00100.00,
+			'shipping_additional'	=> 01000.00
 		))
 	)
 ));

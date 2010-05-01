@@ -15,22 +15,33 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	 * @var array $_data
 	 */
 	protected $_data = array(
-		// required
-		'id' 					=> null,
-		'title' 				=> null,
-		'amount' 				=> null,
+		// Required
+			'id' 					=> null,
+			'title' 				=> null,
+			'price_total'			=> null,
+			'price_each'			=> null,
+			'total'					=> null,
+			'quantity'				=> null,
 		
-		// optional
-		'quantity' 				=> null,
-		'shipping' 				=> null,
-		'shipping_additional' 	=> null,
-		'tax' 					=> null,
-		'tax_rate' 				=> null,
-		'weight' 				=> null,
-		'weight_unit' 			=> null,
-		'handling' 				=> null,
-		'discount_amount' 		=> null,
-		'discount_rate' 		=> null
+		// Optional
+			'handling_each' 		=> null,
+			'handling_total'		=> null,
+			
+			'tax_each'				=> null,
+			'tax_rate'				=> null,
+			'tax_total'				=> null,
+			
+			'weight_each'			=> null,
+			'weight_total'			=> null,
+			'weight_unit'			=> null,
+			
+			'discount_each'			=> null,
+			'discount_rate'			=> null,
+			'discount_total'		=> null,
+		
+			'shipping_first' 		=> null,
+			'shipping_additional'	=> null,
+			'shipping_total'		=> null,
 	);
 	
 	/**
@@ -44,11 +55,13 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		$InvoiceItem = $this;
 		
 		# Fetch
-		$id = $InvoiceItem->id;
-		$title = $InvoiceItem->title;
-		$amount = $InvoiceItem->amount;
-		$quantity = $InvoiceItem->quantity;
-		$weight_unit = $InvoiceItem->weight_unit;
+		$id				= $InvoiceItem->id;
+		$title 			= $InvoiceItem->title;
+		$price_total 	= $InvoiceItem->price_total;
+		$price_each 	= $InvoiceItem->price_each;
+		$total 			= $InvoiceItem->total;
+		$quantity 		= $InvoiceItem->quantity;
+		$weight_unit 	= $InvoiceItem->weight_unit;
 		
 		# Ensure ID
 		if ( !$id ) {
@@ -60,9 +73,19 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			$error = 'InvoiceItem title must not be empty';
 		}
 		
-		# Ensure Amount
-		if ( $amount === null ) {
-			$error = 'InvoiceItem amount must have a value';
+		# Ensure Price Total
+		if ( $price_total === null ) {
+			$error = 'InvoiceItem price_total must have a value';
+		}
+		
+		# Ensure Price Each
+		if ( $price_each === null ) {
+			$error = 'InvoiceItem price_each must have a value';
+		}
+		
+		# Ensure Total
+		if ( $total === null ) {
+			$error = 'InvoiceItem total must have a value';
 		}
 		
 		# Ensure Quantity
@@ -70,7 +93,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			$error = 'InvoiceItem quantity must be greater than one';
 		}
 		
-		# Ensure Amount
+		# Ensure Weight Unit
 		if ( !in_array($weight_unit, array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)) ) {
 			$error = 'InvoiceItem weight unit is not a valid value';
 		}
@@ -88,38 +111,46 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	}
 	
 	/**
-	 * Generates the total
-	 * @throws Bal_Exception
-	 * @return true
+	 * Apply the Totals to the Model
+	 * @return $this
 	 */
-	public function getTotal ( ) {
+	public function applyTotals ( ) {
 		# Prepare
 		$InvoiceItem = $this;
 		
-		# Fetch
-		$amount = 				$InvoiceItem->amount;
-		$quantity = 			$InvoiceItem->quanity;
-		$shipping = 			$InvoiceItem->shipping;
-		$shipping_additional = 	$InvoiceItem->shipping_additional;
-		$tax = 					$InvoiceItem->tax;
-		$tax_rate = 			$InvoiceItem->tax_rate;
+		# Fetch + Force Valid Inputs
+		$price_each 			= until_numeric($InvoiceItem->price_each, 0.00);
+		$quantity				= until_integer($InvoiceItem->quantity, 1.00);
+		$handling_each			= until_numeric($InvoiceItem->handling_each, 0.00);
+		$tax_each				= until_numeric($InvoiceItem->tax_each, 0.00);
+		$tax_rate				= until_numeric($InvoiceItem->tax_rate, 1.00);
+		$weight_each			= until_numeric($InvoiceItem->weight_each, 0.00);
+		$discount_each			= until_numeric($InvoiceItem->discount_each, 0.00);
+		$discount_rate			= until_numeric($InvoiceItem->discount_rate, 1.00);
+		$shipping_first			= until_numeric($InvoiceItem->shipping_first, 0.00);
+		$shipping_additional 	= until_numeric($InvoiceItem->shipping_additional, 0.00);
 		
-		# Add Together
-		$total =
-			 	$shipping
-		 	+	$quantity
-				*	$amount
-			+	($quantity-1)
-				*	$shipping_additional;
-	
-		# Apply Tax Rate
-		$total *= $tax_rate;
+		# Calculate
+		$price_total 		= $quantiy*$price_each;
+		$handling_total 	= $quantity*$handling_each;
+		$tax_total 			= $quantity*$tax_each + $price_total*$tax_rate;
+		$weight_total 		= $quantity*$weight_each;
+		$shipping_total 	= $shipping_first + ($quantity-1)*$shipping_additional
+		$total 				= $price_total + $handling_total + $tax_total + $weight_total + $shipping_total;
+		$discount_total 	= $quantity*$discount_each + $total*$discount_rate;
+		$total				-= $discount_total;
 		
-		# Add Final Tax
-		$total += $tax;
+		# Apply Totals
+		$InvoiceItem->price_total 		= $price_total;
+		$InvoiceItem->handling_total 	= $handling_total;
+		$InvoiceItem->tax_total 		= $tax_total;
+		$InvoiceItem->weight_total 		= $weight_total;
+		$InvoiceItem->discount_total 	= $discount_total;
+		$InvoiceItem->shipping_total 	= $shipping_total;
+		$InvoiceItem->total 			= $total;
 		
-		# Return total
-		return $total;
+		# Return this
+		return $this;
 	}
 	
 }

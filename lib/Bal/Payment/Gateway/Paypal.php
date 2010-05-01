@@ -43,7 +43,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			'invoice' => array(
 				'id' => 'invoice',
 				'amount' => 'amount',
-				'currency' => 'currency_code',
+				'currency_code' => 'currency_code',
 				'handling' => 'handling',
 				'shipping' => 'shipping',
 				'tax' => 'tax_cart',

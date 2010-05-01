@@ -363,21 +363,121 @@ if ( function_compare('has_true', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('cycle', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('until_integer', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Cycle through param until find one which is set and return that one
-	 * @version 1, January 11, 2010
+	 * @version 1, May 01, 2010
 	 * @param mixed ...
 	 * @return mixed
 	 */
-	function cycle ( ) {
+	function until_numeric ( ) {
 		# Prepare
 		$result = null;
 		$args = func_get_args();
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = $arg;
+			$result = realvalue($arg);
+			if ( !is_integer($result) ) {
+				break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+if ( function_compare('until_numeric', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Cycle through param until find one which is set and return that one
+	 * @version 1, May 01, 2010
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function until_numeric ( ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args();
+		
+		# Handle
+		foreach ( $args as $arg ) {
+			$result = realvalue($arg);
+			if ( !is_numeric($result) ) {
+				break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+if ( function_compare('until_notnullorfalse', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Cycle through param until find one which is set and return that one
+	 * @version 1, May 01, 2010
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function until_notnullorfalse ( ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args();
+		
+		# Handle
+		foreach ( $args as $arg ) {
+			$result = realvalue($arg);
+			if ( $result !== null && $result !== false ) {
+				break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+if ( function_compare('until_notnull', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Cycle through param until find one which is set and return that one
+	 * @version 1, May 01, 2010
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function until_notnull ( ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args();
+		
+		# Handle
+		foreach ( $args as $arg ) {
+			$result = realvalue($arg);
+			if ( $result !== null ) {
+				break;
+			}
+		}
+		
+		# Done
+		return $result;
+	}
+}
+
+if ( function_compare('until_notempty', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Cycle through param until find one which is set and return that one
+	 * @version 1, May 01, 2010
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function until_notempty ( ) {
+		# Prepare
+		$result = null;
+		$args = func_get_args();
+		
+		# Handle
+		foreach ( $args as $arg ) {
+			$result = realvalue($arg);
 			if ( !empty($result) ) {
 				break;
 			}
