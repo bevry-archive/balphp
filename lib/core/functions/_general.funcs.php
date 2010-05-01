@@ -180,3 +180,4 @@ if ( function_compare('get_backtrace_slim', 1, true, __FILE__, __LINE__) ) {
 		return $result;
 	}
 }
+

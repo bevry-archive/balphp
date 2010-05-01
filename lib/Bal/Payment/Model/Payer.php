@@ -1,4 +1,6 @@
 <?php
+require_once 'Bal/Payment/Model/Abstract.php';
+
 class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 	
 	/**
@@ -29,24 +31,15 @@ class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 	 */
 	public function validate ( ) {
 		# Prepare
-		$error = false;
 		$Payer = $this;
 		
-		# Fetch
-		$id = $Payer->id;
+		# Prepare Checks
+		$checks = array(
+			'id'					=> !empty($Payer->id),
+		);
 		
-		# Ensure ID
-		if ( !$id ) {
-			$error = 'Payer id must not be empty';
-		}
-		
-		# Handle?
-		if ( $error ) {
-			throw new Bal_Exception(array(
-				$error,
-				'Payer' => $Payer
-			));
-		}
+		# Validate Checks
+		validate_checks($checks);
 		
 		# Return true
 		return true;

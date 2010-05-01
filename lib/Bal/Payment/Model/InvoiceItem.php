@@ -1,4 +1,5 @@
 <?php
+require_once 'Bal/Payment/Model/Abstract.php';
 
 class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	
@@ -18,10 +19,13 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		// Required
 			'id' 					=> null,
 			'title' 				=> null,
+			
 			'price_total'			=> null,
 			'price_each'			=> null,
 			'total'					=> null,
 			'quantity'				=> null,
+			
+			'weight_unit'			=> null,
 		
 		// Optional
 			'handling_each' 		=> null,
@@ -33,7 +37,6 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			
 			'weight_each'			=> null,
 			'weight_total'			=> null,
-			'weight_unit'			=> null,
 			
 			'discount_each'			=> null,
 			'discount_rate'			=> null,
@@ -51,60 +54,34 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	 */
 	public static function validate ( ) {
 		# Prepare
-		$error = false;
 		$InvoiceItem = $this;
 		
-		# Fetch
-		$id				= $InvoiceItem->id;
-		$title 			= $InvoiceItem->title;
-		$price_total 	= $InvoiceItem->price_total;
-		$price_each 	= $InvoiceItem->price_each;
-		$total 			= $InvoiceItem->total;
-		$quantity 		= $InvoiceItem->quantity;
-		$weight_unit 	= $InvoiceItem->weight_unit;
+		# Prepare Checks
+		$checks = array(
+			'id'					=> !empty($InvoiceItem->id),
+			'title' 				=> !empty($InvoiceItem->title),
+			'price_total' 			=> in_range(0, $InvoiceItem->price_each_total, 		null, '<=', true),
+			'price_each' 			=> in_range(0, $InvoiceItem->each_total, 			null, '<=', true),
+			'total' 				=> in_range(0, $InvoiceItem->each_total, 			null, '<=', true),
+			'weight_unit' 			=> in_array($InvoiceItem->weight_unit, 				array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
+			
+			'handling_each'			=> in_range(0, $InvoiceItem->handling_each, 		null, '<=', true),
+			'handling_total'		=> in_range(0, $InvoiceItem->handling_total, 		null, '<=', true),
+			'tax_each'				=> in_range(0, $InvoiceItem->tax_each, 				null, '<=', true),
+			'tax_rate'				=> in_range(0, $InvoiceItem->tax_rate, 				1,    '<=', true),
+			'tax_total'				=> in_range(0, $InvoiceItem->tax_total, 			null, '<=', true),
+			'weight_each'			=> in_range(0, $InvoiceItem->weight_each, 			null, '<=', true),
+			'weight_total'			=> in_range(0, $InvoiceItem->weight_total, 			null, '<=', true),
+			'discount_each'			=> in_range(0, $InvoiceItem->discount_each, 		null, '<=', true),
+			'discount_rate'			=> in_range(0, $InvoiceItem->discount_rate, 		1,    '<=', true),
+			'discount_total'		=> in_range(0, $InvoiceItem->discount_total, 		null, '<=', true),
+			'shipping_first'		=> in_range(0, $InvoiceItem->shipping_first, 		null, '<=', true),
+			'shipping_additional'	=> in_range(0, $InvoiceItem->shipping_additional, 	null, '<=', true),
+			'shipping_total'		=> in_range(0, $InvoiceItem->shipping_total, 		null, '<=', true)
+		);
 		
-		# Ensure ID
-		if ( !$id ) {
-			$error = 'InvoiceItem id must not be empty';
-		}
-		
-		# Ensure Title
-		if ( !$title ) {
-			$error = 'InvoiceItem title must not be empty';
-		}
-		
-		# Ensure Price Total
-		if ( $price_total === null ) {
-			$error = 'InvoiceItem price_total must have a value';
-		}
-		
-		# Ensure Price Each
-		if ( $price_each === null ) {
-			$error = 'InvoiceItem price_each must have a value';
-		}
-		
-		# Ensure Total
-		if ( $total === null ) {
-			$error = 'InvoiceItem total must have a value';
-		}
-		
-		# Ensure Quantity
-		if ( $quantity < 1 ) {
-			$error = 'InvoiceItem quantity must be greater than one';
-		}
-		
-		# Ensure Weight Unit
-		if ( !in_array($weight_unit, array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)) ) {
-			$error = 'InvoiceItem weight unit is not a valid value';
-		}
-		
-		# Handle?
-		if ( $error ) {
-			throw new Bal_Exception(array(
-				$error,
-				'InvoiceItem' => $InvoiceItem
-			));
-		}
+		# Validate Checks
+		validate_checks($checks);
 		
 		# Return true
 		return true;
@@ -135,7 +112,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		$handling_total 	= $quantity*$handling_each;
 		$tax_total 			= $quantity*$tax_each + $price_total*$tax_rate;
 		$weight_total 		= $quantity*$weight_each;
-		$shipping_total 	= $shipping_first + ($quantity-1)*$shipping_additional
+		$shipping_total 	= $shipping_first + ($quantity-1)*$shipping_additional;
 		$total 				= $price_total + $handling_total + $tax_total + $weight_total + $shipping_total;
 		$discount_total 	= $quantity*$discount_each + $total*$discount_rate;
 		$total				-= $discount_total;

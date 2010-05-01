@@ -1,4 +1,8 @@
 <?php
+require_once 'Bal/Payment/Model/Abstract.php';
+require_once 'Bal/Payment/Model/InvoiceItem.php';
+require_once 'Bal/Payment/Model/Payer.php';
+
 class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	
 	/**
@@ -26,6 +30,8 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			'price_each_total'		=> null,
 			'total'					=> null,
 		
+			'weight_unit'			=> null,	// overall
+			
 	 	// Optional
 			'paid_at'				=> null,
 			
@@ -38,7 +44,6 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			
 			'weight_each_total'		=> null,
 			'weight_total'			=> null,	// overall
-			'weight_unit'			=> null,	// overall
 			
 			'discount'				=> null,	// overall
 			'discount_rate'			=> null,	// overall
@@ -57,73 +62,42 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	 */
 	public function validate ( ) {
 		# Prepare
-		$error = false;
 		$Invoice = $this;
 		
-		# Fetch
-		$id = $Invoice->id;
-		$total = $Invoice->total;
-		$price_each_total = $Invoice->price_each_total;
-		$each_total = $Invoice->each_total;
-		$currency_code = $Invoice->currency_code;
+		# Prepare Checks
+		$checks = array(
+			'id'					=> !empty($Invoice->id),
+			'total'					=> in_range(0, $Invoice->total, 				null, '<', true),
+			'price_each_total' 		=> in_range(0, $Invoice->price_each_total, 		null, '<', true),
+			'each_total' 			=> in_range(0, $Invoice->each_total, 			null, '<', true),
+			'currency_code' 		=> !empty($Invoice->currency_code),
+			'payment_status' 		=> in_array($Invoice->payment_status, 			array('created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')),
+			'weight_unit' 			=> in_array($Invoice->weight_unit, 				array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
+			'InvoiceItems' 			=> !reallyempty($Invoice->InvoiceItems),
+			'Payer' 				=> !reallyempty($Invoice->Payer),
+			
+			'paid_at'				=> $Invoice->paid_at === null || is_timestamp($Invoice->paid_at),
+			'handling'				=> in_range(0, $Invoice->handling, 				null, '<=', true),
+			'handling_each_total'	=> in_range(0, $Invoice->handling_each_total, 	null, '<=', true),
+			'handling_total'		=> in_range(0, $Invoice->handling_total, 		null, '<=', true),
+			'tax_each_total'		=> in_range(0, $Invoice->tax_each_total, 		null, '<=', true),
+			'tax_total'				=> in_range(0, $Invoice->tax_total, 			null, '<=', true),
+			'weight_each_total'		=> in_range(0, $Invoice->weight_each_total, 	null, '<=', true),
+			'weight_total'			=> in_range(0, $Invoice->weight_total, 			null, '<=', true),
+			'discount'				=> in_range(0, $Invoice->discount, 				null, '<=', true),
+			'discount_rate'			=> in_range(0, $Invoice->discount_rate, 		1,    '<=', true),
+			'discount_each_total'	=> in_range(0, $Invoice->discount_each_total, 	null, '<=', true),
+			'discount_total'		=> in_range(0, $Invoice->discount_total, 		null, '<=', true),
+			'shipping'				=> in_range(0, $Invoice->shipping, 				null, '<=', true),
+			'shipping_each_total'	=> in_range(0, $Invoice->shipping_each_total, 	null, '<=', true),
+			'shipping_total'		=> in_range(0, $Invoice->shipping_total, 		null, '<=', true)
+		);
+		
+		# Validate Checks
+		validate_checks($checks);
+		
+		# Check Payment Status
 		$payment_status = $Invoice->payment_status;
-		$weight_unit = $Invoice->weight_unit;
-		$InvoiceItems = $Invoice->InvoiceItems;
-		$Payer = $Invoice->Payer;
-		
-		# Check ID
-		if ( !$id ) {
-			$error = 'Invoice id must not be empty';
-		}
-		
-		# Check total
-		if ( !$total ) {
-			$error = 'Invoice total must not be empty';
-		}
-		# Check price_each_total
-		if ( !$price_each_total ) {
-			$error = 'Invoice price_each_total must not be empty';
-		}
-		# Check each_total
-		if ( !$each_total ) {
-			$error = 'Invoice each_total must not be empty';
-		}
-		
-		
-		# Check Currency
-		if ( !$currency_code ) {
-			$error = 'Invoice currency code must not be empty';
-		}
-		
-		# Check Payment Status
-		if ( !in_array($payment_status, array('created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')) ) {
-			$error = 'Invoice status is not a valid value';
-		}
-		
-		# Ensure Weight Unit
-		if ( !in_array($weight_unit, array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)) ) {
-			$error = 'Invoice weight unit is not a valid value';
-		}
-		
-		# Check Invoice Items
-		if ( !$InvoiceItems ) {
-			$error = 'Invoice must have at least one invoice item';
-		}
-		else {
-			foreach ( $InvoiceItems as $InvoiceItem ) {
-				$InvoiceItem->validate();
-			}
-		}
-		
-		# Check Payer
-		if ( !$Payer ) {
-			$error = 'Invoice must have a Payer';
-		}
-		else {
-			$Payer->validate();
-		}
-		
-		# Check Payment Status
 		switch ( $payment_status ) {
 			case 'awaiting':
 				// Awaiting: Awaiting an action
@@ -194,13 +168,15 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 				break;
 		}
 		
-		# Handle?
-		if ( $error ) {
-			throw new Bal_Exception(array(
-				$error,
-				'Invoice' => $Invoice
-			));
+		# Validate InvoiceItems
+		$InvoiceItems = $Invoice->InvoiceItems;
+		foreach ( $InvoiceItems as $InvoiceItem ) {
+			$InvoiceItem->validate();
 		}
+		
+		# Validate Payer
+		$Payer = $Invoice->Payer;
+		$Payer->validate();
 		
 		# Return true
 		return true;
@@ -224,6 +200,10 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		
 		# Calculate Each Totals
 		foreach ( $InvoiceItems as $InvoiceItem ) {
+			# Calculate
+			$InvoiceItem->applyTotals();
+			
+			# Fetch
 			$price_each_total 		+= until_numeric($InvoiceItem->price_total, 0.00);
 			$handling_each_total	+= until_numeric($InvoiceItem->handling_total, 0.00);
 			$tax_each_total			+= until_numeric($InvoiceItem->tax_total, 0.00);
@@ -297,7 +277,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		}
 		
 		# Cycle
-		foreach ( $invoiceitems as $invoiceItem ) {
+		foreach ( $invoiceitems as $invoiceitem ) {
 			$InvoiceItem = new Bal_Payment_Model_InvoiceItem($invoiceitem);
 			$InvoiceItems[] = $InvoiceItem;
 		}

@@ -7,6 +7,7 @@ $Invoice = new Bal_Payment_Model_Invoice(array(
 	'id' => intval(rand(50,200)),
 	'currency_code' => 'AUD',
 	'payment_status' => 'awaiting',
+	'weight_unit' => Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
 	'Payer' =>  new Bal_Payment_Model_Payer(array(
 		'id' => intval(rand(50,200)),
 		'firstname' => 'Benjamin',
@@ -14,8 +15,20 @@ $Invoice = new Bal_Payment_Model_Invoice(array(
 	)),
 	'InvoiceItems' => array(
 		new Bal_Payment_Model_InvoiceItem(array(
-			'id' 					=> 2,
+			'id' 					=> 1,
 			'title' 				=> 'My First Item',
+			'price_each'			=> 1.00,
+			'quantity'				=> 1
+		)),
+		new Bal_Payment_Model_InvoiceItem(array(
+			'id' 					=> 2,
+			'title' 				=> 'My Second Item',
+			'price_each'			=> 10000.00,
+			'quantity'				=> 3
+		)),
+		new Bal_Payment_Model_InvoiceItem(array(
+			'id' 					=> 3,
+			'title' 				=> 'My Third Item',
 			'price_each'			=> 10000.00,
 			'quantity'				=> 3,
 			
@@ -32,8 +45,8 @@ $Invoice = new Bal_Payment_Model_Invoice(array(
 			'shipping_additional'	=> 01000.00
 		)),
 		new Bal_Payment_Model_InvoiceItem(array(
-			'id' 					=> 2,
-			'title' 				=> 'My Second Item',
+			'id' 					=> 4,
+			'title' 				=> 'My Fourth Item',
 			'price_each'			=> 10000.00,
 			'quantity'				=> 3,
 			
@@ -46,13 +59,22 @@ $Invoice = new Bal_Payment_Model_Invoice(array(
 			'weight_unit'			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
 			
 			'discount_each'			=> 00010.00,
-			'discount_rate'			=> 00000.10,
+			'discount_rate'			=> 00000.01,
 			
 			'shipping_first' 		=> 00100.00,
 			'shipping_additional'	=> 01000.00
 		))
 	)
 ));
+
+# Calculate Totals
+$Invoice->applyTotals();
+
+# Validate
+$Invoice->validate();
+
+
+
 $Payer = new Bal_Payment_Payer(array(
 	'firstname' => 'Benjamin',
 	'lastname' => 'Lupton'

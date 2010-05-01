@@ -471,30 +471,3 @@ if ( function_compare('sanitize', 1, true, __FILE__, __LINE__) ) {
 
 }
 
-
-if ( function_compare('reallyempty', 1, true, __FILE__, __LINE__) ) {
-
-	/**
-	 * Checks if the string is totally completely empty
-	 * @version 1, March 24, 2010
-	 * @param	string	$haystack
-	 * @return    bool
-	 */
-	function reallyempty ( $haystack ) {
-		$result = false;
-		if ( empty($haystack) ) {
-			$result = true;
-		} elseif ( is_string($haystack) ) {
-			$haystack = preg_replace('/\s/', '', $haystack);
-			$result = empty($haystack);
-		}
-		elseif ( is_traversable($haystack) ) {
-			array_clean($haystack);
-			$result = empty($haystack);
-		}
-		else {
-			$result = empty($haystack);
-		}
-		return $result;
-	}
-}

@@ -50,7 +50,7 @@ abstract class Bal_Payment_Model_Abstract {
 	 */
 	protected function _get ( $key ) {
 		$this->_exists($key);
-		return $this->_data[$key]
+		return $this->_data[$key];
 	}
 	
 	/**
