@@ -580,8 +580,7 @@ class Bal_User extends Base_Bal_User {
 	
 	
 	# ========================
-	# CRUD HELPERS
-	
+	# CRUD Helpers
 	
 	/**
 	 * Fetch all the records for public access
@@ -604,7 +603,7 @@ class Bal_User extends Base_Bal_User {
 					->addSelect('User.subscriptions, SubscriptionTag.name, COUNT(MessagesPublishedFor.id) as subscription_published_count')
 					->from('User.SubscriptionTags SubscriptionTag')
 					->where('User.status = ?', 'published')
-					->andWhere('User.subscriptions != ?', '')
+					->andWhere('User.subscriptions != ?', '') // not empty
 					->orderBy('User.email ASC')
 					->leftJoin('User.MessagesFor MessagesPublishedFor WITH MessagesPublishedFor.template = ? AND MessagesPublishedFor.status = ?', array('content-subscription','published'))
 					->groupBy('User.id')

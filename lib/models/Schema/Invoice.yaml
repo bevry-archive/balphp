@@ -14,19 +14,96 @@ Bal_InvoiceItem:
         title:
             type: string(50)
             notblank: true
-        cost:
-            type: decimal(8)
-            scale: 2
-            notblank: true
-            extra:
-                currency: true
         template:
             type: string(50)
             notblank: true
             default: "user_invoiceitem"
             extra:
                 auto: true
-                
+        
+        total:
+            # The total amount
+            type: decimal(8)
+            scale: 2
+            notblank: true
+            extra:
+                currency: true
+        amount:
+            # The individual item amount
+            type: decimal(8)
+            scale: 2
+            notblank: true
+            extra:
+                currency: true
+        quantity:
+            # The total quantity
+            type: integer(1)
+            notblank: true
+            default: 1
+        shipping:
+            # The total of shipping for the initial item
+            type: decimal(8)
+            scale: 2
+            notblank: true
+            default: 0.00
+            extra:
+                currency: true
+        shipping_additional:
+            # The total of shipping for the additional items
+            type: decimal(8)
+            scale: 2
+            notblank: true
+            default: 0.00
+            extra:
+                currency: true
+        tax:
+            # The total tax applied
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        tax_rate:
+            # The rate the tax was applied
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+        weight:
+            # The total weight of the item(s)
+            type: decimal(8)
+            scale: 2
+            notblank: true
+        weight_unit:
+            # The unit which the item(s) were weighed
+            type: enum
+            values: [lbs,kgs]
+            notblank: true
+            default: kgs
+        handling:
+            # The handling costs applied
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        discount_amount:
+            # The total amount of discount
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        discount_rate:
+            # The total rate of discount
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            
         invoice_id:
             type: integer(2)
             unsigned: true
@@ -59,7 +136,14 @@ Bal_Invoice:
             default: "user_invoice"
             extra:
                 auto: true
-        cost:
+        amount_paid:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        amount:
             type: decimal(8)
             scale: 2
             notnull: true
@@ -84,7 +168,13 @@ Bal_Invoice:
             # Cache of any information that may change externally
             type: array
             notnull: true
-
+        
+        status:
+            type: enum
+            values: [pending,published,completed]
+            notblank: true
+            default: published
+        
         File_id:
             type: integer(2)
             unsigned: true
@@ -107,6 +197,52 @@ Bal_Invoice:
             local: UserFor_id
             foreign: id
             foreignAlias: InvoicesFor
+        UserFrom:
+            class: User
+            local: UserFrom_id
+            foreign: id
+            foreignAlias: InvoicesFrom
+
+
+Bal_Payment:
+    actAs:
+        SoftDelete:
+        Timestampable:
+    columns:
+        id:
+            type: integer(4)
+            primary: true
+            autoincrement: true
+            unsigned: true
+        status:
+            type: enum
+            values: [created,pending,refunded,processed,completed,canceled_reversal,denied,expired,failed,voided,reversed]
+            notblank: true
+            default: awaiting
+        amount:
+            type: decimal(8)
+            scale: 2
+            notblank: true
+            extra:
+                currency: true
+        details:
+            type: string
+            notblank: true
+            extra:
+                html: raw
+                
+        Invoice_id:
+            type: integer(2)
+            unsigned: true
+        UserFrom_id:
+            type: integer(2)
+            unsigned: true
+    relations:
+        Invoice:
+            class: Invoice
+            local: Invoice_id
+            foreign: id
+            foreignAlias: Payments
         UserFrom:
             class: User
             local: UserFrom_id

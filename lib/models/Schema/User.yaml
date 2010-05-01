@@ -43,18 +43,23 @@ Bal_User:
                 auto: true
         website:
             type: string(255)
+            extra:
+                website: true
         paypal:
             type: string(255)
+            extra:
+                email: true
             
         email:
             type: string(255)
             notblank: true
             #email: true
+            extra:
+                email: true
         phone:
             type: string(255)
             extra:
-                formOrder: 320
-                formGroup: "other"
+                phone: true
             
         description:
             # Bio
@@ -99,7 +104,18 @@ Bal_User:
                 # disabled - Disabled for whatever reason
             notblank: true
             default: pending
-            
+        
+        locale:
+            type: string(6)
+        language:
+            type: string(6)
+        charset:
+            type: string(30)
+        timezone:
+            type: string(30)
+        currency:
+            type: string(6)
+        
         Avatar_id:
             type: integer(2)
             unsigned: true

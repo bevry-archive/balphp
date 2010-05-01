@@ -462,6 +462,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 	}
 	
 	
+	
 	# ========================
 	# CRUD Helpers
 	
