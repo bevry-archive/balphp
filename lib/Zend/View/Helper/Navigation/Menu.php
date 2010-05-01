@@ -37,81 +37,6 @@ require_once 'Zend/View/Helper/Navigation/HelperAbstract.php';
 class Zend_View_Helper_Navigation_Menu
     extends Zend_View_Helper_Navigation_HelperAbstract
 {
-	protected $_template = null;
-	
-	public function setTemplate ( $template ) {
-		$this->_template = $template;
-		return $this;
-	}
-	
-	public function getTemplate ( ) {
-		return $this->_template;
-	}
-	
-	
-    /**
-     * Returns an HTML string containing an 'a' element for the given page if
-     * the page's href is not empty, and a 'span' element if it is empty
-     *
-     * Overrides {@link Zend_View_Helper_Navigation_Abstract::htmlify()}.
-     *
-     * @param  Zend_Navigation_Page $page  page to generate HTML for
-     * @return string                      HTML string for the given page
-     */
-    public function htmlify(Zend_Navigation_Page $page)
-    {
-        // get label and title for translating
-        $label = $page->getLabel();
-        $title = $page->getTitle();
-
-        // translate label and title?
-        if ($this->getUseTranslator() && $t = $this->getTranslator()) {
-            if (is_string($label) && !empty($label)) {
-                $label = $t->translate($label);
-            }
-            if (is_string($title) && !empty($title)) {
-                $title = $t->translate($title);
-            }
-        }
-
-        // get attribs for element
-        $attribs = array(
-            'id'     => $page->getId(),
-            'title'  => $title,
-            'class'  => $page->getClass()
-        );
-
-        // does page have a href?
-        if ($href = $page->getHref()) {
-            $element = 'a';
-            $attribs['href'] = $href;
-            $attribs['target'] = $page->getTarget();
-        } else {
-            $element = 'span';
-        }
-		
-		// put together
-		$template = $this->getTemplate();
-		if ( !$template ) {
-			$renderedTemplate = $this->view->escape($label);
-		} else {
-			$renderedTemplate = populate($template,
-				array(
-					'label' => $this->view->escape($label),
-					'title' => $this->view->escape($title),
-					'Page' => $page
-				)
-			);
-		}
-		
-		// return
-        return '<' . $element . $this->_htmlAttribs($attribs) . '>'
-             . $renderedTemplate
-             . '</' . $element . '>';
-    }
-	
-    // Normal Methods:
-	
     /**
      * CSS class to use for the ul element
      *
@@ -271,6 +196,92 @@ class Zend_View_Helper_Navigation_Menu
     }
 
     // Public methods:
+
+    /**
+     * Simple template to use in the htmlify process if specified
+     *
+     * @var string
+     */
+    protected $_template = null;
+
+    /**
+     * Set a simple template to use in the htmlify process
+     * @param string $template
+     * @return $this
+     */
+    public function setTemplate ( $template ) {
+        $this->_template = $template;
+        return $this;
+    }
+
+    /**
+     * Get the simple template to use in the htmlify process if specified
+     * @return string
+     */
+    public function getTemplate ( ) {
+        return $this->_template;
+    }
+
+    /**
+     * Returns an HTML string containing an 'a' element for the given page if
+     * the page's href is not empty, and a 'span' element if it is empty
+     *
+     * Overrides {@link Zend_View_Helper_Navigation_Abstract::htmlify()}.
+     *
+     * @param  Zend_Navigation_Page $page  page to generate HTML for
+     * @return string                      HTML string for the given page
+     */
+    public function htmlify(Zend_Navigation_Page $page)
+    {
+        // get label and title for translating
+        $label = $page->getLabel();
+        $title = $page->getTitle();
+
+        // translate label and title?
+        if ($this->getUseTranslator() && $t = $this->getTranslator()) {
+            if (is_string($label) && !empty($label)) {
+                $label = $t->translate($label);
+            }
+            if (is_string($title) && !empty($title)) {
+                $title = $t->translate($title);
+            }
+        }
+
+        // get attribs for element
+        $attribs = array(
+            'id'     => $page->getId(),
+            'title'  => $title,
+            'class'  => $page->getClass()
+        );
+
+        // does page have a href?
+        if ($href = $page->getHref()) {
+            $element = 'a';
+            $attribs['href'] = $href;
+            $attribs['target'] = $page->getTarget();
+        } else {
+            $element = 'span';
+        }
+
+        // put together
+        $template = $this->getTemplate();
+        if ( !$template ) {
+            $renderedTemplate = $this->view->escape($label);
+        } else {
+            $renderedTemplate = populate($template,
+                array(
+                    'label' => $this->view->escape($label),
+                    'title' => $this->view->escape($title),
+                    'Page' => $page
+                )
+            );
+        }
+
+        // return
+        return '<' . $element . $this->_htmlAttribs($attribs) . '>'
+             . $renderedTemplate
+             . '</' . $element . '>';
+    }
 
     /**
      * Normalizes given render options

@@ -522,8 +522,9 @@ class Bal_Payment_Paypal {
 	 * @return	array		Contains a bool status, error_msg, error_no, and the HTTP Response body(parsed=httpParsedResponseAr  or non-parsed=httpResponse) if successful
 	 * @access	public
 	 * @static
+	 * @author	Paypal Developer Network
 	 */
-	public function PPHttpPost ($url, $fields, $parsed) {
+	public static function PPHttpPost ($url, $fields, $parsed) {
 		// Prepare
 		if ( is_array($fields) ) {
 			foreach ( $fields as $key => $value ) {

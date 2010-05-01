@@ -293,6 +293,21 @@ if ( function_compare('array_apply', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('delve_set', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Alias for array_set
+	 * @version 1, May 01, 2010
+	 * @param array $arr
+	 * @param array $depth
+	 * @param mixed $value
+	 * @param boolean $copy [optional]
+	 * @return array
+	 */
+	function delve_set ( &$arr, $depth, &$value, $copy = true ) {
+		return array_apply($arr, $depth, $value, $copy);
+	}
+}
+
 if ( function_compare('array_unapply', 2, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -449,8 +464,8 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 						/* Is Doctrine Record */
 						||	(	($holder instanceOf Doctrine_Record)
 								&&	($holder->hasAccessor($key)
-										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) || isset($holder->$key)) ) // && $holder->$key->exists())
 										||	$holder->getTable()->hasField($key)
+										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) /* < returns null, hence the OR and extra check > */ || isset($holder->$key)) ) // && $holder->$key->exists())
 									)
 							)
 						/* Is normal object */
@@ -1203,17 +1218,77 @@ if ( function_compare('check_flow', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('make_array', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('force_array', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * If value is not an array, make it one
 	 * @version 1, April 11, 2010
 	 * @param array $array
 	 * @return mixed
 	 */
-	function make_array ( $array ) {
+	function force_array ( $array ) {
 		return is_array($array) ? $array : array($array);
 	}
 }
+
+if ( function_compare('array_flip_deep', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Flip an array with support for indexed arrays
+	 * @version 1, April 25, 2010
+	 * @param traversable $array
+	 * @param array $map
+	 * @return array
+	 */
+	function array_flip_deep ( array $array ) {
+		# Prepare
+		$result = array();
+		
+		# Apply Invoice Data
+		foreach ( $map as $local_field => $remote_field ) {
+			# Prepare
+			$remote_fields = force_array($remote_fields);
+			# Cycle through
+			foreach ( $remote_fields as $remote_field ) {
+				$result[$remote_field] = $local_field;
+			}
+		}
+		
+		# Return result
+		return $result;
+	}
+}
+
+if ( function_compare('array_keys_map', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Map the values from array according to the map.
+	 * The map format should be in $map[$from_field] => $map[$to_field]
+	 * @version 1, April 25, 2010
+	 * @param traversable $array
+	 * @param array $map
+	 * @return array
+	 */
+	function array_keys_map ( array $array, array $map ) {
+		# Prepare
+		$result = array();
+		
+		# Apply Invoice Data
+		foreach ( $map as $local_field => $remote_fields ) {
+			# Prepare
+			$remote_fields = force_array($remote_fields);
+			# Fetch
+			$local_value = delve($array,$local_field);
+			# Check existance
+			if ( $local_value === null ) continue;
+			# Cycle through possible names
+			foreach ( $remote_fields as $remote_field ) {
+				$result[$remote_field] = $local_value;
+			}
+		}
+		
+		# Return result
+		return $result;
+	}
+}
+
 
 if ( function_compare('make_field_name', 1, true, __FILE__, __LINE__) ) {
 	/**
