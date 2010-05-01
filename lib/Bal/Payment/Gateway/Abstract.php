@@ -101,34 +101,83 @@ abstract class Bal_Payment_Gateway_Abstract {
 		return $this->Log;
 	}
 	
-	
 	# ========================
 	# Invoice
 	
-	
-	public function getDetails ( ) {
-		return $this->getStore($this->Order->id);
+	/**
+	 * Get the full path of a store file
+	 * @param mixed $id
+	 * @return string
+	 */
+	protected function getStoreFilePath ( $file ) {
+		# Prepare
+		$Config = $this->getConfig();
+		$path = delve($Config,'transactions_path');
+		
+		# Handle
+		$file_path = $path . DIRECTORY_SEPARATOR . $file . '.txt';
+		
+		# Return file_path
+		return $file_path;
 	}
 	
-	public function setStore ( $store, $file = 'store' ) {
-		// Log
-		$file = $this->settings['transactions_path'].'/'.$file.'.txt';
-		file_put_contents($file, serialize($store));
-		// Done
-		return $this;
-	}
-	public function getStore ( $file = 'store' ) {
-		// Log
-		$file = $this->settings['transactions_path'].'/'.$file.'.txt';
-		return unserialize(file_get_contents($file));
-	}
-	
-	public function log ( $stuff, $file = 'log' ) {
-		// Log
-		$file = $this->settings['logs_path'].'/'.$file.'.txt';
-		file_put_contents($file, "\n\n----\n".var_export($stuff,true), FILE_APPEND);
-		// Done
-		return $this;
+	/**
+	 * Set or Get the file in the store
+	 * @throws Bal_Exception
+	 * @param string $file
+	 * @param array $data [optional]
+	 * @return mixed
+	 */
+	public function store ( $file, $data = null ) {
+		# Prepare
+		$file_path = $this->getStoreFilePath($file);
+		$result = null;
+		
+		# Handle
+		if ( $data === null ) {
+			# Get Contents
+			$data = file_get_contents($file_path);
+			if ( $data === false ) {
+				throw new Bal_Exception(array(
+					'Failed to get the store data',
+					'file_path' => $file_path
+				));
+			}
+			
+			# Unserialise Data
+			$result = unserialize($data);
+			if ( $result === false ) {
+				throw new Bal_Exception(array(
+					'Failed to unserialize the store data',
+					'file_path' => $file_path,
+					'data' => $data
+				));
+			}
+		}
+		else {
+			# Serialise Data
+			$result = serialize($data);
+			if ( $result === false ) {
+				throw new Bal_Exception(array(
+					'Failed to serialise the store data',
+					'file_path' => $file_path,
+					'data' => $data
+				));
+			}
+			
+			# Put Contents
+			$result = file_put_contents($file_path, $result);
+			if ( $result === false ) {
+				throw new Bal_Exception(array(
+					'Failed to put the store data',
+					'file_path' => $file_path,
+					'data' => $data
+				));
+			}
+		}
+		
+		# Chain
+		return $result;
 	}
 	
 }

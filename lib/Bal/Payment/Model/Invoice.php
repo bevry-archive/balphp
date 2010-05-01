@@ -8,11 +8,10 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	protected $_data = array(
 		// required
 		'id' 				=> null,
-		'payment_status' 	=> null,
 		'InvoiceItems' 		=> null,
 		'Payer' 			=> null,
 		
-		// optional
+		// optional - the below fields are ALL totals
 		'amount' 			=> null,
 		'currency' 			=> null,
 		'handling' 			=> null,
@@ -21,7 +20,10 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		'weight' 			=> null,
 		'weight_unit' 		=> null,
 		'discount_amount' 	=> null,
-		'discount_rate' 	=> null
+		'discount_rate' 	=> null,
+		
+		'paid_at'			=> null,
+		'payment_status' 	=> null,
 	);
 	
 	/**
@@ -40,22 +42,22 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		$InvoiceItems = $Invoice->InvoiceItems;
 		$Payer = $Invoice->Payer;
 		
-		# Ensure ID
+		# Check ID
 		if ( !$id ) {
 			$error = 'Invoice id must not be empty';
 		}
 		
-		# Ensure Amount
+		# Check Amount
 		if ( $amount === null ) {
 			$error = 'Invoice amount must have a value';
 		}
 		
-		# Ensure Payment Status
+		# Check Payment Status
 		if ( !in_array($payment_status, array('created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')) ) {
 			$error = 'Invoice status is not a valid value';
 		}
 		
-		# Ensure Invoice Items
+		# Check Invoice Items
 		if ( !$InvoiceItems ) {
 			$error = 'Invoice must have at least one invoice item';
 		}
@@ -65,12 +67,83 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			}
 		}
 		
-		# Ensure Payer
+		# Check Payer
 		if ( !$Payer ) {
 			$error = 'Invoice must have a Payer';
 		}
 		else {
 			$Payer->validate();
+		}
+		
+		# Check Payment Status
+		switch ( $payment_status ) {
+			case 'awaiting':
+				// Awaiting: Awaiting an action
+				break;
+				
+			case 'canceled_reversal':
+				// Canceled_Reversal: A reversal has been canceled. For example, you won a dispute with the customer, and the funds for the transaction that was reversed have been returned to you.
+				throw new Bal_Exception(array(
+					'Canceled_Reversal: A reversal has been canceled. For example, you won a dispute with the customer, and the funds for the transaction that was reversed have been returned to you.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'denied':
+				// Denied: You denied the payment. This happens only if the payment was previously pending because of possible reasons described for the pending_reason variable or the Fraud_Management_Filters_x variable.
+				throw new Bal_Exception(array(
+					'Denied: You denied the payment. This happens only if the payment was previously pending because of possible reasons described for the pending_reason variable or the Fraud_Management_Filters_x variable.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'expired':
+				// Expired: This authorization has expired and cannot be captured.
+				throw new Bal_Exception(array(
+					'Expired: This authorization has expired and cannot be captured.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'failed':
+				// Failed: The payment has failed. This happens only if the payment was made from your customer’s bank account.
+				throw new Bal_Exception(array(
+					'Failed: The payment has failed. This happens only if the payment was made from your customer’s bank account.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'voided':
+				// Voided: This authorization has been voided.
+				throw new Bal_Exception(array(
+					'Voided: This authorization has been voided.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'reversed':
+				// Reversed: A payment was reversed due to a chargeback or other type of reversal. The funds have been removed from your account balance and returned to the buyer. The reason for the reversal is specified in the ReasonCode element.
+				throw new Bal_Exception(array(
+					'Reversed: A payment was reversed due to a chargeback or other type of reversal. The funds have been removed from your account balance and returned to the buyer. The reason for the reversal is specified in the ReasonCode element.',
+					'Invoice' => $Invoice
+				));
+				break;
+			
+			case 'created':
+				// Created: A German ELV payment is made using Express Checkout.
+			case 'pending':
+				// Pending: The payment is pending. See pending_reason for more information.
+			case 'refunded':
+				// Refunded: You refunded the payment.
+			case 'processed':
+				// Processed: A payment has been accepted.
+			case 'completed':
+				// Completed: The payment has been completed, and the funds have been added successfully to your account balance.
+				break;
+			
+			default:
+				// Unkown: Unkown payment status.
+				throw new Bal_Exception(array(
+					'Unknown: Unknown payment status',
+					'payment_status' => $payment_status,
+					'Invoice' => $Invoice
+				));
+				break;
 		}
 		
 		# Handle?

@@ -462,6 +462,23 @@ class Bal_Invoice extends Base_Bal_Invoice
 	}
 	
 	
+	# ========================
+	# Payment Helpers
+	
+	/**
+	 * Convert us into the Payment Model Representation
+	 * @return Bal_Payment_Model_Invoice
+	 */
+	public function generatePaymentModel ( ) {
+		# Prepare
+		$Invoice = $this;
+		
+		# Handle
+		$invoice = array(
+		
+		)
+	}
+	
 	
 	# ========================
 	# CRUD Helpers
