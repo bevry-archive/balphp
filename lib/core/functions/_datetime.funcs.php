@@ -25,7 +25,7 @@ if ( function_compare('ensure_timestamp', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Gets the days between two timestamps
 	 * @version 1, January 28, 2010
-	 * @param mixed	$start
+	 * @param mixed	$value
 	 * @return timestamp
 	 */
 	function ensure_timestamp ( $value = null ) {
@@ -36,6 +36,37 @@ if ( function_compare('ensure_timestamp', 1, true, __FILE__, __LINE__) ) {
 		elseif ( is_string($value) ) $result = strtotime($value);
 		else throw new Exception('Unkown timestamp type.');
 		
+		return $result;
+	}
+}
+
+
+if ( function_compare('is_timestamp', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks to see if the value is a timestamp
+	 * @version 1, May 02, 2010
+	 * @param mixed	$value
+	 * @return timestamp
+	 */
+	function is_timestamp ( $value ) {
+		# Prepare
+		$result = true;
+		
+		# Handle
+		if ( !$value ) {
+			$result = false;
+		}
+		else {
+			try {
+				$timestamp = ensure_timestamp($value);
+				$result = is_numeric($timestamp);
+			}
+			catch ( Exception $E ) {
+				$result = false;
+			}
+		}
+		
+		# Return result
 		return $result;
 	}
 }

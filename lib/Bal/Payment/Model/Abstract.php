@@ -138,13 +138,13 @@ abstract class Bal_Payment_Model_Abstract {
 		if ( is_array($merge) ) {
 			# Cycle
 			foreach ( $merge as $key => $value ) {
-				# Recurse
+				# Set
 				$this->set($key, $value);
 			}
 		}
 		elseif ( is_object($merge) ) {
 			# Convert to array and recurse
-			$this->set($merge->toArray());
+			$this->merge($merge->toArray());
 		}
 		
 		# Chain

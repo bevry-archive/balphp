@@ -87,28 +87,39 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 		$totals = 0.00;
 		
 		# Check first InvoiceITem
-		$total = 1.00; $totals += $total;
-		$this->assertEquals($total, $Invoice->InvoiceItems[0]->total);
+		$total = 1.00;
+		$total = round($total,2);
+		$totals += $total;
+		$this->assertEquals($total, $Invoice->InvoiceItems[0]->price_total);
 		
 		# Check Second Invoice Item
-		$total = 30000.00; $totals += $total;
-		$this->assertEquals($total, $Invoice->InvoiceItems[1]->total);
+		$total = 3.00;
+		$total = round($total,2);
+		$totals += $total;
+		$this->assertEquals($total, $Invoice->InvoiceItems[1]->price_total);
 		
 		# Check Third Invoice Item
-		$total = 32100.33-30.00; $totals += $total;
-		$this->assertEquals((int)($total), (int)$Invoice->InvoiceItems[2]->total);
+		$total =  3.00;					// price
+		$total -= 0.30;					// discount
+		$total += 3.00;					// tax fixed
+		$total += 3.00;					// handling
+		$total += 2.00;					// shipping
+		$total = round($total,2);
+		$totals += $total;
+		$this->assertEquals($total, $Invoice->InvoiceItems[2]->price_total);
 		
 		# Check Fourth Invoice Item
-		$subtotal = 30000.00;
-		$discount = 30.00 + $subtotal * 0.01;
-		$subtotal += 2100.33+(30000*0.10);
-		$total = $subtotal - $discount; $totals += $total;
-		$this->assertEquals((int)$total, (int)$Invoice->InvoiceItems[3]->total);
+		$total =  3.00;					// price
+		$total -= 0.30 + $total*0.10;	// discount
+		$total += 3.00 + $total*0.01;	// tax
+		$total += 3.00;					// handling
+		$total += 2.00;					// shipping
+		$total = round($total,2);
+		$totals += $total;
+		$this->assertEquals($total, $Invoice->InvoiceItems[3]->price_total);
 		
-		# Now Ensure Invoice Totals
-		$totals = $totals*0.50 - 1.00; // discount
-		$totals += 1.00 + 2.00; // shipping, handling
-		$this->assertEquals((int)$totals, (int)$Invoice->total);
+		# Check Invoice
+		$this->assertEquals(strval($totals), strval($Invoice->price_total));
     }
 	
     /**
@@ -155,11 +166,6 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 			'payment_status' => 'awaiting',
 			'weight_unit' => Bal_Payment_Model_Invoice::WEIGHT_UNIT_KGS,
 			
-			'handling_invoice' 			=> 1.00,
-			'shipping_invoice' 			=> 2.00,
-			'discount_invoice' 			=> 1.00,
-			'discount_invoice_rate'		=> 0.50,
-			
 			'Payer' =>  array(
 				'id' => intval(rand(50,200)),
 				'firstname' => 'Benjamin',
@@ -176,47 +182,47 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 				array(
 					'id' 					=> 2,
 					'title' 				=> 'My Second Item',
-					'price_each'			=> 10000.00,
+					'price_each'			=> 1.00,
 					'quantity'				=> 3,
 					'weight_unit' 			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
 				),
 				array(
 					'id' 					=> 3,
 					'title' 				=> 'My Third Item',
-					'price_each'			=> 10000.00,
+					'price_each'			=> 1.00,
 					'quantity'				=> 3,
-			
-					'handling_each' 		=> 00000.01,
-			
-					'tax_each'				=> 00000.10,
-			
-					'weight_each'			=> 00001.00,
+					
+					'handling_each' 		=> 1.00,
+					
+					'tax_each'				=> 1.00,
+					
+					'weight_each'			=> 1.00,
 					'weight_unit'			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
-			
-					'discount_each'			=> 00010.00,
-			
-					'shipping_first' 		=> 00100.00,
-					'shipping_additional'	=> 01000.00
+					
+					'discount_each'			=> 0.10,
+					
+					'shipping_first' 		=> 1.00,
+					'shipping_additional'	=> 0.50
 				),
 				array(
 					'id' 					=> 4,
 					'title' 				=> 'My Fourth Item',
-					'price_each'			=> 10000.00,
+					'price_each'			=> 1.00,
 					'quantity'				=> 3,
-			
-					'handling_each' 		=> 00000.01,
-			
-					'tax_each'				=> 00000.10,
-					'tax_rate'				=> 00000.10,
-			
-					'weight_each'			=> 00001.00,
+					
+					'handling_each' 		=> 1.00,
+					
+					'tax_each'				=> 1.00,
+					'tax_each_rate'			=> 0.01,
+					
+					'weight_each'			=> 1.00,
 					'weight_unit'			=> Bal_Payment_Model_InvoiceItem::WEIGHT_UNIT_KGS,
-			
-					'discount_each'			=> 00010.00,
-					'discount_rate'			=> 00000.01,
-			
-					'shipping_first' 		=> 00100.00,
-					'shipping_additional'	=> 01000.00
+					
+					'discount_each'			=> 0.10,
+					'discount_each_rate'	=> 0.10,
+					
+					'shipping_first' 		=> 1.00,
+					'shipping_additional'	=> 0.50
 				)
 			)
 		);

@@ -471,7 +471,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 						/* Is normal object */
 						||	(	!($holder instanceOf Doctrine_Record)
 								&&	method_exists($holder, 'get')
-								&&	$holder->get($key)
+								&&	$holder->get($key) !== null
 							)
 					) {
 						# We exist, so recurse
@@ -1300,7 +1300,7 @@ if ( function_compare('array_flip_deep', 1, true, __FILE__, __LINE__) ) {
 		$result = array();
 		
 		# Apply Invoice Data
-		foreach ( $map as $local_field => $remote_field ) {
+		foreach ( $array as $local_field => $remote_fields ) {
 			# Prepare
 			$remote_fields = force_array($remote_fields);
 			# Cycle through

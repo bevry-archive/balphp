@@ -34,13 +34,7 @@ class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 		# Prepare
 		$Payer = $this;
 		
-		# Prepare Checks
-		$checks = array(
-			'id'					=> !reallyempty($Payer->id),
-		);
-		
-		# Validate Checks
-		validate_checks($checks);
+		// we should check the id, however this is not returned with paypal IPN, so no use
 		
 		# Return true
 		return true;

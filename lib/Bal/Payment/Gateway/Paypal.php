@@ -37,41 +37,34 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			// NOTE: The below uses the PDT guide
 			'invoice' => array(
 				'id' 						=> 'invoice',
-				'subtotal' 					=> 'amount', // after discount, before shipping, handling, tax
 				'currency_code' 			=> 'currency_code',
+				'weight_unit' 				=> 'weight_unit',
+				'weight_all_total' 			=> 'weight_cart',
 				
-				'handling_total' 			=> 'handling',
-				'shipping_total' 			=> 'shipping',
-				
-				'tax_total' 				=> 'tax_cart',
-				
-				'weight_total' 				=> 'weight_cart',
-				'weight_unit' 				=> 'weight_unit'
+				'price_all_total_d'			=> 'amount', 			// + discount, - shipping, handling, tax
+				'shipping_all_total' 		=> 'shipping',
+				'handling_all_total' 		=> 'handling',
+				'tax_all_total' 			=> 'tax_cart'
 			),
 			'item' => array(
 				// for multiples the (_x) is appended
 				'id' 						=> 'item_number',
 				'title' 					=> 'item_name',
 				'quantity' 					=> 'quantity',
-				'price_each_total' 			=> 'amount', // after discount, before shipping, handling, tax
+				'weight_unit' 				=> 'weight_unit',
+				'weight_each' 				=> 'weight', 			// unsure if each or total should be used
 				
+				'price_each_d' 				=> 'amount', 			// + discount, - shipping, handling, tax
 				'shipping_first' 			=> 'shipping',
 				'shipping_additional' 		=> 'shipping2',
-				
-				'tax_total'					=> 'tax',
-				// 'tax_each' 				=> 'tax',
-				// 'tax_rate' 				=> 'tax_rate',
-				// ^ too complicated using both
-				
-				'weight_each' 				=> 'weight', // unsure if each or total should be used
-				'weight_unit' 				=> 'weight_unit',
-				'handling_total' 			=> 'handling',
+				'handling_all_total' 		=> 'handling',
+				'tax_each_total'			=> 'tax',
 			),
 			'payer' => array(
 				'address1' 					=> 'address1',
 				'address2' 					=> 'address2',
 				'city' 						=> 'city',
-				'country_code' 				=> 'country', // is actually country_code
+				'country_code' 				=> 'country', 			// is actually country_code
 				'state' 					=> 'state',
 				'postcode' 					=> 'zip',
 				'firstname' 				=> 'first_name',
@@ -84,30 +77,29 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			// NOTE: The below uses the IPNGuide
 			'invoice' => array(
 				'id' 						=> 'invoice',
-				'total' 					=> 'mc_gross', // after discount, shipping, handling, tax
 				'currency_code' 			=> 'mc_currency',
-				
 				'payment_fee'				=> 'mc_fee',
-				'handling_total'			=> 'mc_handling',
-				'shipping_total'			=> 'mc_shipping', // shipping
-				'tax_total'					=> 'tax',
-				
-				'paid_at' 					=> 'payment_date',
 				'payment_status' 			=> 'payment_status',
 				'payment_error'				=> 'reason_code',
+				'paid_at' 					=> 'payment_date',
+				
+				'price_total' 				=> 'mc_gross',			// + discount, shipping, handling, tax
+				'shipping_all_total'		=> 'mc_shipping', 		// altenative is: shipping
+				'handling_all_total'		=> 'mc_handling',
+				'tax_all_total'				=> 'tax'
 			),
 			'item' => array(
 				// for multiples the (x) is appended
 				// underscores gets trimmed if we only have a singular
 				'id' 						=> 'item_number',
 				'title' 					=> 'item_name',
+				'payment_fee'				=> 'mc_fee_',
 				'quantity' 					=> 'quantity',
 				
-				'total' 					=> 'mc_gross_', // after discount, shipping, handling, tax
-				'payment_fee'				=> 'mc_fee_',
-				'shipping' 					=> 'mc_shipping',
-				'tax' 						=> 'tax',
-				'handling' 					=> 'mc_handling'
+				'price_all_total_dhs' 		=> 'mc_gross_',			// + discount, shipping, handling, - tax
+				'handling_all_total' 		=> 'mc_handling',
+				'shipping_all_total' 		=> 'mc_shipping',
+				'tax_all_total' 			=> 'tax',				// unsure if each or all should be used
 			),
 			'payer' => array(
 				'email'						=> 'payer_email',
@@ -135,10 +127,11 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			'url', 'token', 'business', 'notify_url', 'return'
 		),
 		'invoice' => array(
-			'id', 'amount', 'currency', 'handling', 'shipping', 'tax'
+			'id', 'currency_code', 'price_total', 'shipping_all_total', 'handling_all_total', 'tax_all_total'
 		),
 		'item' => array(
-			'id', 'amount', 'quantity', 'handling', 'shipping', 'tax'
+			'id', 'quantity', 'price_all_total_dhs', 'shipping_all_total', 'handling_all_total',
+			// 'tax_all_total' - paypal does not return the tax back!
 		),
 		'request' => array(
 			'business', 'notify_url', 'return'
@@ -190,51 +183,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	public function generateForm ( Bal_Payment_Model_Invoice $Invoice ) {
 		# Prepare
-		$Log = $this->getLog();
 		$Config = $this->getConfig();
 		$request = $this->generateRequest($Invoice);
-		
-		# Determine Type
-		if ( sizeof($Invoice->InvoiceItems) > 1 ) {
-			$type = 'cart';
-		}
-		else {
-			$type = 'buynow';
-		}
-		
-		# Prepare Request based on Type
-		switch ( $type ) {
-			case 'cart':
-				$request['cmd'] = '_cart';
-				$request['upload'] = '1';
-				break;
-				
-			case 'buynow':
-				$request['cmd'] = '_xclick';
-				if ( sizeof($Invoice->InvoiceItems) > 1 ) {
-					throw new Bal_Exception(array(
-						'Too many items for buynow',
-						'Invoice' => $Invoice
-					));
-				}
-				break;
-		}
-		
-		# Add some config variables to request if they are set
-		$params = $this->validates['request'];
-		foreach ( $params as $param ) {
-			$config_value = delve($Config,$param);
-			if ( $config_value ) {
-				$request[$param] = $config_value;
-			}
-		}
-		
-		# Store our Request
-		$this->store('paypal-request-'.$Invoice->id, array(
-			'Invoice' => $Invoice,
-			'request' => $request,
-			'Config' => $Config
-		));
 		
 		# Generate Form
 		$form = '';
@@ -261,6 +211,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	public function generateRequest ( Bal_Payment_Model_Invoice $Invoice ) {
 		# Prepare
+		$Config = $this->getConfig();
 		$maps = $this->maps['request'];
 		$request = array();
 		
@@ -336,6 +287,54 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		
 		
 		# --------------------------
+		# Append Extra Information
+		
+		
+		# Determine Type
+		if ( sizeof($Invoice->InvoiceItems) > 1 ) {
+			$type = 'cart';
+		}
+		else {
+			$type = 'buynow';
+		}
+		
+		# Prepare Request based on Type
+		switch ( $type ) {
+			case 'cart':
+				$request['cmd'] = '_cart';
+				$request['upload'] = '1';
+				break;
+				
+			case 'buynow':
+				$request['cmd'] = '_xclick';
+				if ( sizeof($Invoice->InvoiceItems) > 1 ) {
+					throw new Bal_Exception(array(
+						'Too many items for buynow',
+						'Invoice' => $Invoice
+					));
+				}
+				break;
+		}
+		
+		# Add some config variables to request if they are set
+		$params = $this->validates['request'];
+		foreach ( $params as $param ) {
+			$config_value = delve($Config,$param);
+			if ( $config_value ) {
+				$request[$param] = $config_value;
+			}
+		}
+		
+		# Store our Request
+		$this->store('paypal-request-'.$Invoice->id, array(
+			'Invoice' => $Invoice,
+			'request' => $request,
+			'Config' => $Config
+		));
+		
+		
+		
+		# --------------------------
 		# Done
 		
 		# Return request
@@ -353,9 +352,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param array $response
 	 * @return Bal_Payment_Model_Invoice
 	 */
-	public function handleResponse ( array $response ) {
+	public function handleResponse ( array $response = array() ) {
 		# Prepare
 		$Invoice = null;
+		if ( empty($response) ) {
+			$response = !empty($_POST) ? $_POST : $_GET;
+		}
 		
 		# Check
 		if ( empty($response['tx']) && empty($response['txn_id']) ) {
@@ -396,19 +398,19 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$Invoice = null;
 		
 		# Check we have a transaction id
-		if ( empty($reponse_pdt['tx']) ) {
+		if ( empty($response_pdt['tx']) ) {
 			# Error
 			throw new Bal_Exception(array(
-				'PDT received an HTTP GET request without a transaction ID.',
-				'response' => $reponse_pdt
+				'PDT received without a transaction ID.',
+				'response' => $response_pdt
 			));
 		}
 		
 		# Send a request to paypal to receive the Authentic Reponse for that transaction
-		$response_authentic = $this->fetchResponse($reponse_pdt['tx']);
+		$response_authentic = $this->fetchResponse($response_pdt['tx']);
 		
 		# Fetch the Authentc Response's Data
-		$response_authentic_data = $response["httpParsedResponseAr"];
+		$response_authentic_data = $response_authentic["httpParsedResponseAr"];
 		
 		# Check that the Authentic Responses's Transaction ID does not differ from that of our original PDT Response
 		if ( $response_authentic_data['txn_id'] !== $response_pdt['tx'] ) {
@@ -436,6 +438,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * As soon as a update to the payment is performed, PayPal will try to send us a notification request (IPN) to inform us
 	 * This may however occur before or after the PDT request due to network slowdowns
 	 * Therefor we also trigger this in our @handlePDT function
+	 * @throws Bal_Exception
 	 * @param array $response
 	 * @return Bal_Payment_Model_Invoice
 	 */
@@ -444,8 +447,26 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$Config = $this->GetConfig();
 		$maps = $this->maps['response'];
 		
+		# Check we have a transaction id
+		if ( empty($response['txn_id']) ) {
+			# Error
+			throw new Bal_Exception(array(
+				'IPN received without a transaction ID.',
+				'response' => $response
+			));
+		}
+		
+		# Check we have a invoice id
+		if ( empty($response['invoice']) ) {
+			# Error
+			throw new Bal_Exception(array(
+				'IPN received without a invoice ID.',
+				'response' => $response
+			));
+		}
+		
 		# Fetch the local Invoice
-		$local_Store = $this->store('paypal-request-'.$Invoice->id);
+		$local_Store = $this->store('paypal-request-'.$response['invoice']);
 		$local_Invoice = delve($local_Store, 'Invoice');
 		
 		
@@ -459,7 +480,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$remote_Invoice = $this->fetchInvoice($response);
 		
 		# Validate the Invoice
-		$remote_Invoice->validate();
+		// $remote_Invoice->validate();
 		
 		# Compare the local invoice against the remote invoice
 		$this->validateInvoices($local_Invoice, $remote_Invoice);
@@ -473,7 +494,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		// - paid_at
 		
 		# Store the remote Invoice
-		$this->store('paypal-response-'.$Invoice->id, array(
+		$this->store('paypal-response-'.$remote_Invoice->id, array(
 			'Invoice' => $remote_Invoice,
 			'response' => $response,
 			'Config' => $Config
@@ -521,17 +542,95 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	
 	protected function fetchInvoice ( array $response ) {
 		# Prepare
-		$map = $this->maps['invoice'];
+		$map = $this->maps['response']['invoice'];
 		
 		# Map a Invoice from the response
-		$Invoice = new Bal_Payment_Model_Invoice(array_keys_map($response, array_flip_deep($map)));
+		$invoice = array_keys_map($response, array_flip_deep($map));
+		
+		# Adjust
+		$invoice['payment_status'] = strtolower($invoice['payment_status']);
+		
+		# Generate
+		$Invoice = new Bal_Payment_Model_Invoice($invoice);
 		
 		# Payer + InvoiceItems
 		$Invoice->Payer = $this->fetchPayer($response);
 		$Invoice->InvoiceItems = $this->fetchInvoiceItems($response);
 		
+		# Check Payment Status
+		$payment_status = $Invoice->payment_status;
+		switch ( $payment_status ) {
+			case 'awaiting':
+				// Awaiting: Awaiting an action
+				break;
+				
+			case 'canceled_reversal':
+				// Canceled_Reversal: A reversal has been canceled. For example, you won a dispute with the customer, and the funds for the transaction that was reversed have been returned to you.
+				throw new Bal_Exception(array(
+					'Canceled_Reversal: A reversal has been canceled. For example, you won a dispute with the customer, and the funds for the transaction that was reversed have been returned to you.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'denied':
+				// Denied: You denied the payment. This happens only if the payment was previously pending because of possible reasons described for the pending_reason variable or the Fraud_Management_Filters_x variable.
+				throw new Bal_Exception(array(
+					'Denied: You denied the payment. This happens only if the payment was previously pending because of possible reasons described for the pending_reason variable or the Fraud_Management_Filters_x variable.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'expired':
+				// Expired: This authorization has expired and cannot be captured.
+				throw new Bal_Exception(array(
+					'Expired: This authorization has expired and cannot be captured.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'failed':
+				// Failed: The payment has failed. This happens only if the payment was made from your customer’s bank account.
+				throw new Bal_Exception(array(
+					'Failed: The payment has failed. This happens only if the payment was made from your customer’s bank account.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'voided':
+				// Voided: This authorization has been voided.
+				throw new Bal_Exception(array(
+					'Voided: This authorization has been voided.',
+					'Invoice' => $Invoice
+				));
+				break;
+			case 'reversed':
+				// Reversed: A payment was reversed due to a chargeback or other type of reversal. The funds have been removed from your account balance and returned to the buyer. The reason for the reversal is specified in the ReasonCode element.
+				throw new Bal_Exception(array(
+					'Reversed: A payment was reversed due to a chargeback or other type of reversal. The funds have been removed from your account balance and returned to the buyer. The reason for the reversal is specified in the ReasonCode element.',
+					'Invoice' => $Invoice
+				));
+				break;
+			
+			case 'created':
+				// Created: A German ELV payment is made using Express Checkout.
+			case 'pending':
+				// Pending: The payment is pending. See pending_reason for more information.
+			case 'refunded':
+				// Refunded: You refunded the payment.
+			case 'processed':
+				// Processed: A payment has been accepted.
+			case 'completed':
+				// Completed: The payment has been completed, and the funds have been added successfully to your account balance.
+				break;
+			
+			default:
+				// Unkown: Unkown payment status.
+				throw new Bal_Exception(array(
+					'Unknown: Unknown payment status',
+					'payment_status' => $payment_status,
+					'Invoice' => $Invoice
+				));
+				break;
+		}
+		
 		# Validate
-		$Invoice->validate();
+		//$Invoice->validate();
 		
 		# Return Invoice
 		return $Invoice;
@@ -539,11 +638,11 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	
 	protected function fetchPayer ( array $response ) {
 		# Prepare
-		$map = $this->maps['payer'];
+		$map = $this->maps['response']['payer'];
 		
 		# Map a Payer from the response
 		$Payer = new Bal_Payment_Model_Payer(array_keys_map($response, array_flip_deep($map)));
-		$Payer->validate();
+		//$Payer->validate();
 		
 		# Return Payer
 		return $Payer;
@@ -551,11 +650,20 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	
 	protected function fetchInvoiceItems ( array $response ) {
 		# Prepare
-		$map = $this->maps['item'];
-		$InvoicItems = array();
+		$map = $this->maps['response']['item'];
+		$InvoiceItems = array();
+		
+		# Check for num_cart_items
+		if( empty($response['num_cart_items']) ) {
+			// Error
+			throw new Bal_Exception(array(
+				'Response received however did not included num_cart_items',
+				'response' => $response
+			));
+		}
 		
 		# Check if we have a single or multiple items
-		$InvoiceItems_count = count($InvoiceItems);
+		$InvoiceItems_count = $response['num_cart_items'];
 		
 		# Handle Appropriatly
 		if ( $InvoiceItems_count === 1 ) {
@@ -571,14 +679,15 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				
 			# Merge mapped Item to request
 			$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
-			$InvoiceItem->validate();
+			//$InvoiceItem->applyTotals();
+			//$InvoiceItem->validate();
 			$InvoiceItems[] = $InvoiceItem;
 		}
 		else {
 			# Multiple Items
 			
 			# Cycle through the remote fields
-			for ( $InvoiceItems_i=0; $i<$InvoiceItems_count; +$InvoiceItems_i ) {
+			for ( $InvoiceItems_i=0; $InvoiceItems_i<$InvoiceItems_count; ++$InvoiceItems_i ) {
 				# Prepare
 				$maps_item = $map; // reset map
 				
@@ -589,7 +698,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				
 				# Merge mapped Item to request
 				$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
-				$InvoiceItem->validate();
+				//$InvoiceItem->applyTotals();
+				//$InvoiceItem->validate();
 				$InvoiceItems[] = $InvoiceItem;
 			}
 		}
@@ -650,10 +760,10 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			$value_a = real_value(delve($a,$check_field));
 			$value_b = real_value(delve($b,$check_field));
 			# Check
-			$valid = ($value_a === $value_b) || (empty($value_a) && empty($value_b));
+			$valid = ($value_a == $value_b) || (empty($value_a) && empty($value_b));
 			if ( !$valid ) {
 				throw new Bal_Exception(array(
-					$message,
+					$message . ' ['.$check_field.'] ['.$value_a.'] ['.$value_b.']',
 					'check_field' => $check_field,
 					'value_a' => $value_a,
 					'value_b' => $value_b
@@ -692,7 +802,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		);
 		
 		# Validate Items Size
-		if ( count($Invoice->InvoiceItems) !== count($local_Invoice->InvoiceItems) ) {
+		if ( count($local_Invoice->InvoiceItems) !== count($remote_Invoice->InvoiceItems) ) {
 			throw new Bal_Exception(array(
 				'The Invoice new vs local check on Items count failed',
 				'remote_count' => count($remote_Invoice->InvoiceItems),
