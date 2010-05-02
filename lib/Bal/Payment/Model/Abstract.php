@@ -25,18 +25,32 @@ abstract class Bal_Payment_Model_Abstract {
 	}
 	
 	/**
+	 * Gets a list of keys that are possible
+	 * @return array
+	 */
+	public function getKeys ( ) {
+		# Fetch
+		$keys = array_keys($this->_data);
+		
+		# Return keys
+		return $keys;
+	}
+	
+	/**
 	 * Checks if the $key exists in our data
 	 * @param string $key
 	 * @return boolean
 	 */
-	protected function _exists ( $key ) {
+	protected function hasKey ( $key ) {
+		# Prepare
+		$keys = $this->getKeys();
+		
 		# Check
-		if ( !array_key_exists($key, $this->_data) ) {
+		if ( !in_array($key, $keys) ) {
 			throw new Bal_Exception(array(
-				'They desired key ['.$key.'] does not exist in our model ['.get_class($this).']',
+				'They desired key ['.$key.'] does not exist in our model',
 				'key' => $key,
-				'keys' => array_keys($this->_data),
-				'model' => get_class($this)
+				'keys' => $keys
 			));
 		}
 		
@@ -51,7 +65,7 @@ abstract class Bal_Payment_Model_Abstract {
 	 * @return $this
 	 */
 	protected function _get ( $key ) {
-		$this->_exists($key);
+		$this->hasKey($key);
 		return $this->_data[$key];
 	}
 	
@@ -62,7 +76,7 @@ abstract class Bal_Payment_Model_Abstract {
 	 * @return $this
 	 */
 	protected function _set ( $key, $value ) {
-		$this->_exists($key);
+		$this->hasKey($key);
 		$this->_data[$key] = $value;
 		return $this;
 	}

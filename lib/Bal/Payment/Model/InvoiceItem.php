@@ -24,6 +24,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			'subtotal'				=> null,
 			'total'					=> null,
 			'quantity'				=> null,
+			'payment_fee'			=> null,
 			
 			'weight_unit'			=> null,
 		
@@ -64,6 +65,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			'price_each' 			=> in_range(0, $InvoiceItem->price_each, 			null, '<=', true),
 			'subtotal' 				=> in_range(0, $InvoiceItem->subtotal, 				null, '<=', true),
 			'total' 				=> in_range(0, $InvoiceItem->total, 				null, '<=', true),
+			'payment_fee' 			=> in_range(0, $InvoiceItem->payment_fee, 			null, '<=', true),
 			'weight_unit' 			=> in_array($InvoiceItem->weight_unit, 				array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
 			
 			'handling_each'			=> in_range(0, $InvoiceItem->handling_each, 		null, '<=', true),
@@ -98,6 +100,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		
 		
 		# Fetch + Force Valid Inputs
+		$payment_fee 			= until_numeric($InvoiceItem->payment_fee, 0.00);
 		$price_each 			= until_numeric($InvoiceItem->price_each, 0.00);
 		$quantity				= until_integer($InvoiceItem->quantity, 1.00);
 		$handling_each			= until_numeric($InvoiceItem->handling_each, 0.00);
@@ -110,6 +113,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		$shipping_additional 	= until_numeric($InvoiceItem->shipping_additional, 0.00);
 		
 		# Apply Valid Values
+		$InvoiceItem->payment_fee 				= $payment_fee;
 		$InvoiceItem->price_each 				= $price_each;
 		$InvoiceItem->quantity 					= $quantity;
 		$InvoiceItem->handling_each 			= $handling_each;
@@ -122,15 +126,18 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		$InvoiceItem->shipping_additional 		= $shipping_additional;
 		
 		
-		# Calculate
+		# Calculate Totals
 		$price_total 		= $quantity*$price_each;
 		$handling_total 	= $quantity*$handling_each;
 		$tax_total 			= $quantity*$tax_each + $price_total*$tax_rate;
 		$weight_total 		= $quantity*$weight_each;
 		$shipping_total 	= $shipping_first + ($quantity-1)*$shipping_additional;
-		$subtotal 			= $price_total + $handling_total + $tax_total + $shipping_total;
+		
+		# Final Totals
+		$subtotal 			= $price_total;
 		$discount_total 	= $quantity*$discount_each + $subtotal*$discount_rate;
-		$total				= $subtotal-$discount_total;
+		$subtotal			= $subtotal - $discount_total;
+		$total				= $subtotal + $handling_total + $tax_total + $shipping_total;
 		
 		# Apply Totals
 		$InvoiceItem->price_total 		= $price_total;

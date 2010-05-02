@@ -1319,11 +1319,11 @@ if ( function_compare('array_keys_map', 1, true, __FILE__, __LINE__) ) {
 	 * Map the values from array according to the map.
 	 * The map format should be in $map[$from_field] => $map[$to_field]
 	 * @version 1, April 25, 2010
-	 * @param traversable $array
+	 * @param array|object $array
 	 * @param array $map
 	 * @return array
 	 */
-	function array_keys_map ( array $array, array $map ) {
+	function array_keys_map ( $array, array $map ) {
 		# Prepare
 		$result = array();
 		

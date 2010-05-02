@@ -64,6 +64,38 @@ class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 	}
 	
 	
+	
+	# ========================
+	# Payment Helpers
+	
+	/**
+	 * Convert us into the Payment Model Representation
+	 * @return Bal_Payment_Model_InvoiceItem
+	 */
+	public function generatePaymentModel ( ) {
+		# Prepare
+		$InvoiceItem = $this;
+		$PaymentInvoiceItem = new Bal_Payment_Model_InvoiceItem();
+		
+		# Get Common
+		$keys = $PaymentInvoiceItem->getKeys();
+		$invoiceitem = $InvoiceItem->toArray(false);
+		array_keys_keep($invoiceitem, $keys);
+		
+		# Create PaymentInvoiceItem
+		$PaymentInvoiceItem->merge($invoiceitem);
+		
+		# Apply the Totals
+		$PaymentInvoiceItem->applyTotals();
+		
+		# Validate
+		$PaymentInvoiceItem->validate();
+		
+		# Return the PaymentInvoiceItem
+		return $PaymentInvoiceItem;
+	}
+	
+	
 	# ========================
 	# Events
 	

@@ -242,7 +242,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 				'position' => array(140,713),
 				'length' => 65
 			),
-			'cost' => array(
+			'total' => array(
 				'position' => array(190,436),
 				'length' => 70
 			),
@@ -472,11 +472,24 @@ class Bal_Invoice extends Base_Bal_Invoice
 	public function generatePaymentModel ( ) {
 		# Prepare
 		$Invoice = $this;
+		$PaymentInvoice = new Bal_Payment_Model_Invoice();
 		
-		# Handle
-		$invoice = array(
+		# Get Common
+		$keys = $PaymentInvoice->getKeys();
+		$invoice = $Invoice->toArray(true);
+		array_keys_keep($invoice, $keys);
 		
-		)
+		# Create PaymentInvoice
+		$PaymentInvoice->merge($invoice);
+		
+		# Apply the Totals
+		$PaymentInvoice->applyTotals();
+		
+		# Validate
+		$PaymentInvoice->validate();
+		
+		# Return the PaymentInvoice
+		return $PaymentInvoice;
 	}
 	
 	

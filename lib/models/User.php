@@ -578,6 +578,33 @@ class Bal_User extends Base_Bal_User {
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($Event) : $result;
 	}
 	
+	# ========================
+	# Payment Helpers
+	
+	/**
+	 * Convert us into the Payment Model Representation
+	 * @return Bal_Payment_Model_Payer
+	 */
+	public function generatePaymentModel ( ) {
+		# Prepare
+		$User = $this;
+		$PaymentPayer = new Bal_Payment_Model_Payer();
+		
+		# Get Common
+		$keys = $PaymentPayer->getKeys();
+		$user = $User->toArray(false);
+		array_keys_keep($user, $keys);
+		
+		# Create PaymentPayer
+		$PaymentPayer->merge($user);
+		
+		# Validate
+		$PaymentPayer->validate();
+		
+		# Return the PaymentPayer
+		return $PaymentPayer;
+	}
+	
 	
 	# ========================
 	# CRUD Helpers

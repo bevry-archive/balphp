@@ -24,9 +24,13 @@ abstract class Bal_Payment_Gateway_Abstract {
 	 * @param Zend_Log $Log[optional]
 	 * @return $this
 	 */
-	public function __construct ( array $Config, Zend_Log $Log = null ) {
+	public function __construct ( array $Config, $Log = null ) {
 		# Apply
-		$this->setConfig($Config)->setLog($Log);
+		$this->setConfig($Config);
+		if ( $Log ) {
+			$this->setLog($Log);
+		}
+		
 		# Return this
 		return $this;
 	}
@@ -112,10 +116,13 @@ abstract class Bal_Payment_Gateway_Abstract {
 	protected function getStoreFilePath ( $file ) {
 		# Prepare
 		$Config = $this->getConfig();
-		$path = delve($Config,'transactions_path');
+		$store_path = delve($Config,'store_path');
 		
 		# Handle
-		$file_path = $path . DIRECTORY_SEPARATOR . $file . '.txt';
+		if ( $path )
+			$file_path = $store_path . DIRECTORY_SEPARATOR . $file . '.txt';
+		else
+			$file_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Bal_Payment_Gateway-' . $file . '.txt';
 		
 		# Return file_path
 		return $file_path;

@@ -11,16 +11,18 @@ class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 		'id'		=> null,
 		
 		// optional
-		'address1'	=> null,
-		'address2'	=> null,
-		'city' 		=> null,
-		'country' 	=> null,
-		'state' 	=> null,
-		'postcode' 	=> null,
-		'firstname' => null,
-		'lastname' 	=> null,
-		'language' 	=> null,
-		'charset' 	=> null,
+		'email'			=> null,
+		'address1'		=> null,
+		'address2'		=> null,
+		'city' 			=> null,
+		'country' 		=> null,
+		'country_code' 	=> null,
+		'state' 		=> null,
+		'postcode' 		=> null,
+		'firstname' 	=> null,
+		'lastname' 		=> null,
+		'language' 		=> null,
+		'charset' 		=> null,
 	);
 	
 	/**

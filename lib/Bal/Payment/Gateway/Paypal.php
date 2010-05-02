@@ -34,79 +34,94 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	protected $maps = array(
 		'request' => array(
+			// NOTE: The below uses the PDT guide
 			'invoice' => array(
-				'id' => 'invoice',
-				'amount' => 'amount',
-				'currency_code' => 'currency_code',
-				'handling' => 'handling',
-				'shipping' => 'shipping',
-				'tax' => 'tax_cart',
-				'weight' => 'weight_cart',
-				'weight_unit' => 'weight_unit',
-				'discount_amount' => 'discount_amount_cart',
-				'discount_rate' => 'discount_rate_cart'
+				'id' 						=> 'invoice',
+				'subtotal' 					=> 'amount', // after discount, before shipping, handling, tax
+				'currency_code' 			=> 'currency_code',
+				
+				'handling_total' 			=> 'handling',
+				'shipping_total' 			=> 'shipping',
+				
+				'tax_total' 				=> 'tax_cart',
+				
+				'weight_total' 				=> 'weight_cart',
+				'weight_unit' 				=> 'weight_unit'
 			),
-			'item' => array( // for multiples the number is appended
-				'id' => 'item_number',
-				'amount' => 'amount',
-				'title' => 'item_name',
-			
-				'quantity' => 'quantity',
-				'shipping' => 'shipping',
-				'shipping_additional' => 'shipping2',
-				'tax' => 'tax',
-				'tax_rate' => 'tax_rate',
-				'weight' => 'weight',
-				'weight_unit' => 'weight_unit',
-				'handling' => 'handling',
-			
-				'discount_amount' => 'discount_amount',
-				'discount_rate' => 'discount_rate',
+			'item' => array(
+				// for multiples the (_x) is appended
+				'id' 						=> 'item_number',
+				'title' 					=> 'item_name',
+				'quantity' 					=> 'quantity',
+				'subtotal' 					=> 'amount', // after discount, before shipping, handling, tax
+				
+				'shipping_first' 			=> 'shipping',
+				'shipping_additional' 		=> 'shipping2',
+				
+				'tax_total'					=> 'tax',
+				// 'tax_each' 				=> 'tax',
+				// 'tax_rate' 				=> 'tax_rate',
+				// ^ too complicated using both
+				
+				'weight_each' 				=> 'weight', // unsure if each or total should be used
+				'weight_unit' 				=> 'weight_unit',
+				'handling_total' 			=> 'handling',
 			),
 			'payer' => array(
-				'address1' => 'address1',
-				'address2' => 'address2',
-				'city' => 'city',
-				'country' => 'country',
-				'state' => 'state',
-				'postcode' => 'zip',
-				'firstname' => 'first_name',
-				'lastname' => 'last_name',
-				'language' => 'lc',
-				'charset' => 'charset'
+				'address1' 					=> 'address1',
+				'address2' 					=> 'address2',
+				'city' 						=> 'city',
+				'country_code' 				=> 'country', // is actually country_code
+				'state' 					=> 'state',
+				'postcode' 					=> 'zip',
+				'firstname' 				=> 'first_name',
+				'lastname' 					=> 'last_name',
+				'language' 					=> 'lc',
+				'charset' 					=> 'charset'
 			)
 		),
 		'response' => array(
+			// NOTE: The below uses the IPNGuide
 			'invoice' => array(
-				'id' => 'invoice',
-				'amount' => 'mc_gross',
-				'currency' => 'mc_currency',
-				'handling' => array('handling_amount','mc_handling'),
-				'shipping' => array('shipping','mc_shipping'),
-				'tax' => 'tax',
-				'paid_at' => 'payment_date',
-				'payment_status' => 'payment_status'
+				'id' 						=> 'invoice',
+				'total' 					=> 'mc_gross', // after discount, shipping, handling, tax
+				'currency_code' 			=> 'mc_currency',
+				
+				'payment_fee'				=> 'mc_fee',
+				'handling_total'			=> 'mc_handling',
+				'shipping_total'			=> 'mc_shipping', // shipping
+				'tax_total'					=> 'tax',
+				
+				'paid_at' 					=> 'payment_date',
+				'payment_status' 			=> 'payment_status',
+				'payment_error'				=> 'reason_code',
 			),
-			'item' => array( // for multiples the number is appended
-				'id' => 'item_number',
-				'amount' => 'mc_gross_', // underscore gets trimmed if we only have a single
-				'title' => 'item_name',
-				'quantity' => 'quantity',
-				'shipping' => 'mc_shipping',
-				'tax' => 'tax',
-				'handling' => 'mc_handling'
+			'item' => array(
+				// for multiples the (x) is appended
+				// underscores gets trimmed if we only have a singular
+				'id' 						=> 'item_number',
+				'title' 					=> 'item_name',
+				'quantity' 					=> 'quantity',
+				
+				'total' 					=> 'mc_gross_', // after discount, shipping, handling, tax
+				'payment_fee'				=> 'mc_fee_',
+				'shipping' 					=> 'mc_shipping',
+				'tax' 						=> 'tax',
+				'handling' 					=> 'mc_handling'
 			),
 			'payer' => array(
-				'address1' => 'address_street',
-				'address2' => 'address_street2',
-				'city' => 'address_city',
-				'country' => 'address_country', // 'address_country_code', - incorrect, actually not code
-				'state' => 'address_state',
-				'postcode' => 'address_zip',
-				'firstname' => 'first_name',
-				'lastname' => 'last_name',
-				'charset' => 'charset',
-				'phone' => 'contact_phone'
+				'email'						=> 'payer_email',
+				'address1' 					=> 'address_street',
+				'address2' 					=> 'address_street2',
+				'city' 						=> 'address_city',
+				'country' 					=> 'address_country',
+				'country_code' 				=> 'address_country_code',
+				'state' 					=> 'address_state',
+				'postcode' 					=> 'address_zip',
+				'firstname' 				=> 'first_name',
+				'lastname' 					=> 'last_name',
+				'charset' 					=> 'charset',
+				'phone' 					=> 'contact_phone'
 			)
 		)
 	);
@@ -141,7 +156,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	public function setConfig ( array $Config ) {
 		# Check
-		$validate = $this->validate['config'];
+		$validate = $this->validates['config'];
 		foreach ( $validate as $validate_field ) {
 			$value = delve($Config,$validate_field);
 			if ( empty($value) ) {
@@ -170,9 +185,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param Bal_Payment_Model_Invoice $Invoice
 	 * @return string HTML Form
 	 */
-	public function genereateForm ( Bal_Payment_Model_Invoice $Invoice ) {
+	public function generateForm ( Bal_Payment_Model_Invoice $Invoice ) {
 		# Prepare
-		$Invoice = $this->getInvoice();
 		$Log = $this->getLog();
 		$Config = $this->getConfig();
 		$request = $this->generateRequest($Invoice);
@@ -218,7 +232,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		}
 		
 		# Store our Request
-		$this->store($Invoice->id, array(
+		$this->store('paypal-request-'.$Invoice->id, array(
 			'Invoice' => $Invoice,
 			'request' => $request,
 			'Config' => $Config
@@ -289,16 +303,18 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			# Single Item
 			
 			# Prepare
+			$InvoiceItems_i = 0;
 			$maps_item = $maps['item'];
 			
 			# Merge mapped Item to request
+			$InvoiceItem = $InvoiceItems[$InvoiceItems_i];
 			$request = array_merge($request, array_keys_map($InvoiceItem, $maps_item));
 		}
 		else {
 			# Multiple Items
 			
 			# Cycle through the remote fields
-			for ( $InvoiceItems_i=0; $i<$InvoiceItems_count; +$InvoiceItems_i ) {
+			for ( $InvoiceItems_i=0; $InvoiceItems_i<$InvoiceItems_count; ++$InvoiceItems_i ) {
 				# Prepare
 				$maps_item = $maps['item'];
 				
@@ -308,6 +324,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				}
 				
 				# Merge mapped Item to request
+				$InvoiceItem = $InvoiceItems[$InvoiceItems_i];
 				$request = array_merge($request, array_keys_map($InvoiceItem, $maps_item));
 			}
 		}
@@ -423,7 +440,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$maps = $this->maps['response'];
 		
 		# Fetch the local Invoice
-		$local_Store = $this->store('request-'.$Invoice->id);
+		$local_Store = $this->store('paypal-request-'.$Invoice->id);
 		$local_Invoice = delve($local_Store, 'Invoice');
 		
 		
@@ -451,7 +468,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		// - paid_at
 		
 		# Store the remote Invoice
-		$this->store('response-'.$Invoice->id, array(
+		$this->store('paypal-response-'.$Invoice->id, array(
 			'Invoice' => $remote_Invoice,
 			'response' => $response,
 			'Config' => $Config
@@ -664,7 +681,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		
 		# Validate Invoice
 		$this->validateCompare(
-			$this->validate['invoice'],
+			$this->validates['invoice'],
 			$local_Invoice, $remote_Invoice,
 			'A Invoice local VS remote check failed'
 		);
@@ -684,7 +701,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			
 			# Check Fields
 			$this->validateCompare(
-				$this->validate['item'],
+				$this->validates['item'],
 				$local_InvoiceItem, $remote_InvoiceItem,
 				'A InvoiceItem local VS remote check failed'
 			);

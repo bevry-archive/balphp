@@ -32,6 +32,8 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			
 	 	// Optional
 			'paid_at'					=> null,
+			'payment_error'				=> null,
+			'payment_fee'				=> null,
 			
 			'handling_invoice'			=> null,		
 			'handling_invoice_total'	=> null,
@@ -256,10 +258,13 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		$weight_total 						= $weight_items_total;
 		$shipping_invoice_total				= $shipping_invoice;
 		$shipping_total 					= $shipping_invoice_total + $shipping_items_total;
-		$subtotal 							= $items_total + $handling_invoice_total + $shipping_invoice_total;
+		$subtotal							= $items_total;
+		
+		# Final Totals
 		$discount_invoice_total 			= $discount_invoice + $subtotal*$discount_invoice_rate;
 		$discount_total						= $discount_invoice_total + $discount_items_total;
-		$total								= $subtotal-$discount_invoice_total;
+		$subtotal 							= $subtotal - $discount_invoice_total;
+		$total								= $subtotal + $handling_invoice_total + $shipping_invoice_total;
 		
 		# Apply Totals
 		$Invoice->handling_invoice_total 	= $handling_invoice_total;
@@ -304,7 +309,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		$InvoiceItems = array();
 		
 		# Check
-		if ( $invoiceitems && !is_traversable($invoiceitems) ) {
+		if ( !is_traversable($invoiceitems) ) {
 			throw new Bal_Exception(array(
 				'Passed InvoiceItems to set are not of a valid traversable type',
 				'InvoiceItems' => $invoiceitems

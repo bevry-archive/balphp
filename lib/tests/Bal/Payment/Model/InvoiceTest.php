@@ -1,7 +1,4 @@
 <?php
-require_once 'PHPUnit/Framework.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-require_once 'Bal/Payment/Model/Invoice.php';
 require_once 'core/functions/_arrays.funcs.php';
 require_once 'core/functions/_validate.funcs.php';
  
@@ -12,7 +9,7 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 	
     /**
      */
-    public function testInvoiceCreation ( ) {
+    public function testCreation ( ) {
 		# Prepare
 		$invoice = array(
 			'id' => 1
@@ -36,11 +33,11 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
     }
 	
     /**
-     * @depends testInvoiceCreation
+     * @depends testCreation
      */
-    public function testInvoiceToArray ( ) {
+    public function testToArray ( ) {
 		# Prepare
-		$invoice = $this->generateInvoiceArray();
+		$invoice = self::generateInvoiceArray();
 		$Invoice = new Bal_Payment_Model_Invoice($invoice);
 		
 		# Get toArray
@@ -51,11 +48,11 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
     }
 	
     /**
-     * @depends testInvoiceCreation
+     * @depends testCreation
      * @expectedException Exception
      * @expectedException Bal_Exception
      */
-    public function testInvoiceValidateException ( ) {
+    public function testValidateException ( ) {
 		# Prepare
 		$Invoice = new Bal_Payment_Model_Invoice();
 		
@@ -64,11 +61,26 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
     }
 	
     /**
-     * @depends testInvoiceCreation
+     * @depends testCreation
+     * @expectedException Bal_Exception
      */
-    public function testInvoiceTotals ( ) {
+    public function testSetInvoiceItemsException ( ) {
 		# Prepare
-		$Invoice = $this->generateInvoice();
+		$Invoice = new Bal_Payment_Model_Invoice();
+		
+		# Try to Break
+		$Invoice->setInvoiceItems(false);
+		$Invoice->setInvoiceItems(true);
+		$Invoice->setInvoiceItems(0);
+		$Invoice->setInvoiceItems(null);
+    }
+	
+    /**
+     * @depends testCreation
+     */
+    public function testTotals ( ) {
+		# Prepare
+		$Invoice = self::generateInvoice();
 		
 		# Totals
 		$Invoice->applyTotals();
@@ -87,23 +99,24 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals((int)($total), (int)$Invoice->InvoiceItems[2]->total);
 		
 		# Check Fourth Invoice Item
-		$subtotal = 32100.33+(30000*0.10);
+		$subtotal = 30000.00;
 		$discount = 30.00 + $subtotal * 0.01;
+		$subtotal += 2100.33+(30000*0.10);
 		$total = $subtotal - $discount; $totals += $total;
 		$this->assertEquals((int)$total, (int)$Invoice->InvoiceItems[3]->total);
 		
 		# Now Ensure Invoice Totals
-		$totals += 1.00 + 2.00;
-		$totals = $totals*0.50 - 1.00;
+		$totals = $totals*0.50 - 1.00; // discount
+		$totals += 1.00 + 2.00; // shipping, handling
 		$this->assertEquals((int)$totals, (int)$Invoice->total);
     }
 	
     /**
-     * @depends testInvoiceTotals
+     * @depends testTotals
      */
-    public function testInvoiceValidate ( ) {
+    public function testValidate ( ) {
 		# Prepare
-		$Invoice = $this->generateInvoice();
+		$Invoice = self::generateInvoice();
 		
 		# Totals
 		$Invoice->applyTotals();
@@ -115,9 +128,13 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 	# ========================
 	# Providers
 	
-	public function generateInvoice ( ) {
+	/**
+	 * Generate a populated Invoice
+	 * @return Bal_Payment_Model_Invoice
+	 */
+	public static function generateInvoice ( ) {
 		# Generate Array
-		$invoice = $this->generateInvoiceArray();
+		$invoice = self::generateInvoiceArray();
 		
 		# Generate Invoice
 		$Invoice = new Bal_Payment_Model_Invoice($invoice);
@@ -126,7 +143,11 @@ class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
 		return $Invoice;
 	}
 	
-	public function generateInvoiceArray ( ) {
+	/**
+	 * Generate a populated invoice array
+	 * @return array
+	 */
+	public static function generateInvoiceArray ( ) {
 		# Generate Array 
 		$invoice = array(
 			'id' => intval(rand(50,200)),

@@ -21,97 +21,131 @@ Bal_InvoiceItem:
             extra:
                 auto: true
         
-        total:
-            # The total amount
+        price_total:
             type: decimal(8)
             scale: 2
-            notblank: true
+            notnull: true
             extra:
                 currency: true
-        amount:
-            # The individual item amount
+        price_each:
             type: decimal(8)
             scale: 2
-            notblank: true
+            notnull: true
+            extra:
+                currency: true
+        subtotal:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
             extra:
                 currency: true
         quantity:
-            # The total quantity
-            type: integer(1)
-            notblank: true
-            default: 1
-        shipping:
-            # The total of shipping for the initial item
-            type: decimal(8)
-            scale: 2
-            notblank: true
-            default: 0.00
+            type: int(2)
+            notnull: true
             extra:
                 currency: true
-        shipping_additional:
-            # The total of shipping for the additional items
-            type: decimal(8)
-            scale: 2
-            notblank: true
-            default: 0.00
-            extra:
-                currency: true
-        tax:
-            # The total tax applied
+        payment_fee:
             type: decimal(8)
             scale: 2
             notnull: true
             default: 0.00
+            extra:
+                currency: true
+               
+        handling_each:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        handling_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+             
+        tax_each:
+            type: decimal(8)
+            scale: 2
+            notnull: true
             extra:
                 currency: true
         tax_rate:
-            # The rate the tax was applied
             type: decimal(8)
             scale: 2
             notnull: true
-            default: 0.00
-        weight:
-            # The total weight of the item(s)
-            type: decimal(8)
-            scale: 2
-            notblank: true
-        weight_unit:
-            # The unit which the item(s) were weighed
-            type: enum
-            values: [lbs,kgs]
-            notblank: true
-            default: kgs
-        handling:
-            # The handling costs applied
+            extra:
+                percentage: true
+        tax_total:
             type: decimal(8)
             scale: 2
             notnull: true
-            default: 0.00
             extra:
                 currency: true
-        discount_amount:
-            # The total amount of discount
+                    
+        weight_each:
             type: decimal(8)
             scale: 2
             notnull: true
-            default: 0.00
+        weight_unit:
+            type: enum
+            values: [kgs,lbs]
+            default: kgs
+            notblank: true
+                
+        discount_each:
+            type: decimal(8)
+            scale: 2
+            notnull: true
             extra:
                 currency: true
         discount_rate:
-            # The total rate of discount
             type: decimal(8)
             scale: 2
             notnull: true
-            default: 0.00
-            
-        invoice_id:
+            extra:
+                percentage: true
+        discount_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
+        shipping_first:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_additional:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+           
+        Invoice_id:
             type: integer(2)
             unsigned: true
             notblank: true
     relations:
         Invoice:
             class: Invoice
-            local: invoice_id
+            local: Invoice_id
             foreign: id
             foreignAlias: InvoiceItems
             foreignType: many
@@ -136,14 +170,44 @@ Bal_Invoice:
             default: "user_invoice"
             extra:
                 auto: true
-        amount_paid:
+        
+        status:
+            type: enum
+            values: [pending,published,completed]
+            notblank: true
+            default: published
+        payment_status:
+            type: enum
+            values: [awaiting,created,pending,refunded,processed,completed,canceled_reversal,denied,expired,failed,voided,reversed]
+            notblank: true
+            default: awaiting
+        payment_error:
+            type: string(255)
+        payment_fee:
             type: decimal(8)
             scale: 2
             notnull: true
             default: 0.00
             extra:
                 currency: true
-        amount:
+        paid_at:
+            type: timestamp
+        currency_code:
+            type: string(2)
+            country: true
+        weight_unit:
+            type: enum
+            values: [kgs,lbs]
+            default: kgs
+            notblank: true
+            
+        items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_items_total:
             type: decimal(8)
             scale: 2
             notnull: true
@@ -155,26 +219,125 @@ Bal_Invoice:
             notnull: true
             extra:
                 currency: true
-        tax:
+        total:
             type: decimal(8)
             scale: 2
             notnull: true
             extra:
                 currency: true
+        
+        handling_invoice:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        handling_invoice_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        handling_items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        handling_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
+        tax_items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        tax_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
+        weight_items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+        weight_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+        
+        discount_invoice:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_invoice_rate:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_invoice_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        
+        shipping_invoice:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_invoice_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_items_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_total:
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
         config:
+            # Cache of any invoice configuration that may change externally
             type: array
             notnull: true
         cache:
-            # Cache of any information that may change externally
+            # Cache of any invoice information that may change externally
             type: array
             notnull: true
-        
-        status:
-            type: enum
-            values: [pending,published,completed]
-            notblank: true
-            default: published
-        
+            
         File_id:
             type: integer(2)
             unsigned: true
@@ -203,48 +366,3 @@ Bal_Invoice:
             foreign: id
             foreignAlias: InvoicesFrom
 
-
-Bal_Payment:
-    actAs:
-        SoftDelete:
-        Timestampable:
-    columns:
-        id:
-            type: integer(4)
-            primary: true
-            autoincrement: true
-            unsigned: true
-        status:
-            type: enum
-            values: [created,pending,refunded,processed,completed,canceled_reversal,denied,expired,failed,voided,reversed]
-            notblank: true
-            default: awaiting
-        amount:
-            type: decimal(8)
-            scale: 2
-            notblank: true
-            extra:
-                currency: true
-        details:
-            type: string
-            notblank: true
-            extra:
-                html: raw
-                
-        Invoice_id:
-            type: integer(2)
-            unsigned: true
-        UserFrom_id:
-            type: integer(2)
-            unsigned: true
-    relations:
-        Invoice:
-            class: Invoice
-            local: Invoice_id
-            foreign: id
-            foreignAlias: Payments
-        UserFrom:
-            class: User
-            local: UserFrom_id
-            foreign: id
-            foreignAlias: InvoicesFrom
