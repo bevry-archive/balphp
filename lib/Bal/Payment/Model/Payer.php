@@ -1,5 +1,4 @@
 <?php
-require_once 'Bal/Payment/Model/Abstract.php';
 
 class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 	
@@ -35,7 +34,7 @@ class Bal_Payment_Model_Payer extends Bal_Payment_Model_Abstract {
 		
 		# Prepare Checks
 		$checks = array(
-			'id'					=> !empty($Payer->id),
+			'id'					=> !reallyempty($Payer->id),
 		);
 		
 		# Validate Checks

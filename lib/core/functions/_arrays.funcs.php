@@ -929,6 +929,20 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('array_clean_copy', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Clean empty values from an array
+	 * @version 1, July 22, 2008
+	 * @param array $array
+	 * @param mixed $to [optional] if null unset value, if else set as default
+	 * @return mixed
+	 */
+	function array_clean_copy ( $array, $to = null ) {
+		return array_clean($array,$to);
+	}
+}
+
 
 if ( function_compare('array_clean_pattern', 1, true, __FILE__, __LINE__) ) {
 
@@ -1227,6 +1241,49 @@ if ( function_compare('force_array', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function force_array ( $array ) {
 		return is_array($array) ? $array : array($array);
+	}
+}
+
+if ( function_compare('to_array_deep', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Convert a value into an array
+	 * @version 1, May 02, 2010
+	 * @param mixed &$array
+	 * @return mixed
+	 */
+	function to_array_deep ( &$array ) {
+		# Determine
+		if ( is_object($array) ) {
+			# Convert
+			$array = $array->toArray();
+		}
+		elseif ( is_array($array) ) {
+			# Cycle
+			foreach ( $array as &$value ) {
+				if ( is_object($value) || is_array($value) ) {
+					$value = to_array_deep($value);
+				}
+			}
+		}
+		
+		# Return array
+		return $array;
+	}
+}
+
+if ( function_compare('to_array_deep_copy', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Convert a value into an array
+	 * @version 1, May 02, 2010
+	 * @param array|object $array
+	 * @return mixed
+	 */
+	function to_array_deep_copy ( $array ) {
+		# Determine
+		to_array_deep($array);
+		
+		# Return array
+		return $array;
 	}
 }
 

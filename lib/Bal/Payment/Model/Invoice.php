@@ -1,7 +1,4 @@
 <?php
-require_once 'Bal/Payment/Model/Abstract.php';
-require_once 'Bal/Payment/Model/InvoiceItem.php';
-require_once 'Bal/Payment/Model/Payer.php';
 
 class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	
@@ -20,39 +17,43 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	protected $_data = array(
 		// Required
 			// Standard
-			'id' 					=> null,
-			'InvoiceItems' 			=> null,
-			'Payer' 				=> null,
-			'currency_code' 		=> null,
-			'payment_status' 		=> null,
+			'id' 						=> null,
+			'InvoiceItems' 				=> null,
+			'Payer' 					=> null,
+			'currency_code' 			=> null,
+			'payment_status' 			=> null,
 			
-			'each_total'			=> null,
-			'price_each_total'		=> null,
-			'total'					=> null,
+			'items_total'				=> null,
+			'price_items_total'			=> null,
+			'subtotal'					=> null,
+			'total'						=> null,
 		
-			'weight_unit'			=> null,	// overall
+			'weight_unit'				=> null,
 			
 	 	// Optional
-			'paid_at'				=> null,
+			'paid_at'					=> null,
 			
-			'handling'				=> null,	// overall
-			'handling_each_total' 	=> null,
-			'handling_total'		=> null,
+			'handling_invoice'			=> null,		
+			'handling_invoice_total'	=> null,
+			'handling_items_total' 		=> null,
+			'handling_total'			=> null,
 			
-			'tax_each_total'		=> null,
-			'tax_total'				=> null,
+			'tax_items_total'			=> null,
+			'tax_total'					=> null,
 			
-			'weight_each_total'		=> null,
-			'weight_total'			=> null,	// overall
+			'weight_items_total'		=> null,
+			'weight_total'				=> null,
 			
-			'discount'				=> null,	// overall
-			'discount_rate'			=> null,	// overall
-			'discount_each_total'	=> null,
-			'discount_total'		=> null,
+			'discount_invoice'			=> null,
+			'discount_invoice_rate'		=> null,
+			'discount_invoice_total'	=> null,
+			'discount_items_total'		=> null,
+			'discount_total'			=> null,
 		
-			'shipping' 				=> null,	// overall
-			'shipping_each_total'	=> null,
-			'shipping_total'		=> null,
+			'shipping_invoice' 			=> null,
+			'shipping_invoice_total' 	=> null,
+			'shipping_items_total'		=> null,
+			'shipping_total'			=> null,
 	);
 	
 	/**
@@ -66,31 +67,40 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		
 		# Prepare Checks
 		$checks = array(
-			'id'					=> !empty($Invoice->id),
-			'total'					=> in_range(0, $Invoice->total, 				null, '<', true),
-			'price_each_total' 		=> in_range(0, $Invoice->price_each_total, 		null, '<', true),
-			'each_total' 			=> in_range(0, $Invoice->each_total, 			null, '<', true),
-			'currency_code' 		=> !empty($Invoice->currency_code),
-			'payment_status' 		=> in_array($Invoice->payment_status, 			array('created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')),
-			'weight_unit' 			=> in_array($Invoice->weight_unit, 				array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
-			'InvoiceItems' 			=> !reallyempty($Invoice->InvoiceItems),
-			'Payer' 				=> !reallyempty($Invoice->Payer),
+			'id'						=> !reallyempty($Invoice->id),
+			'subtotal'					=> in_range(0, $Invoice->subtotal, 					null, '<', true),
+			'total'						=> in_range(0, $Invoice->total, 					null, '<', true),
+			'price_items_total' 		=> in_range(0, $Invoice->price_items_total, 		null, '<', true),
+			'items_total' 				=> in_range(0, $Invoice->items_total, 				null, '<', true),
+			'currency_code' 			=> !reallyempty($Invoice->currency_code),
+			'payment_status' 			=> in_array($Invoice->payment_status, 				array('awaiting','created','pending','refunded','processed','completed','canceled_reversal','denied','expired','failed','voided','reversed')),
+			'weight_unit' 				=> in_array($Invoice->weight_unit, 					array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
+			'InvoiceItems' 				=> !reallyempty($Invoice->InvoiceItems),
+			'Payer' 					=> !reallyempty($Invoice->Payer),
 			
-			'paid_at'				=> $Invoice->paid_at === null || is_timestamp($Invoice->paid_at),
-			'handling'				=> in_range(0, $Invoice->handling, 				null, '<=', true),
-			'handling_each_total'	=> in_range(0, $Invoice->handling_each_total, 	null, '<=', true),
-			'handling_total'		=> in_range(0, $Invoice->handling_total, 		null, '<=', true),
-			'tax_each_total'		=> in_range(0, $Invoice->tax_each_total, 		null, '<=', true),
-			'tax_total'				=> in_range(0, $Invoice->tax_total, 			null, '<=', true),
-			'weight_each_total'		=> in_range(0, $Invoice->weight_each_total, 	null, '<=', true),
-			'weight_total'			=> in_range(0, $Invoice->weight_total, 			null, '<=', true),
-			'discount'				=> in_range(0, $Invoice->discount, 				null, '<=', true),
-			'discount_rate'			=> in_range(0, $Invoice->discount_rate, 		1,    '<=', true),
-			'discount_each_total'	=> in_range(0, $Invoice->discount_each_total, 	null, '<=', true),
-			'discount_total'		=> in_range(0, $Invoice->discount_total, 		null, '<=', true),
-			'shipping'				=> in_range(0, $Invoice->shipping, 				null, '<=', true),
-			'shipping_each_total'	=> in_range(0, $Invoice->shipping_each_total, 	null, '<=', true),
-			'shipping_total'		=> in_range(0, $Invoice->shipping_total, 		null, '<=', true)
+			'paid_at'					=> $Invoice->paid_at === null || is_timestamp($Invoice->paid_at),
+			
+			'handling_invoice'			=> in_range(0, $Invoice->handling_invoice, 			null, '<=', true),
+			'handling_invoice_total'	=> in_range(0, $Invoice->handling_invoice_total,	null, '<=', true),
+			'handling_items_total'		=> in_range(0, $Invoice->handling_items_total, 		null, '<=', true),
+			'handling_total'			=> in_range(0, $Invoice->handling_total, 			null, '<=', true),
+			
+			'tax_items_total'			=> in_range(0, $Invoice->tax_items_total, 			null, '<=', true),
+			'tax_total'					=> in_range(0, $Invoice->tax_total, 				null, '<=', true),
+			
+			'weight_items_total'		=> in_range(0, $Invoice->weight_items_total, 		null, '<=', true),
+			'weight_total'				=> in_range(0, $Invoice->weight_total, 				null, '<=', true),
+			
+			'discount_invoice'			=> in_range(0, $Invoice->discount_invoice, 			null, '<=', true),
+			'discount_invoice_rate'		=> in_range(0, $Invoice->discount_invoice_rate, 	1,    '<=', true),
+			'discount_invoice_total'	=> in_range(0, $Invoice->discount_invoice_total, 	null, '<=', true),
+			'discount_items_total'		=> in_range(0, $Invoice->discount_items_total, 		null, '<=', true),
+			'discount_total'			=> in_range(0, $Invoice->discount_total, 			null, '<=', true),
+			
+			'shipping_invoice'			=> in_range(0, $Invoice->shipping_invoice, 			null, '<=', true),
+			'shipping_invoice_total'	=> in_range(0, $Invoice->shipping_invoice_total,	null, '<=', true),
+			'shipping_items_total'		=> in_range(0, $Invoice->shipping_items_total, 		null, '<=', true),
+			'shipping_total'			=> in_range(0, $Invoice->shipping_total, 			null, '<=', true)
 		);
 		
 		# Validate Checks
@@ -188,56 +198,81 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	 */
 	public function applyTotals ( ) {
 		# Prepare
-		$InvoiceItems = $this->InvoiceItems;
+		$Invoice = $this;
+		
 		
 		# Overall Values
-		$handling					= until_numeric($InvoiceItem->handling, 0.00);
-		$tax						= until_numeric($InvoiceItem->tax, 0.00);
-		$tax_rate					= until_numeric($InvoiceItem->tax_rate, 1.00);
-		$discount					= until_numeric($InvoiceItem->discount, 0.00);
-		$discount_rate				= until_numeric($InvoiceItem->discount_rate, 1.00);
-		$shipping					= until_numeric($InvoiceItem->shipping, 0.00);
+		$handling_invoice					= until_numeric($Invoice->handling_invoice, 0.00);
+		$discount_invoice					= until_numeric($Invoice->discount_invoice, 0.00);
+		$discount_invoice_rate				= until_numeric($Invoice->discount_invoice_rate, 0.00);
+		$shipping_invoice					= until_numeric($Invoice->shipping_invoice, 0.00);
+		
+		# Apply Valid Overall Values
+		$Invoice->handling_invoice 			= $handling_invoice;
+		$Invoice->discount_invoice 			= $discount_invoice;
+		$Invoice->discount_invoice_rate 	= $discount_invoice_rate;
+		$Invoice->shipping_invoice 			= $shipping_invoice;
+		
+		
+		# Prepare Each Totals
+		$price_items_total 			= 
+		$handling_items_total		= 
+		$tax_items_total			= 
+		$weight_items_total			= 
+		$discount_items_total		= 
+		$shipping_items_total		= 
+		$items_total				= 0;
 		
 		# Calculate Each Totals
+		$InvoiceItems = $this->InvoiceItems;
 		foreach ( $InvoiceItems as $InvoiceItem ) {
 			# Calculate
 			$InvoiceItem->applyTotals();
 			
 			# Fetch
-			$price_each_total 		+= until_numeric($InvoiceItem->price_total, 0.00);
-			$handling_each_total	+= until_numeric($InvoiceItem->handling_total, 0.00);
-			$tax_each_total			+= until_numeric($InvoiceItem->tax_total, 0.00);
-			$weight_each_total		+= until_numeric($InvoiceItem->weight_total, 0.00);
-			$discount_each_total	+= until_numeric($InvoiceItem->discount_total, 0.00);
-			$shipping_each_total	+= until_numeric($InvoiceItem->shipping_total, 0.00);
-			$each_total				+= until_numeric($InvoiceItem->total, 0.00);
+			$price_items_total 				+= until_numeric($InvoiceItem->price_total, 0.00);
+			$handling_items_total			+= until_numeric($InvoiceItem->handling_total, 0.00);
+			$tax_items_total				+= until_numeric($InvoiceItem->tax_total, 0.00);
+			$weight_items_total				+= until_numeric($InvoiceItem->weight_total, 0.00);
+			$discount_items_total			+= until_numeric($InvoiceItem->discount_total, 0.00);
+			$shipping_items_total			+= until_numeric($InvoiceItem->shipping_total, 0.00);
+			$items_total					+= until_numeric($InvoiceItem->total, 0.00);
 		}
 		
-		# Add it all Together
-		$handling_total 	= $handling + $handling_each_total;
-		$tax_total 			= $tax_each_total;
-		$weight_total 		= $weight_each_total;
-		$shipping_total 	= $shipping + $shipping_each_total;
-		$total 				= $each_total + $handling_total + $tax_total + $weight_total + $shipping_total;
-		$discount_total 	= $discount + $total*$discount_rate;
-		$total				-= $discount_total;
-		
 		# Apply Each Totals
-		$InvoiceItem->price_each_total 		= $price_each_total;
-		$InvoiceItem->handling_each_total 	= $handling_each_total;
-		$InvoiceItem->tax_each_total 		= $tax_each_total;
-		$InvoiceItem->weight_each_total 	= $weight_each_total;
-		$InvoiceItem->discount_each_total 	= $discount_each_total;
-		$InvoiceItem->shipping_each_total 	= $shipping_each_total;
-		$InvoiceItem->each_total 			= $each_total;
+		$Invoice->price_items_total 		= $price_items_total;
+		$Invoice->handling_items_total 		= $handling_items_total;
+		$Invoice->tax_items_total 			= $tax_items_total;
+		$Invoice->weight_items_total 		= $weight_items_total;
+		$Invoice->discount_items_total 		= $discount_items_total;
+		$Invoice->shipping_items_total 		= $shipping_items_total;
+		$Invoice->items_total 				= $items_total;
+		
+		
+		# Add it all Together
+		$handling_invoice_total				= $handling_invoice;
+		$handling_total 					= $handling_invoice_total + $handling_items_total;
+		$tax_total 							= $tax_items_total;
+		$weight_total 						= $weight_items_total;
+		$shipping_invoice_total				= $shipping_invoice;
+		$shipping_total 					= $shipping_invoice_total + $shipping_items_total;
+		$subtotal 							= $items_total + $handling_invoice_total + $shipping_invoice_total;
+		$discount_invoice_total 			= $discount_invoice + $subtotal*$discount_invoice_rate;
+		$discount_total						= $discount_invoice_total + $discount_items_total;
+		$total								= $subtotal-$discount_invoice_total;
 		
 		# Apply Totals
-		$InvoiceItem->handling_total 	= $handling_total;
-		$InvoiceItem->tax_total 		= $tax_total;
-		$InvoiceItem->weight_total 		= $weight_total;
-		$InvoiceItem->discount_total 	= $discount_total;
-		$InvoiceItem->shipping_total 	= $shipping_total;
-		$InvoiceItem->total 			= $total;
+		$Invoice->handling_invoice_total 	= $handling_invoice_total;
+		$Invoice->handling_total 			= $handling_total;
+		$Invoice->tax_total 				= $tax_total;
+		$Invoice->weight_total 				= $weight_total;
+		$Invoice->discount_invoice_total 	= $discount_invoice_total;
+		$Invoice->discount_total 			= $discount_total;
+		$Invoice->shipping_invoice_total 	= $shipping_invoice_total;
+		$Invoice->shipping_total 			= $shipping_total;
+		$Invoice->subtotal 					= $subtotal;
+		$Invoice->total 					= $total;
+		
 		
 		# Return this
 		return $this;

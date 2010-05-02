@@ -1,5 +1,4 @@
 <?php
-require_once 'Bal/Payment/Model/Abstract.php';
 
 class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	
@@ -22,6 +21,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			
 			'price_total'			=> null,
 			'price_each'			=> null,
+			'subtotal'				=> null,
 			'total'					=> null,
 			'quantity'				=> null,
 			
@@ -52,17 +52,18 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 	 * @throws Bal_Exception
 	 * @return true
 	 */
-	public static function validate ( ) {
+	public function validate ( ) {
 		# Prepare
 		$InvoiceItem = $this;
 		
 		# Prepare Checks
 		$checks = array(
-			'id'					=> !empty($InvoiceItem->id),
-			'title' 				=> !empty($InvoiceItem->title),
-			'price_total' 			=> in_range(0, $InvoiceItem->price_each_total, 		null, '<=', true),
-			'price_each' 			=> in_range(0, $InvoiceItem->each_total, 			null, '<=', true),
-			'total' 				=> in_range(0, $InvoiceItem->each_total, 			null, '<=', true),
+			'id'					=> !reallyempty($InvoiceItem->id),
+			'title' 				=> !reallyempty($InvoiceItem->title),
+			'price_total' 			=> in_range(0, $InvoiceItem->price_total, 			null, '<=', true),
+			'price_each' 			=> in_range(0, $InvoiceItem->price_each, 			null, '<=', true),
+			'subtotal' 				=> in_range(0, $InvoiceItem->subtotal, 				null, '<=', true),
+			'total' 				=> in_range(0, $InvoiceItem->total, 				null, '<=', true),
 			'weight_unit' 			=> in_array($InvoiceItem->weight_unit, 				array(self::WEIGHT_UNIT_LBS,self::WEIGHT_UNIT_KGS)),
 			
 			'handling_each'			=> in_range(0, $InvoiceItem->handling_each, 		null, '<=', true),
@@ -95,27 +96,41 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		# Prepare
 		$InvoiceItem = $this;
 		
+		
 		# Fetch + Force Valid Inputs
 		$price_each 			= until_numeric($InvoiceItem->price_each, 0.00);
 		$quantity				= until_integer($InvoiceItem->quantity, 1.00);
 		$handling_each			= until_numeric($InvoiceItem->handling_each, 0.00);
 		$tax_each				= until_numeric($InvoiceItem->tax_each, 0.00);
-		$tax_rate				= until_numeric($InvoiceItem->tax_rate, 1.00);
+		$tax_rate				= until_numeric($InvoiceItem->tax_rate, 0.00);
 		$weight_each			= until_numeric($InvoiceItem->weight_each, 0.00);
 		$discount_each			= until_numeric($InvoiceItem->discount_each, 0.00);
-		$discount_rate			= until_numeric($InvoiceItem->discount_rate, 1.00);
+		$discount_rate			= until_numeric($InvoiceItem->discount_rate, 0.00);
 		$shipping_first			= until_numeric($InvoiceItem->shipping_first, 0.00);
 		$shipping_additional 	= until_numeric($InvoiceItem->shipping_additional, 0.00);
 		
+		# Apply Valid Values
+		$InvoiceItem->price_each 				= $price_each;
+		$InvoiceItem->quantity 					= $quantity;
+		$InvoiceItem->handling_each 			= $handling_each;
+		$InvoiceItem->tax_each 					= $tax_each;
+		$InvoiceItem->tax_rate 					= $tax_rate;
+		$InvoiceItem->weight_each 				= $weight_each;
+		$InvoiceItem->discount_each 			= $discount_each;
+		$InvoiceItem->discount_rate 			= $discount_rate;
+		$InvoiceItem->shipping_first 			= $shipping_first;
+		$InvoiceItem->shipping_additional 		= $shipping_additional;
+		
+		
 		# Calculate
-		$price_total 		= $quantiy*$price_each;
+		$price_total 		= $quantity*$price_each;
 		$handling_total 	= $quantity*$handling_each;
 		$tax_total 			= $quantity*$tax_each + $price_total*$tax_rate;
 		$weight_total 		= $quantity*$weight_each;
 		$shipping_total 	= $shipping_first + ($quantity-1)*$shipping_additional;
-		$total 				= $price_total + $handling_total + $tax_total + $weight_total + $shipping_total;
-		$discount_total 	= $quantity*$discount_each + $total*$discount_rate;
-		$total				-= $discount_total;
+		$subtotal 			= $price_total + $handling_total + $tax_total + $shipping_total;
+		$discount_total 	= $quantity*$discount_each + $subtotal*$discount_rate;
+		$total				= $subtotal-$discount_total;
 		
 		# Apply Totals
 		$InvoiceItem->price_total 		= $price_total;
@@ -124,6 +139,7 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 		$InvoiceItem->weight_total 		= $weight_total;
 		$InvoiceItem->discount_total 	= $discount_total;
 		$InvoiceItem->shipping_total 	= $shipping_total;
+		$InvoiceItem->subtotal 			= $subtotal;
 		$InvoiceItem->total 			= $total;
 		
 		# Return this

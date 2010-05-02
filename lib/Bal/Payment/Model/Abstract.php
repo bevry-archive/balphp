@@ -1,4 +1,5 @@
 <?php
+require_once 'Bal/Exception.php';
 
 abstract class Bal_Payment_Model_Abstract {
 	
@@ -32,9 +33,10 @@ abstract class Bal_Payment_Model_Abstract {
 		# Check
 		if ( !array_key_exists($key, $this->_data) ) {
 			throw new Bal_Exception(array(
-				'They desired key does not exist in our model',
+				'They desired key ['.$key.'] does not exist in our model ['.get_class($this).']',
 				'key' => $key,
-				'keys' => array_keys($this->_data)
+				'keys' => array_keys($this->_data),
+				'model' => get_class($this)
 			));
 		}
 		
@@ -140,7 +142,7 @@ abstract class Bal_Payment_Model_Abstract {
 	 * @return array
 	 */
 	public function toArray ( ) {
-		return $this->_data;
+		return to_array_deep_copy($this->_data);
 	}
 	
 	/**

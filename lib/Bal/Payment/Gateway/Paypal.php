@@ -1,10 +1,4 @@
-<?php;
-/* Resources */
-require_once 'Bal/Payment/Model/Invoice.php';
-require_once 'Bal/Payment/Model/InvoiceItem.php';
-require_once 'Bal/Payment/Model/Payer.php';
-require_once 'Bal/Payment/Gateway/Abstract.php';
-
+<?php
 /**
  * Paypal Payment Gateway
  * @author Benjamin "balupton" Lupton
@@ -38,7 +32,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * A map of from our Bal_Payment_Models to the PayPal standards
 	 * @var array $maps
 	 */
-	protected const $maps = array(
+	protected $maps = array(
 		'request' => array(
 			'invoice' => array(
 				'id' => 'invoice',
@@ -82,7 +76,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				'charset' => 'charset'
 			)
 		),
-		'response' => 
+		'response' => array(
 			'invoice' => array(
 				'id' => 'invoice',
 				'amount' => 'mc_gross',
@@ -102,7 +96,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				'tax' => 'tax',
 				'handling' => 'mc_handling'
 			),
-			'payer' = array(
+			'payer' => array(
 				'address1' => 'address_street',
 				'address2' => 'address_street2',
 				'city' => 'address_city',
@@ -121,17 +115,17 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * A map of values to validate
 	 * @var array $validate
 	 */
-	protected const $validates = array(
+	protected $validates = array(
 		'config' => array(
 			'url', 'token', 'business', 'notify_url', 'return'
-		)
+		),
 		'invoice' => array(
 			'id', 'amount', 'currency', 'handling', 'shipping', 'tax'
 		),
 		'item' => array(
 			'id', 'amount', 'quantity', 'handling', 'shipping', 'tax'
 		),
-		'response' = array(
+		'response' => array(
 			'business'
 		)
 	);
@@ -154,7 +148,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				throw new Bal_Exception(array(
 					'Missing a configuration field for the paypal payment gateway',
 					'config' => $Config,
-					'field' => $validate_field
+					'field' => $validate_field,
 					'required_fields' => $validate
 				));
 			}
@@ -554,7 +548,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			}
 				
 			# Merge mapped Item to request
-			$InvoiceItem = new Bal_Payment_Model_InvoiceItem = array_keys_map($response, array_flip_deep($maps_item)));
+			$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
 			$InvoiceItem->validate();
 			$InvoiceItems[] = $InvoiceItem;
 		}
@@ -572,7 +566,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				}
 				
 				# Merge mapped Item to request
-				$InvoiceItem = new Bal_Payment_Model_InvoiceItem = array_keys_map($response, array_flip_deep($maps_item)));
+				$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
 				$InvoiceItem->validate();
 				$InvoiceItems[] = $InvoiceItem;
 			}
@@ -597,7 +591,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$Config = $this->getConfig();
 		$local_response = array(
 			'business' => delve($Config,'business')
-		)
+		);
+		
 		# Check Payment Date
 		if ( !delve($response,'payment_date') ) {
 			throw new Bal_Exception(array(

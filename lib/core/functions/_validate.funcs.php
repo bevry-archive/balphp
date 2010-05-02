@@ -19,6 +19,7 @@
  */
 
 require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
+require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_strings.funcs.php');
 
 
 if ( function_compare('reallyempty', 1, true, __FILE__, __LINE__) ) {
@@ -31,18 +32,18 @@ if ( function_compare('reallyempty', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function reallyempty ( $haystack ) {
 		$result = false;
-		if ( empty($haystack) ) {
+		if ( empty($haystack) && !$haystack ) {
 			$result = true;
 		} elseif ( is_string($haystack) ) {
 			$haystack = preg_replace('/\s/', '', $haystack);
-			$result = empty($haystack);
+			$result = strlen($haystack) === 0 ? true : false;
 		}
 		elseif ( is_traversable($haystack) ) {
 			array_clean($haystack);
-			$result = empty($haystack);
+			$result = count($haystack) === 0 ? true : false;
 		}
 		else {
-			$result = empty($haystack);
+			$result = empty($haystack) && !$haystack; // !$haystack in here due to very wierd problem with magic properties
 		}
 		return $result;
 	}
@@ -152,8 +153,8 @@ if ( function_compare('until_integer', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = realvalue($arg);
-			if ( !is_integer($result) ) {
+			$result = real_value($arg);
+			if ( is_integer($result) ) {
 				break;
 			}
 		}
@@ -177,8 +178,8 @@ if ( function_compare('until_numeric', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = realvalue($arg);
-			if ( !is_numeric($result) ) {
+			$result = real_value($arg);
+			if ( is_numeric($result) ) {
 				break;
 			}
 		}
@@ -202,7 +203,7 @@ if ( function_compare('until_notnullorfalse', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = realvalue($arg);
+			$result = real_value($arg);
 			if ( $result !== null && $result !== false ) {
 				break;
 			}
@@ -227,7 +228,7 @@ if ( function_compare('until_notnull', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = realvalue($arg);
+			$result = real_value($arg);
 			if ( $result !== null ) {
 				break;
 			}
@@ -252,8 +253,8 @@ if ( function_compare('until_notempty', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $args as $arg ) {
-			$result = realvalue($arg);
-			if ( !empty($result) ) {
+			$result = real_value($arg);
+			if ( !empty($result) && $result ) {
 				break;
 			}
 		}
