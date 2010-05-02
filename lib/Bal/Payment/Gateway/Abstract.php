@@ -119,7 +119,7 @@ abstract class Bal_Payment_Gateway_Abstract {
 		$store_path = delve($Config,'store_path');
 		
 		# Handle
-		if ( $path )
+		if ( $store_path )
 			$file_path = $store_path . DIRECTORY_SEPARATOR . $file . '.txt';
 		else
 			$file_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Bal_Payment_Gateway-' . $file . '.txt';

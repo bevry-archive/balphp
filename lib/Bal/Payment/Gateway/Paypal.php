@@ -53,7 +53,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				'id' 						=> 'item_number',
 				'title' 					=> 'item_name',
 				'quantity' 					=> 'quantity',
-				'subtotal' 					=> 'amount', // after discount, before shipping, handling, tax
+				'price_each_total' 			=> 'amount', // after discount, before shipping, handling, tax
 				
 				'shipping_first' 			=> 'shipping',
 				'shipping_additional' 		=> 'shipping2',
@@ -140,6 +140,9 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		'item' => array(
 			'id', 'amount', 'quantity', 'handling', 'shipping', 'tax'
 		),
+		'request' => array(
+			'business', 'notify_url', 'return'
+		),
 		'response' => array(
 			'business'
 		)
@@ -218,17 +221,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		}
 		
 		# Add some config variables to request if they are set
-		$params = array('business', 'notify_url', 'return');
+		$params = $this->validates['request'];
 		foreach ( $params as $param ) {
-			$config_value = delve($Config,'param');
+			$config_value = delve($Config,$param);
 			if ( $config_value ) {
 				$request[$param] = $config_value;
 			}
-		}
-		
-		# Apply our Request?
-		if ( !empty($request) ) {
-			$request = array_merge($request, $request);
 		}
 		
 		# Store our Request
@@ -263,8 +261,6 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	public function generateRequest ( Bal_Payment_Model_Invoice $Invoice ) {
 		# Prepare
-		$Payer = $Invoice->Payer;
-		$InvoiceItems = $Invoice->InvoiceItems;
 		$maps = $this->maps['request'];
 		$request = array();
 		
@@ -272,12 +268,18 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		# --------------------------
 		# Invoice
 		
+		# Prepare Invoice
+		$Invoice->applyTotals();
+		
 		# Merge mapped Invoice to request
 		$request = array_merge($request, array_keys_map($Invoice, $maps['invoice']));
 		
 		
 		# --------------------------
 		# Payer
+		
+		# Fetch Payer
+		$Payer = $Invoice->Payer;
 		
 		# Merge mapped Payer to request
 		$request = array_merge($request, array_keys_map($Payer, $maps['payer']));
@@ -294,6 +296,9 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		
 		# --------------------------
 		# Items
+		
+		# Fetch InvoiceItems
+		$InvoiceItems = $Invoice->InvoiceItems;
 		
 		# Check if we have a single or multiple items
 		$InvoiceItems_count = count($InvoiceItems);
