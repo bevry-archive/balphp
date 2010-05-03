@@ -22,6 +22,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			'currency_code'			=> null,
 			'paid_at'				=> null,
 			'payment_status'		=> null, // returned payment status from paypal
+			'payment_error'			=> null, // returned payment error from paypal
 			'payment_fee'			=> null, // returned payment fee from gateway
 			'weight_unit'			=> null, // weight unit to use
 		
@@ -34,8 +35,8 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 			'handling_all_total'	=> null, // total handling for all items
 			'tax_all_total'			=> null, // total tax for all items
 			'weight_all_total'		=> null, // total weight for all times
-			'discount_all_total'	=> null, // total discount for all  items
-			'shipping_all_total'	=> null, // total shipping for all itmes
+			'discount_all_total'	=> null, // total discount for all items
+			'shipping_all_total'	=> null, // total shipping for all items
 	);
 	
 	/**

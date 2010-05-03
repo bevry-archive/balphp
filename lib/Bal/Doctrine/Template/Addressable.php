@@ -69,6 +69,13 @@ class Bal_Doctrine_Template_Addressable extends Bal_Doctrine_Template_Abstract {
 			'type'			=>	'string',
 			'length'		=>	60
 		),
+		'country_code' => array(
+			'disabled'		=>	false,
+        	'name'			=>	'country_code',
+			'type'			=>	'string',
+			'length'		=>	2,
+            'country'		=> 	true
+		),
 		'postcode' => array(
 			'disabled'		=>	false,
         	'name'			=>	'postcode',

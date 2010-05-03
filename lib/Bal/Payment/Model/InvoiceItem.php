@@ -44,11 +44,11 @@ class Bal_Payment_Model_InvoiceItem extends Bal_Payment_Model_Abstract {
 			'discount_each'			=> null, // discount for each item
 			'discount_each_rate'	=> null, // discount rate for each item
 			'discount_each_total'	=> null, // total discount for each item
-			'discount_all_total'	=> null, // total discount for all  items
+			'discount_all_total'	=> null, // total discount for all items
 			
 			'shipping_first' 		=> null, // shipping for first item
 			'shipping_additional'	=> null, // shipping for each additional item
-			'shipping_all_total'	=> null, // total shipping for all itmes
+			'shipping_all_total'	=> null, // total shipping for all items
 	);
 	
 	/**

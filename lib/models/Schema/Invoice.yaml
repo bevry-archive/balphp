@@ -20,99 +20,154 @@ Bal_InvoiceItem:
             default: "user_invoiceitem"
             extra:
                 auto: true
-        
-        price_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        price_each:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        subtotal:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
+                
         quantity:
+            # the amount of items to have
             type: int(2)
-            notnull: true
-            extra:
-                currency: true
+            notblank: true
         payment_fee:
+            # returned payment fee from gateway
             type: decimal(8)
             scale: 2
             notnull: true
             default: 0.00
             extra:
                 currency: true
-               
-        handling_each:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        handling_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-             
-        tax_each:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        tax_rate:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                percentage: true
-        tax_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-                    
-        weight_each:
-            type: decimal(8)
-            scale: 2
-            notnull: true
         weight_unit:
+            # weight unit to use
             type: enum
             values: [kgs,lbs]
             default: kgs
             notblank: true
-                
-        discount_each:
+        
+        
+        price_each:
+            # the price for each item		- Discount, Handling, Shipping, Tax
             type: decimal(8)
             scale: 2
             notnull: true
             extra:
                 currency: true
-        discount_rate:
+        price_each_d:
+            # the price for each item 	+ Discount
             type: decimal(8)
             scale: 2
             notnull: true
             extra:
+                currency: true
+        price_all_total:
+            # the price for all  items	- Discount, Handling, Shipping, Tax
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_all_total_d:
+            # the price for all  items	+ Discount
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_all_total_dhs:
+            # the price for all  items	+ Discount, Handling, Shipping
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_each_d:
+            # the price for all  items	+ Discount, Handling, Shipping, Tax
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        
+        handling_each:
+            # handling for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        handling_all_total:
+            # total handling for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
+        tax_each:
+            # tax for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        tax_each_rate:
+            # tax rate for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
                 percentage: true
-        discount_total:
+        tax_each_total:
+            # total tax for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        tax_all_total:
+            # total tax for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+                
+        weight_each:
+            # weight for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+        weight_all_total:
+            # total weight for all times
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            
+        discount_each:
+            # discount for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        discount_each_rate:
+            # discount rate for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                percentage: true
+        discount_each_total:
+            # total discount for each item
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_all_total:
+            # total discount for all items
             type: decimal(8)
             scale: 2
             notnull: true
@@ -120,24 +175,28 @@ Bal_InvoiceItem:
                 currency: true
                 
         shipping_first:
+            # shipping for first item
             type: decimal(8)
             scale: 2
             notnull: true
+            default: 0.00
             extra:
-                currency: true
+                percentage: true
         shipping_additional:
+            # shipping for each additional item
             type: decimal(8)
             scale: 2
             notnull: true
             extra:
                 currency: true
-        shipping_total:
+        shipping_all_total:
+            # total shipping for all items
             type: decimal(8)
             scale: 2
             notnull: true
             extra:
                 currency: true
-           
+        
         Invoice_id:
             type: integer(2)
             unsigned: true
@@ -170,165 +229,11 @@ Bal_Invoice:
             default: "user_invoice"
             extra:
                 auto: true
-        
         status:
             type: enum
             values: [pending,published,completed]
             notblank: true
             default: published
-        payment_status:
-            type: enum
-            values: [awaiting,created,pending,refunded,processed,completed,canceled_reversal,denied,expired,failed,voided,reversed]
-            notblank: true
-            default: awaiting
-        payment_error:
-            type: string(255)
-        payment_fee:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            default: 0.00
-            extra:
-                currency: true
-        paid_at:
-            type: timestamp
-        currency_code:
-            type: string(2)
-            country: true
-        weight_unit:
-            type: enum
-            values: [kgs,lbs]
-            default: kgs
-            notblank: true
-            
-        items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        price_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        subtotal:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        
-        handling_invoice:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        handling_invoice_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        handling_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        handling_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-                
-        tax_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        tax_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-                
-        weight_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-        weight_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-        
-        discount_invoice:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        discount_invoice_rate:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        discount_invoice_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        discount_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        discount_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        
-        shipping_invoice:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        shipping_invoice_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        shipping_items_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-        shipping_total:
-            type: decimal(8)
-            scale: 2
-            notnull: true
-            extra:
-                currency: true
-                
         config:
             # Cache of any invoice configuration that may change externally
             type: array
@@ -337,7 +242,100 @@ Bal_Invoice:
             # Cache of any invoice information that may change externally
             type: array
             notnull: true
-            
+        
+        currency_code:
+            type: string(3)
+        paid_at:
+            type: timestamp
+        payment_status:
+            # returned payment status from paypal
+            type: enum
+            values: [awaiting,created,pending,refunded,processed,completed,canceled_reversal,denied,expired,failed,voided,reversed]
+            notblank: true
+            default: awaiting
+        payment_fee:
+            # returned payment fee from gateway
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            default: 0.00
+            extra:
+                currency: true
+        payment_error:
+            # returned payment error from gateway
+            type: string(255)
+        weight_unit:
+            # weight unit to use
+            type: enum
+            values: [kgs,lbs]
+            default: kgs
+            notblank: true
+        
+        price_all_total:
+            # the price for all  items	- Discount, Handling, Shipping, Tax
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_all_total_d:
+            # the price for all  items	+ Discount
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_all_total_dhs:
+            # the price for all  items	+ Discount, Handling, Shipping
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        price_total:
+            # the price for all  items	+ Discount, Handling, Shipping, Tax
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        
+        handling_all_total:
+            # total handling for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        tax_all_total:
+            # total tax for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        weight_all_total:
+            # total weight for all times
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        discount_all_total:
+            # total discount for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        shipping_all_total:
+            # total shipping for all items
+            type: decimal(8)
+            scale: 2
+            notnull: true
+            extra:
+                currency: true
+        
         File_id:
             type: integer(2)
             unsigned: true

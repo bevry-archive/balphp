@@ -242,7 +242,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 				'position' => array(140,713),
 				'length' => 65
 			),
-			'total' => array(
+			'price_total' => array(
 				'position' => array(190,436),
 				'length' => 70
 			),
