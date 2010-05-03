@@ -137,12 +137,14 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				
 				case real_value(delve($properties,'extra.rating')):
 					$type = 'rating';
-					$value = null;
 					break;
 				
 				case real_value(delve($properties,'extra.csv')):
 					$type = 'csv';
-					$value = null;
+					break;
+				
+				case real_value(delve($properties,'extra.currency')):
+					$type = 'currency';
 					break;
 				
 				default:

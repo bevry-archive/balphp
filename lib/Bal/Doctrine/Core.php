@@ -786,7 +786,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array $options [optional] - Query, create, only
 	 * @return Doctrine_Record
 	 */
-	public static function fetchItem ( $table, $Record = null, array $options = array() ) {
+	public static function getItem ( $table, $Record = null, array $options = array() ) {
 		# Prepare
 		$item = $Item = false;
 		$tableComponentName = self::getTableComponentName($table);
@@ -863,6 +863,64 @@ abstract class Bal_Doctrine_Core {
 	}
 	
 	/**
+	 * Fetch a Item (AND REQUEST DATA) based upon it's fetchItemIdentifier result
+	 * If a Record was not found, create one depending on $create
+	 * A custom query can be passed via $Query
+	 * 
+	 * @version 1.1, April 12, 2010
+	 * @param string $table
+	 * @param Doctrine_Record $Record
+	 * @param array $options [optional] - keep, remove, empty | Query, create, only
+	 * @return Doctrine_Record
+	 */
+	public static function fetchItem ( $table, Doctrine_Record $Record = null, array $options = array() ) {
+		# Prepare
+		$Table = self::getTable($table);
+		$tableComponentName = self::getTableComponentName($table);
+		$tableComponentNameLower = strtolower($tableComponentName);
+		$Item = false;
+		$item = $data = $apply = array();
+		
+		# --------------------------
+		
+		# Get Item
+		$Item = self::getItem($table,$Record,$options);
+		
+		# --------------------------
+		
+		# Fetch item data
+		$data = 
+			array_key_exists('data',$options) && is_array($options['data'])
+			?	$options['data']
+			:	self::fetchItemParam($tableComponentName);
+
+		# Prepare data
+		if ( !is_array($data) ) {
+			// Clear it, no longer needed, and assign empty array
+			$data = array();
+		}
+		
+		# Fetch extra item data
+		$apply = delve($options,'apply',array());
+		
+		# Fetch default item data
+		$default = delve($options,'default',array());
+		
+		# Merge
+		$item = array_merge($default,$data,$apply);
+		
+		# Apply
+		if ( !empty($item) ) {
+			self::applyRecord($Item, $item, $options);
+		}
+		
+		# --------------------------
+		
+		# Return Item
+		return $Item;
+	}
+	
+	/**
 	 * Save the Item properly with $options
 	 * @version 1.1, April 12, 2010
 	 * @param string $table
@@ -892,40 +950,11 @@ abstract class Bal_Doctrine_Core {
 			# Fetch Item
 			$Item = self::fetchItem($table,$Record,$options);
 			
-			# --------------------------
-			
-			# Fetch item data
-			$data = 
-				array_key_exists('data',$options) && is_array($options['data'])
-				?	$options['data']
-				:	self::fetchItemParam($tableComponentName);
-
-			# Prepare data
-			if ( !is_array($data) ) {
-				// Clear it, no longer needed, and assign empty array
-				$data = array();
-			}
-			
-			# Fetch extra item data
-			$apply = delve($options,'apply',array());
-			
-			# Fetch default item data
-			$default = delve($options,'default',array());
-			
-			# Merge
-			$item = array_merge($default,$data,$apply);
-			
-			# Apply
-			self::applyRecord($Item, $item, $options);
-			
-			# Check Existance of Save
-			if ( empty($data) ) {
-				# Return Found/New Content
+			# Check if Modified
+			if ( !$Item->isModified(true) ) {
+				# Nothing to do
 				return $Item;
 			}
-			
-			# Save
-			self::saveRecord($Item, array(), $options);
 			
 			# Stop Duplicates
 			$Request->setPost($tableComponentName, $Item->id);
