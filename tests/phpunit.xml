@@ -1,21 +1,21 @@
 <phpunit bootstrap="./Bootstrap.php">
+	
     <testsuite name="balphp test suite">
         <directory>./</directory>
     </testsuite>
 
     <php>
     	<ini name="include_path"
-			value="../:../../doctrine-1.2.2-lib:/usr/local/zend/share/ZendFramework/library:/usr/local/zend/share/pear"/>
+			value="../lib:../../doctrine-1.2.2-lib:/usr/local/zend/share/ZendFramework/library:/usr/local/zend/share/pear"/>
     </php>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">../</directory>
+            <directory suffix=".php">../lib</directory>
             <exclude>
-            	<directory>.</directory>
-            	<directory>../data</directory>
-            	<directory>../shop</directory>
-            	<directory>../models</directory>
+            	<directory>../lib/data</directory>
+            	<directory>../lib/shop</directory>
+            	<directory>../lib/models</directory>
             </exclude>
         </whitelist>
     </filter>
@@ -26,4 +26,5 @@
             lowUpperBound="50" highLowerBound="80"/>
         <log type="testdox-html" target="./log/testdox.html" />
     </logging>
+
 </phpunit>
