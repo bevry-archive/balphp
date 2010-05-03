@@ -76,7 +76,7 @@ Bal_InvoiceItem:
             notnull: true
             extra:
                 currency: true
-        price_each_d:
+        price_total:
             # the price for all  items	+ Discount, Handling, Shipping, Tax
             type: decimal(8)
             scale: 2
@@ -236,12 +236,8 @@ Bal_Invoice:
             default: published
         config:
             # Cache of any invoice configuration that may change externally
+            # For example company name, tax amounts, commission rates etc
             type: array
-            notnull: true
-        cache:
-            # Cache of any invoice information that may change externally
-            type: array
-            notnull: true
         
         currency_code:
             type: string(3)
@@ -363,4 +359,30 @@ Bal_Invoice:
             local: UserFrom_id
             foreign: id
             foreignAlias: InvoicesFrom
+
+
+InvoiceDataBackup:
+    actAs:
+        SoftDelete:
+        Timestampable:
+    columns:
+        id:
+            type: integer(2)
+            primary: true
+            unsigned: true
+            autoincrement: true
+        data:
+            type: array
+            notnull: true
+        Invoice_id:
+            type: integer(2)
+            unsigned: true
+    relations:
+        Invoice:
+            class: Invoice
+            local: Invoice_id
+            foreign: id
+            #foreignAlias: InvoiceDataBackups
+            foreignType: many
+            onDelete: "CASCADE"
 

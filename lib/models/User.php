@@ -583,19 +583,20 @@ class Bal_User extends Base_Bal_User {
 	
 	/**
 	 * Convert us into the Payment Model Representation
-	 * @return Bal_Payment_Model_Payer
+	 * @return PaymentPayer
 	 */
 	public function generatePaymentModel ( ) {
 		# Prepare
 		$User = $this;
+		$user = $User->toArray(false);
+		
+		# Prepare PaymentPayer
 		$PaymentPayer = new Bal_Payment_Model_Payer();
 		
-		# Get Common
-		$keys = $PaymentPayer->getKeys();
-		$user = $User->toArray(false);
-		array_keys_keep($user, $keys);
+		# Adjust Keys
+		$keys = $PaymentPayer->getKeys(); array_keys_keep($user, $keys);
 		
-		# Create PaymentPayer
+		# Apply the PaymentPayer
 		$PaymentPayer->merge($user);
 		
 		# Validate
@@ -604,7 +605,6 @@ class Bal_User extends Base_Bal_User {
 		# Return the PaymentPayer
 		return $PaymentPayer;
 	}
-	
 	
 	# ========================
 	# CRUD Helpers

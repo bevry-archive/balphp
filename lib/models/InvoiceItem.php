@@ -17,40 +17,31 @@ class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 	# Ensure Helpers
 	
 	/**
-	 * Ensure Total
+	 * Ensure Totals
 	 * @param Doctrine_Event $Event
 	 * @return boolean	success
 	 */
-	public function ensureTotal($Event, $Event_type){
+	public function ensureTotals($Event, $Event_type){
 		# Check
 		if ( !in_array($Event_type,array('preSave')) ) {
 			# Not designed for these events
 			return null;
 		}
 		
-		# Prepare
-		$save = false;
-		
 		# Fetch
-		$Item = $Event->getInvoker();
-	
+		$InvoiceItem = $Event->getInvoker();
+		
 		# --------------------------
-		# Ensure Total
+		# Ensure
 		
-		# Fetch
-		$total = $Item->shipping + $Item->quantity*$Item->amount + ($Item->quantity-1)*$Item->shipping_additional;
-		if ( $Item->tax_rate ) $total *= $Item->tax_rate;
-		$total += $Item->tax;
-		
-		# Apply
-		$this->_set('total',$total);
+		# Apply Totals
+		$InvoiceItem->applyTotals();
 		
 		# --------------------------
 		
-		# Return save
-		return $save;
+		# Return true
+		return true;
 	}
-	
 	
 	/**
 	 * Ensure Consistency
@@ -59,10 +50,9 @@ class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 	 */
 	public function ensure ( $Event, $Event_type ){
 		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
-			'ensureTotal'
+			'ensureTotals'
 		));
 	}
-	
 	
 	
 	# ========================
@@ -75,14 +65,15 @@ class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 	public function generatePaymentModel ( ) {
 		# Prepare
 		$InvoiceItem = $this;
+		$invoiceitem = $InvoiceItem->toArray(false);
+		
+		# Prepare PaymentInvoiceItem
 		$PaymentInvoiceItem = new Bal_Payment_Model_InvoiceItem();
 		
-		# Get Common
-		$keys = $PaymentInvoiceItem->getKeys();
-		$invoiceitem = $InvoiceItem->toArray(false);
-		array_keys_keep($invoiceitem, $keys);
+		# Adjust Keys
+		$keys = $PaymentInvoiceItem->getKeys(); array_keys_keep($invoiceitem, $keys);
 		
-		# Create PaymentInvoiceItem
+		# Apply the InvoiceItem
 		$PaymentInvoiceItem->merge($invoiceitem);
 		
 		# Apply the Totals
@@ -93,6 +84,21 @@ class Bal_InvoiceItem extends Base_Bal_InvoiceItem {
 		
 		# Return the PaymentInvoiceItem
 		return $PaymentInvoiceItem;
+	}
+	
+	/**
+	 * Calculate totals for ourself
+	 * @return true
+	 */
+	public function applyTotals ( ) {
+		# Prepare
+		$InvoiceItem = $this;
+		
+		# Apply Totals
+		Bal_Payment_Model_InvoiceItem::applyTotalsModel($InvoiceItem);
+		
+		# Return true
+		return true;
 	}
 	
 	

@@ -106,6 +106,30 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return $this;
 	}
 	
+	/**
+	 * Backup our Invoice into the back table
+	 * @throws Doctrine_Exception
+	 * @return InvoiceDataBackup
+	 */
+	public function backup ( ) {
+		# Check
+		if ( !$this->isValid() ) {
+			throw new Doctrine_Exception('Cannot backup an invalid model');
+		}
+		
+		# Prepare
+		$Invoice = $this;
+		$invoice = $Invoice->toArray(true);
+		
+		# Create
+		$InvoiceDataBackup = new InvoiceDataBackup();
+		$InvoiceDataBackup->Invoice = $Invoice;
+		$InvoiceDataBackup->data = $invoice;
+		$InvoiceDataBackup->save();
+		
+		# Return InvoiceBackup
+		return $InvoiceDataBackup;
+	}
 	
 	public function getPath ( ) {
 		# Prepare
@@ -295,43 +319,6 @@ class Bal_Invoice extends Base_Bal_Invoice
 	}
 	
 	
-	
-	/**
-	 * Ensure Cache
-	 * @param Doctrine_Event $Event
-	 * @return boolean	wheter or not to save
-	 */
-	public function ensureCache($Event,$Event_type){
-		# Check
-		if ( !in_array($Event_type,array('preInsert','postInsert')) ) {
-			# Not designed for these events
-			return null;
-		}
-		
-		# Prepare
-		$save = false;
-		
-		# Fetch
-		$Invoice = $Event->getInvoker();
-		
-		# Check Existance
-		if ( $Invoice->id && empty($Invoice->cache) ) {
-			# Fetch Cache
-			$cache = $Invoice->toArray(true);
-			unset($cache['cache']);
-			$Invoice->cache = $cache;
-			$save = true;
-		}
-		elseif ( empty($Invoice->cache) ) {
-			$Invoice->cache = array();
-			$save = true;
-		}
-		
-		# Done
-		return $save;
-	}
-	
-	
 	/**
 	 * Ensure Messages
 	 * @param Doctrine_Event $Event
@@ -350,7 +337,6 @@ class Bal_Invoice extends Base_Bal_Invoice
 		
 		# Fetch
 		$Invoice = $Event->getInvoker();
-		$Booking = $Invoice->Booking;
 	
 		# --------------------------
 		# Messages
@@ -363,7 +349,6 @@ class Bal_Invoice extends Base_Bal_Invoice
 		foreach ( $Receivers as $Receiver ) {
 			$Message = new Message();
 			$Message->UserFor = $Receiver;
-			$Message->Booking = $Booking;
 			$Message->useTemplate('invoice-insert');
 			$Message->save();
 		}
@@ -374,6 +359,61 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return $save;
 	}
 	
+	
+	/**
+	 * Ensure Totals
+	 * @param Doctrine_Event $Event
+	 * @return boolean	success
+	 */
+	public function ensureTotals($Event, $Event_type){
+		# Check
+		if ( !in_array($Event_type,array('preSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Fetch
+		$Invoice = $Event->getInvoker();
+		
+		# --------------------------
+		# Ensure
+		
+		# Apply Totals
+		$Invoice->applyTotals();
+		
+		# --------------------------
+		
+		# Return true
+		return true;
+	}
+	
+	/**
+	 * Ensure Backup
+	 * @param Doctrine_Event $Event
+	 * @return boolean	success
+	 */
+	public function ensureBackup($Event, $Event_type){
+		# Check
+		if ( !in_array($Event_type,array('postSave')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Fetch
+		$Invoice = $Event->getInvoker();
+		
+		# --------------------------
+		# Ensure
+		
+		# Apply Totals
+		$Invoice->backup();
+		
+		# --------------------------
+		
+		# Return false
+		return false; // never save again
+	}
+	
 	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
@@ -381,8 +421,9 @@ class Bal_Invoice extends Base_Bal_Invoice
 	 */
 	public function ensure ( $Event, $Event_type ){
 		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
-			'ensureCache',
-			'ensureMessages'
+			'ensureTotals',
+			'ensureMessages',
+			'ensureBackup'
 		));
 	}
 	
@@ -472,14 +513,24 @@ class Bal_Invoice extends Base_Bal_Invoice
 	public function generatePaymentModel ( ) {
 		# Prepare
 		$Invoice = $this;
+		$invoice = $Invoice->toArray(false);
+		
+		# Prepare PaymentInvoice
 		$PaymentInvoice = new Bal_Payment_Model_Invoice();
 		
-		# Get Common
-		$keys = $PaymentInvoice->getKeys();
-		$invoice = $Invoice->toArray(true);
-		array_keys_keep($invoice, $keys);
+		# Adjust Keys
+		$keys = $PaymentInvoice->getKeys(); array_keys_keep($invoice, $keys);
 		
-		# Create PaymentInvoice
+		# Apply the Payer
+		$invoice['Payer'] = $Invoice->UserFor->generatePaymentModel();
+		
+		# Apply the InvoiceItems
+		$invoice['InvoiceItems'] = array();
+		foreach ( $Invoice->InvoiceItems as $InvoiceItem ) {
+			$invoice['InvoiceItems'][] = $InvoiceItem->generatePaymentModel();
+		}
+		
+		# Apply the Invoice
 		$PaymentInvoice->merge($invoice);
 		
 		# Apply the Totals
@@ -492,6 +543,20 @@ class Bal_Invoice extends Base_Bal_Invoice
 		return $PaymentInvoice;
 	}
 	
+	/**
+	 * Calculate totals for ourself
+	 * @return true
+	 */
+	public function applyTotals ( ) {
+		# Prepare
+		$Invoice = $this;
+		
+		# Apply Totals
+		Bal_Payment_Model_Invoice::applyTotalsModel($Invoice);
+		
+		# Return true
+		return true;
+	}
 	
 	# ========================
 	# CRUD Helpers
