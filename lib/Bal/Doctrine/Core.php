@@ -639,7 +639,7 @@ abstract class Bal_Doctrine_Core {
 		$Table = $Record->getTable();
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('keep','remove','empty','ensure','clean'));
+		array_keys_keep_ensure($options,array('keep','remove','empty','ensure','clean','always_save'));
 		extract($options);
 		
 		# Prepare
@@ -686,7 +686,7 @@ abstract class Bal_Doctrine_Core {
 									# Create
 									$valueRecord = self::getRecord($RelationTable, $_value);
 									self::applyRecord($valueRecord,$_value);
-									if ( $valueRecord->id )
+									if ( $always_save || $valueRecord->id )
 										$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
 									$_values[] = $valueRecord; 
 								}
@@ -720,7 +720,7 @@ abstract class Bal_Doctrine_Core {
 									# Create
 									$valueRecord = self::getRecord($RelationTable, $value);
 									self::applyRecord($valueRecord,$value);
-									if ( $valueRecord->id )
+									if ( $always_save || $valueRecord->id )
 										$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
 									$value = $valueRecord; 
 								}

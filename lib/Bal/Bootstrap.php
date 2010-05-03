@@ -378,8 +378,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			# Autoload PEAR Models
 			$model_dirs = scan_dir($models_path, array('skip_files'=>true,'recurse'=>false));
 			foreach ( $model_dirs as $model_dir_path => $model_dir_filename ) {
-				baldump($model_dir_path, $model_dir_filename);
-				
 				$resourceLoader = new Zend_Loader_Autoloader_Resource(array(
 					'basePath'  => $model_dir_path,
 					'namespace' => $model_dir_filename,
@@ -488,7 +486,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		elseif ( false ) {
 			$Manager = Bal_App::getDataManager();
 			$models = Doctrine_Core::getLoadedModelFiles();
-			baldump($models);
 			foreach ( $models as $tableName => $modelPath ) {
 				Doctrine_Core::getTable($tableName)->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 			}

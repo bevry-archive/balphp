@@ -40,7 +40,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	);
 	
 	/**
-	 * Validate our Model
+	 * Validate ourself
 	 * @throws Bal_Exception
 	 * @return true
 	 */
@@ -48,6 +48,20 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		# Prepare
 		$Invoice = $this;
 		
+		# Validate
+		self::validateModel($Invoice);
+		
+		# Return true
+		return true;
+	}
+	
+	/**
+	 * Validates a Model
+	 * @param mixed $Invoice
+	 * @throws Bal_Exception
+	 * @return true
+	 */
+	public static function validateModel ( $Invoice ) {
 		# Prepare Checks
 		$checks = array(
 			'id'					=> !reallyempty($Invoice->id),
@@ -89,13 +103,26 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 	}
 	
 	/**
-	 * Apply the totals of the Invoice Item to this
+	 * Apply the totals to ourself
 	 * @return $this
 	 */
 	public function applyTotals ( ) {
 		# Prepare
 		$Invoice = $this;
 		
+		# Apply Totals
+		self::applyTotalsModel($Invoice);
+		
+		# Return true
+		return true;
+	}
+	
+	/**
+	 * Apply the Totals to the Model
+	 * @param mixed $Invoice
+	 * @return true
+	 */
+	public static function applyTotalsModel ( $Invoice ) {
 		# Force Valid Inputs
 		$Invoice->payment_fee 				= until_numeric($Invoice->payment_fee, 0.00);
 		
@@ -111,7 +138,7 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		$Invoice->shipping_all_total		= 0;
 		
 		# Calculate Each Totals
-		$InvoiceItems = $this->InvoiceItems;
+		$InvoiceItems = $Invoice->InvoiceItems;
 		foreach ( $InvoiceItems as $InvoiceItem ) {
 			# Calculate
 			$InvoiceItem->applyTotals();
@@ -136,9 +163,6 @@ class Bal_Payment_Model_Invoice extends Bal_Payment_Model_Abstract {
 		foreach ( $fields as $field ) {
 			$Invoice->$field = round($Invoice->$field, 2);
 		}
-		
-		# Chain
-		return $this;
 	}
 	
 	/**

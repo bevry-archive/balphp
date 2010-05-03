@@ -52,11 +52,9 @@ class Bal_Doctrine_Record_Listener_Html extends Doctrine_Record_Listener {
 					$value = strip_tags($value);
 					break;
 			}
-			//baldump($field,$html,$value);
 			if ( $value !== $orig ) // only call the setter if the value has actually changed, prevents special setters form overloading
 				$Record->set($field, $value);
 		}
-			//baldump($Event->getCode(),$Table->getTableName(),get_class($Record));
 		
 		// Done
 		return true;
