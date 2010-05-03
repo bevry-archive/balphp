@@ -574,7 +574,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 		
 		# Query
 		$Query = Doctrine_Query::create()
-			->select('Invoice.*, InvoiceItem.*, Booking.*, Media.*')
+			->select('Invoice.*, InvoiceItem.*, Media.*')
 			->from('Invoice, Invoice.InvoiceItems InvoiceItem')
 			->orderBy('Invoice.created_at ASC');
 		
