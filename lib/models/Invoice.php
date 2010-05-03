@@ -73,7 +73,6 @@ class Bal_Invoice extends Base_Bal_Invoice
 	public function useTemplate ( $template, array $data = array() ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
-		$applicationConfig = Bal_App::getConfig();
 		$Invoice = $this;
 		
 		# Merge Data
@@ -83,8 +82,11 @@ class Bal_Invoice extends Base_Bal_Invoice
 		}
 		
 		# Apply Config
-		$config = delve($applicationConfig, 'bal.invoice', array());
+		$config = Bal_App::getConfig('bal.invoice', array());
 		$this->config = $config;
+		
+		# Apply Currency
+		$this->currency_code = Bal_App::getConfig('locale.currency', 'AUD');
 		
 		# Apply Template
 		$this->_set('template', $template, false);
@@ -117,6 +119,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 			throw new Doctrine_Exception('Cannot backup an invalid model');
 		}
 		
+		return;
 		# Prepare
 		$Invoice = $this;
 		$invoice = $Invoice->toArray(true);
@@ -505,6 +508,37 @@ class Bal_Invoice extends Base_Bal_Invoice
 	
 	# ========================
 	# Payment Helpers
+	
+	/**
+	 * Process the Payment and Save changes
+	 * @param Bal_Payment_Model_Invoice
+	 * @return true
+	 */
+	public function processPaymentAndSave ( Bal_Payment_Model_Invoice $PaymentInvoice ) {
+		# Prepare
+		$Invoice = $this;
+		
+		# Apply Payment Data
+		$Invoice->payment_status	= $PaymentInvoice->payment_status;
+		$Invoice->payment_fee		= $PaymentInvoice->payment_fee;
+		$Invoice->paid_at			= doctrine_timestamp($PaymentInvoice->paid_at);
+		
+		# Propogate to Invoice
+		switch ( $Invoice->payment_status ) {
+			case 'completed':
+				$Invoice->status = 'completed';
+				break;
+			
+			default:
+				break;
+		}
+		
+		# Save Invoice
+		$Invoice->save();
+		
+		# Return true
+		return true;
+	}
 	
 	/**
 	 * Convert us into the Payment Model Representation
