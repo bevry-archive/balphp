@@ -57,7 +57,7 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
     /**
      * @depends testRequest
      */
-    public function testResponseIPN ( ) {
+    public function testResponseIpn ( ) {
 		# Prepare
 		$Invoice = Bal_Payment_Model_InvoiceTest::generateInvoice();
 		$Paypal = self::generatePaypal();
@@ -66,10 +66,10 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 		$request = self::generateRequest();
 		
 		# Response
-		$response = self::generateResponseIPN();
+		$response = self::generateResponseIpn();
 		
 		# Response
-		$Paypal->handleResponseIPN($response);
+		$Paypal->handleResponseIpn($response);
     }
 	
 
@@ -89,7 +89,7 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 		return $request;
 	}
 	
-	public static function generateResponsePDT ( ) {
+	public static function generateResponsePdt ( ) {
 		# Create
 		$response = array(
 			'tx' => '4A412521A3541820E',
@@ -107,7 +107,7 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 		return $response;
 	}
 	
-	public static function generateResponseIPN ( ) {
+	public static function generateResponseIpn ( ) {
 		# Create
 		$response = array(
 			'mc_gross' => '25.12',

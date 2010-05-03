@@ -373,12 +373,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		# Handle Appropriatly
 		switch ( $response_type ) {
 			case self::RESPONSE_PDT:
-				$Invoice = $this->handleResponsePDT($response);
+				$Invoice = $this->handleResponsePdt($response);
 				break;
 				
 			case self::RESPONSE_IPN:
 			default:
-				$Invoice = $this->handleResponseIPN($response);
+				$Invoice = $this->handleResponseIpn($response);
 				break;
 		}
 		
@@ -393,7 +393,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param array $response_pdt
 	 * @return $this
 	 */
-	public function handleResponsePDT ( array $response_pdt ) {
+	public function handleResponsePdt ( array $response_pdt ) {
 		# Prepare
 		$Invoice = null;
 		
@@ -427,7 +427,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		$response_complete = array_merge($response_pdt, $response_authentic_data);
 		
 		# Now continue as if we were an IPN request
-		$Invoice = $this->handleIPN($response_complete);
+		$Invoice = $this->handleResponseIpn($response_complete);
 		
 		# Return Invoice
 		return $Invoice;
@@ -442,7 +442,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param array $response
 	 * @return Bal_Payment_Model_Invoice
 	 */
-	public function handleResponseIPN ( array $response ) {
+	public function handleResponseIpn ( array $response ) {
 		# Prepare
 		$Config = $this->GetConfig();
 		$maps = $this->maps['response'];
