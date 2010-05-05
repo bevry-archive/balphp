@@ -220,6 +220,11 @@ Bal_Invoice:
             primary: true
             unsigned: true
             autoincrement: true
+        code:
+            type: string(30)
+            unsigned: true
+            notblank: true
+            unique: true
         title:
             type: string(50)
             notblank: true

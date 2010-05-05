@@ -4,6 +4,10 @@
 
 Bal_User:
     actAs:
+        Sluggable:
+            name: code
+            canUpdate: true
+            fields: [username]
         Taggable:
             tagAlias: "SubscriptionTags"
         SoftDelete:

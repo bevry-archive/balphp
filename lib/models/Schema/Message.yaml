@@ -50,7 +50,7 @@ Bal_Message:
             default: "user_message"
             extra:
                 auto: true
-        ReplyTo_id:
+        MessageTo_id:
             type: integer(3)
             unsigned: true
         UserFor_id:
@@ -60,11 +60,11 @@ Bal_Message:
             type: integer(2)
             unsigned: true
     relations:
-        ReplyTo_id:
+        MessageTo:
             class: Message
-            local: ReplyTo_id
+            local: MessageTo_id
             foreign: id
-            foreignAlias: Replies
+            foreignAlias: MessagesFrom
         UserFor:
             class: User
             local: UserFor_id

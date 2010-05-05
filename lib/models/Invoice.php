@@ -418,12 +418,45 @@ class Bal_Invoice extends Base_Bal_Invoice
 	}
 	
 	/**
+	 * Ensure Code
+	 * @param Doctrine_Event $Event
+	 * @return boolean	success
+	 */
+	public function ensureCode($Event, $Event_type){
+		# Check
+		if ( !in_array($Event_type,array('preInsert')) ) {
+			# Not designed for these events
+			return null;
+		}
+		
+		# Prepare
+		$save = false;
+		
+		# Fetch
+		$Invoice = $Event->getInvoker();
+		
+		# --------------------------
+		# Ensure
+		
+		# Check if code is set
+		if ( !$Invoice->code ) {
+			$Invoice->code = 'invoice-'.time();
+		}
+		
+		# --------------------------
+		
+		# Return save
+		return $save;
+	}
+	
+	/**
 	 * Ensure Consistency
 	 * @param Doctrine_Event $Event
 	 * @return boolean	wheter or not to save
 	 */
 	public function ensure ( $Event, $Event_type ){
 		return Bal_Doctrine_Core::ensure($Event,$Event_type,array(
+			'ensureCode',
 			'ensureTotals',
 			'ensureMessages',
 			'ensureBackup'

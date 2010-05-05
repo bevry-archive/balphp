@@ -651,8 +651,11 @@ class Bal_User extends Base_Bal_User {
 			$Query->andWhere('User.level <= ?', $Identity->level);
 		}
 		if ( $User ) {
-			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('User.id = ?', $User);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
+			$Query->andWhere(
+				'User.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		
 		# Fetch
