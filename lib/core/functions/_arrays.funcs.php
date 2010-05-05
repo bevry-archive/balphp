@@ -885,7 +885,7 @@ if ( function_compare('array_clean', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_clean ( &$array, $to = null ) {
 		# Prepare
-		if ( !is_traversable($array) )
+		if ( !is_array($array) )
 			return $array;
 		if ( is_null($to) )
 			$to = 'remove';
