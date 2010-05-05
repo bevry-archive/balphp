@@ -736,7 +736,7 @@ abstract class Bal_Doctrine_Core {
 		}
 		catch ( Exception $Exception ) {
 			# Reset
-			$Item = false;
+			$Record = false;
 		
 			# Log the Event and Continue
 			$Exceptor = new Bal_Exceptor($Exception);

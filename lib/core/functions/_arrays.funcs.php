@@ -1475,3 +1475,33 @@ if ( function_compare('handle_options', 1, true, __FILE__, __LINE__) ) {
 		return $options;
 	}
 }
+
+
+if ( function_compare('has_relation', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Checks to see if the relation exists in the set of relations
+	 * @version 1, May 06, 2010
+	 * @param mixed $record
+	 * @param mixed $relations
+	 * @return string
+	 */
+	function has_relation ( $record, $relations ) {
+		# Check
+		if ( !is_traversable($relations) ) return null;
+		
+		# Prepare
+		$record_id = delve($record,'id',$record);
+		$found = false;
+		
+		# Cycle
+		foreach ( $relations as $relation ) {
+			if ( $record_id === delve($relation,'id',$relation) ) {
+				$found = true;
+				break;
+			}
+		}
+		
+		# Return found
+		return $found;
+	}
+}
