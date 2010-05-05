@@ -365,7 +365,8 @@ class Bal_Message extends Base_Bal_Message
 		if ( $User ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
 			$Query->andWhere(
-				'Message.UserFor.'.$identifier['column'].' = ? OR Message.UserFrom.'.$identifier['column'].' = ?',
+				'Message.UserFor.'.$identifier['column'].' = ? OR '.
+				'Message.UserFrom.'.$identifier['column'].' = ?',
 				array($identifier['value'],$identifier['value'])
 			);
 		}

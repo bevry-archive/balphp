@@ -358,7 +358,7 @@ class Bal_File extends Base_Bal_File {
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('File','Author'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('fetch','File','Author'));
 		extract($params);
 		
 		# Query

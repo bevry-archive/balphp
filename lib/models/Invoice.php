@@ -650,7 +650,8 @@ class Bal_Invoice extends Base_Bal_Invoice
 		if ( $User ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
 			$Query->andWhere(
-				'Invoice.UserFor.'.$identifier['column'].' = ? OR Invoice.UserFrom.'.$identifier['column'].' = ?',
+				'Invoice.UserFor.'.$identifier['column'].' = ? OR '.
+				'Invoice.UserFrom.'.$identifier['column'].' = ?',
 				array($identifier['value'],$identifier['value'])
 			);
 		}

@@ -616,7 +616,7 @@ class Bal_User extends Base_Bal_User {
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('User','Identity'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('fetch','User','Identity'));
 		extract($params);
 		
 		# Query
