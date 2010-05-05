@@ -508,6 +508,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# balPHP
 		Bal_Framework::import();
 		
+		# Params
+		hydrate_request_init();
+		
 		# Done
 		return true;
 	}

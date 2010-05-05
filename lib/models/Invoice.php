@@ -614,20 +614,32 @@ class Bal_Invoice extends Base_Bal_Invoice
 		
 		# Criteria
 		if ( $User ) {
-			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('Invoice.UserFor.id = ? OR Invoice.UserFrom.id = ?', array($User,$User));
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
+			$Query->andWhere(
+				'Invoice.UserFor.'.$identifer['column'].' = ? OR Invoice.UserFrom.'.$identifer['column'].' = ?',
+				array($identifer['value'],$identifer['value'])
+			);
 		}
 		if ( $UserFor ) {
-			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
-			$Query->andWhere('Invoice.UserFor.id = ?', $UserFor);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFor);
+			$Query->andWhere(
+				'Invoice.UserFor.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		if ( $UserFrom ) {
-			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
-			$Query->andWhere('Invoice.UserFrom.id = ?', $UserFrom);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFrom);
+			$Query->andWhere(
+				'Invoice.UserFrom.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		if ( $Invoice ) {
-			$Invoice = Bal_Doctrine_Core::resolveId($Invoice);
-			$Query->andWhere('Invoice.id = ?', $Invoice);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('Invoice',$Invoice);
+			$Query->andWhere(
+				'Invoice.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		
 		# Fetch

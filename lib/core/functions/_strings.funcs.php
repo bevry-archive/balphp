@@ -100,7 +100,7 @@ if ( function_compare('to_string', 2.1, true, __FILE__, __LINE__) ) {
 	 *
 	 * @see text_value
 	 */
-	function to_string ( $value, $format = NULL ) {
+	function to_string ( $value, $format = null ) {
 		return text_value($value, $format);
 	}
 }
@@ -117,7 +117,7 @@ if ( function_compare('text_value', 2.1, true, __FILE__, __LINE__) ) {
 	 *
 	 * @return	mixed
 	 */
-	function text_value ( $value, $format = NULL ) { // Turns all special values into a string
+	function text_value ( $value, $format = null ) { // Turns all special values into a string
 		// v2.1 -
 		$str = gettype($value) === 'string' ? $value : var_export($value, true);
 		if ( $format ) {
@@ -141,49 +141,81 @@ if ( function_compare('from_string', 2.4, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('real_value', 2.6, true, __FILE__, __LINE__) ) {
+if ( function_compare('real_value', 3.0, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Convert a value from it's text value to it's real value
-	 *
-	 * @version 2.6, March 1, 2010
-	 *
+	 * @version 3.0, May 05, 2010
 	 * @param	mixed		$value
-	 * @param	boolean		$bool		convert from boolean?
-	 * @param	boolean		$null		convert from null?
-	 * @param	boolean		$numeric	convert from numeric?
-	 * @param	boolean		$question	convert question to boolean?
-	 * @param	boolean		$array		convert an array's values into real values?
-	 *
+	 * @param	array 		$options
+	 * 							bool			convert from boolean?
+	 * 							null			convert from null?
+	 * 							numeric			convert from numeric?
+	 * 							question		convert question to boolean?
+	 * 							array 			convert an array's values into real values?
+	 * 							stripslashes	strip the slashes [default=false]
 	 * @return	mixed
 	 */
-	function real_value ( $value, $bool = true, $null = true, $numeric = true, $question = true, $array = true ) { // Turns a value into it's actual value, regardless of strings
-		// v2.6, March 1, 2010 - Numbers starting with 0 are now kept as strings to keep the 0
+	function real_value ( $value, array $options = array() ) {
+		// v3.0, May 05, 2010 - Now we trim strings, and options are now an array, added stripslashes
+		// v2.6, March 01, 2010 - Numbers starting with 0 are now kept as strings to keep the 0
 		// v2.5, January 05, 2010 - Added array option
 		// v2.4 - 02/10/2007
 		// v2.3 - 01/12/2006
 		
-		if ( $bool && ($value === true || $value === 'TRUE' || $value === 'true' || ($question && ($value === 'on' || $value === 'yes'))) )
-			return true;
-		elseif ( $bool && ($value === false || $value === 'FALSE' || $value === 'false' || ($question && ($value === 'off' || $value === 'no'))) )
-			return false;
-		elseif ( $null && ($value === NULL || $value === 'NULL' || $value === 'null' || $value === 'UNDEFINED' || $value === 'undefined') )
-			return NULL;
-		elseif ( $numeric && is_numeric($value) && substr($value,0,1) !== '0' ) {
+		# Prepare
+		$result = null;
+		
+		# Prepare Options
+		array_keys_ensure($options, array('bool','null','numeric','question','array'),true);
+		array_keys_ensure($options, array('stripslashes'),false);
+		
+		# Trim String
+		if ( is_string($value) ) {
+			if ( $options['stripslashes'] ) {
+				$value = stripslashes($value);
+			}
+			$value = trim($value);
+		}
+		
+		# Convert type
+		if ( $options['bool'] && ($value === true || $value === 'TRUE' || $value === 'true' || ($options['question'] && ($value === 'on' || $value === 'yes'))) )
+			$result = true;
+		elseif ( $options['bool'] && ($value === false || $value === 'FALSE' || $value === 'false' || ($options['question'] && ($value === 'off' || $value === 'no'))) )
+			$result = false;
+		elseif ( $options['null'] && ($value === null || $value === 'null' || $value === 'null' || $value === 'UNDEFINED' || $value === 'undefined') )
+			$result = null;
+		elseif ( $options['numeric'] && is_numeric($value) && substr($value,0,1) !== '0' ) {
 			$int = intval($value);
 			$float = floatval($value);
-			if ( $int == $float ) {
-				return $int;
-			} else {
-				return $float;
-			}
-		} elseif ( $array && is_array($array) ){
+			$result = $int == $float ? $int : $float;
+		} elseif ( $options['array'] && is_traversable($value) ){
 			foreach ( $value as $_key => &$_value ) {
-				$_value = real_value($_value, $bool, $null, $numeric, $question, $array);
+				$_value = real_value($_value, $options);
 			}
+			$result = $value;
 		} else {
-			return $value;
+			$result = $value;
 		}
+		
+		# Return result
+		return $result;
+	}
+}
+
+
+if ( function_compare('hydrate_value', 1.0, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Convert a value into a real value
+	 * @version 1.0, May 05, 2010
+	 * @param	mixed		&$value
+	 * @param	array 		$options
+	 * 						@see real_value
+	 * @return	mixed
+	 */
+	function hydrate_value ( &$value, array $options = array() ) {
+		return $value = real_value($value);
 	}
 }
 
@@ -409,7 +441,7 @@ if ( function_compare('preg_unescape', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function preg_unescape ( $value ) {
 		/*
-		 * When using the e modifier, this function escapes some characters (namely ', ", \ and NULL) in the strings that replace the backreferences.
+		 * When using the e modifier, this function escapes some characters (namely ', ", \ and null) in the strings that replace the backreferences.
 		 * This is done to ensure that no syntax errors arise from backreference usage with either single or double quotes (e.g. 'strlen(\'$1\')+strlen("$2")').
 		 * Make sure you are aware of PHP's string syntax to know exactly how the interpreted string will look like.
 		 */

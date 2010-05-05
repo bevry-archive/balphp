@@ -358,7 +358,7 @@ class Bal_File extends Base_Bal_File {
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('fetch','Root','Parent','User','Author'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('File','Author'));
 		extract($params);
 		
 		# Query
@@ -378,6 +378,22 @@ class Bal_File extends Base_Bal_File {
 				->from('File')
 				->orderBy('File.code ASC')
 				;
+		}
+		
+		# Criteria
+		if ( $Author ) {
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$Author);
+			$Query->andWhere(
+				'File.Author.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
+		}
+		if ( $File ) {
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('File',$File);
+			$Query->andWhere(
+				'File.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		
 		# Fetch

@@ -100,54 +100,13 @@ if ( function_compare('regenerate_params', 2, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
+if ( function_compare('hydrate_request_init', 1, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Get the param
-	 * @version 2
-	 * @param string $name
-	 * @param mixed $default [optional]
-	 * @param boolean $hydrate [optional]
-	 * @param mixed $stripslashes [optional]
-	 * @param boolean $hydrate [optional]
-	 */
-	function get_param ( $name, $default = null, $hydrate = true, $stripslashes = null, $delve = true ) {
-		if ( $stripslashes === null )
-			$stripslashes = get_magic_quotes_gpc() ? true : false;
-		
-		switch ( true ) {
-			case array_key_exists($name, $_POST) :
-				$value = $_POST[$name];
-				$value = trim($stripslashes ? stripslashes($value) : $value);
-				break;
-			
-			case array_key_exists($name, $_GET) :
-				$value = $_GET[$name];
-				$value = trim($stripslashes ? stripslashes($value) : $value);
-				break;
-			
-			case isset($_FILES[$name]) :
-				$value = $_FILES[$name];
-				break;
-			
-			default :
-				$value = $default;
-		}
-		
-		if ( $hydrate )
-			$value = real_value($value);
-		
-		return $value;
-	}
-}
-
-if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
-
-	/**
-	 * Initialise our hydrated params
+	 * Rebuild and hydrate $_REQUEST
 	 * @version 1, January 06, 2010
 	 */
-	function hydrate_param_init ( $once = true ) {
+	function hydrate_request_init ( $once = true ) {
 		# Init
 		if ( defined('REQUEST_HYDRATED') ) {
 			if ( $once ) return;
@@ -155,86 +114,96 @@ if ( function_compare('hydrate_param_init', 1, true, __FILE__, __LINE__) ) {
 			define('REQUEST_HYDRATED', 1);
 	
 		# Prepare
-		global $_POST_HYDRATED, $_GET_HYDRATED, $_REQUEST_HYDRATED, $_FILES_HYDRATED, $_PARAMS_HYDRATED;
-		$_POST_HYDRATED = $_POST;
-		$_GET_HYDRATED = $_GET;
-		$_REQUEST_HYDRATED = $_REQUEST;
-		$_FILES_HYDRATED = array();
+		$stripslashes = ini_get('magic_quotes_gpc') ? true : false;
 		
-		# Apply
-		array_hydrate($_POST_HYDRATED,true);
-		array_hydrate($_GET_HYDRATED,true);
-		array_hydrate($_REQUEST_HYDRATED,true);
-		array_hydrate($_FILES_HYDRATED,true);
+		# Prepare
+		$_POST_HYDRATED		= $_POST;
+		$_GET_HYDRATED		= $_GET;
+		$_FILES_HYDRATED	= array();
+		
+		# Clean
+		array_clean_form($_POST_HYDRATED);
+		array_clean_form($_GET_HYDRATED);
+		array_clean_form($_FILES_HYDRATED);
+		
+		# Hydrate
+		hydrate_value($_POST_HYDRATED,	array('stripslashes'=>$stripslashes));
+		hydrate_value($_GET_HYDRATED,	array('stripslashes'=>$stripslashes));
+		hydrate_value($_FILES_HYDRATED);
+		
+		# Liberate
 		liberate_files($_FILES_HYDRATED);
 		unset_empty_files($_FILES_HYDRATED);
 		
 		# Merge
-		$_PARAMS_HYDRATED = array_merge_recursive_keys(false, $_FILES_HYDRATED, $_GET_HYDRATED, $_POST_HYDRATED);
+		$_REQUEST = array_merge_recursive_keys(false, $_FILES_HYDRATED, $_GET_HYDRATED, $_POST_HYDRATED);
 		
 		# Done
 		return true;
 	}
 }
 
-if ( function_compare('fetch_param', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('get_param', 2, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Fetch a hydrated param
-	 * @version 1, January 06, 2010
+	 * Get a unhydrated param
+	 * @version 3, May 05, 2010
+	 * @since 2
+	 * @param string $name
+	 * @param array $options [optional]
 	 */
-	function fetch_param ( $name, $default = null ) {
+	function get_param ( $name, $default = null, $stripslashes = null) {
 		# Prepare
-		hydrate_param_init();
-		global $_PARAMS_HYDRATED;
-		$value = null;
+		if ( $stripslashes === null )
+			$stripslashes = get_magic_quotes_gpc() ? true : false;
 		
-		# Handle
-		$value = delve($_PARAMS_HYDRATED, $name, $default);
+		# Fetch
+		$value = delve($_POST,$name,delve($_GET,$name,delve($_FILES,$name,$default)));
 		
-		# Hydrate the Param
-		hydrate_param($value);
+		# Stripslashes
+		if ( $stripslashes && is_string($value) ) {
+			$value = stripslashes($value);
+		}
 		
-		# Done
+		# Return value
 		return $value;
 	}
 }
 
 
-if ( function_compare('hydrate_param', 1, true, __FILE__, __LINE__) ) {
+if ( function_compare('fetch_param', 1, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Hydrate a param
+	 * Get a hydrated param
 	 * @version 1, January 06, 2010
 	 */
-	function hydrate_param ( &$value, $realvalue = true, $stripslashes = null, $trim = true ) {
+	function fetch_param ( $name, $default = null ) {
 		# Prepare
-		if ( $stripslashes === null )
-			$stripslashes = ini_get('magic_quotes_gpc') ? true : false;
+		hydrate_request_init();
 		
-		# Handle
-		if ( is_array($value) ) {
-			# Array
-			foreach ( $value as $_key => &$_value ) {
-				hydrate_param($_value, $realvalue, $stripslashes, $trim);
-			}
-		}
-		else {
-			# Value
-			if ( is_string($value) ) {
-				# Stripslashes
-				if ( $stripslashes ) $value = stripslashes($value);
-	
-				# Trim
-				if ( $trim ) $value = trim($value);
-			}
+		# Fetch
+		$value = delve($_REQUEST, $name, $default);
 		
-			# Realvalue
-			if ( $realvalue ) $value = real_value($value);
-		}
+		# Return value
+		return $value;
+	}
+}
+
+if ( function_compare('has_param', 1, true, __FILE__, __LINE__) ) {
+
+	/**
+	 * Check to see if the param exists
+	 * @version 1, January 06, 2010
+	 */
+	function has_param ( $name ) {
+		# Prepare
+		hydrate_request_init();
 		
-		# Done
-		return true;
+		# Fetch
+		$exists = delve($_REQUEST, $name) !== null;
+		
+		# Return exists
+		return $exists;
 	}
 }
 
@@ -334,30 +303,3 @@ if ( function_compare('fix_magic_quotes', 1, true, __FILE__, __LINE__) ) {
 		}
 	}
 }
-
-if ( function_compare('hydrate_params', 1, true, __FILE__, __LINE__) ) {
-
-	/**
-	 * Fix magic quotes, hydrate params, and liberate files
-	 */
-	function hydrate_params ( ) {
-		fix_magic_quotes();
-		array_hydrate($_REQUEST);
-		array_hydrate($_POST);
-		array_hydrate($_GET);
-		array_hydrate($_FILES);
-		liberate_files($_FILES);
-	}
-}
-
-
-/*
-if( function_comp('set_param', 1) )
-{
-	function set_param ( $name, $value, $expire = 2147483647 )
-	{
-		setcookie($name, to_string($value), $expire, '/');
-		return true;
-	}
-}
-*/

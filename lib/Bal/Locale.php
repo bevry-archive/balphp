@@ -375,8 +375,65 @@ class Bal_Locale {
 			$text = $this->translate($text, $data);
 		}
 		
+		# Run it through an advanced translation
+		if ( false )
+		$text = preg_replace(
+			'/([^\\\\])?\\{([^\\}]+)\\}/ie',
+			'preg_unescape("${1}") . $this->_translate_advanced(preg_unescape("${2}"))',
+			$text
+		);
+		
 		# Return translation
     	return $text;
+	}
+	
+	/**
+	 * Perform an advanced series of translations on the text
+	 * @throws Bal_Exception
+	 * @param string $test - will look like "currency:2.00,N/A" or "currency:,N/A"
+	 * @return string
+	 */
+	protected function _translate_advanced ( $text ) {
+		# Prepare
+		$result = '';
+		
+		# Find everything upto a unescaped comma, several times
+		$matches = array();
+		$matches_n = preg_match_all('/([^\\\\]+),?/i', $text, $matches); // find blocks seperated by a unescaped comma
+		
+		baldump($text, $matches);
+		# Check
+		if ( $matches_n === 0 ) {
+			throw new Bal_Exception('Translate advanced did not find what it was looking for..');
+		}
+		
+		# Cycle
+		foreach ( $matches as $match ) {
+			# Prepare
+			$match_str = $match[1]; // the stuff between the ()
+			
+			# Find the translator if it exists - will look like "currency:2.00" or "2.00" or "Eg\\: Hello"
+			$parts = array();
+			$parts_n = preg_match('/^[^\\\\]+:?/i', $match, $parts); // find the first block before a unescaped :
+			
+			# Check
+			if ( $parts_n === 0 ) {
+				throw new Bal_Exception('Translate advanced did not find what it was looking for..');
+			}
+	
+			# Fetch the translator
+			$translator = 'translate';
+			if ( count($parts) === 3 ) {
+				$translator = $parts[1];
+				$match = $parts[2];
+			}
+			
+			# Apply the translator
+			$result = $this->$translator($match);
+		}
+		
+		# Return result
+		return $result;
 	}
 	
 	# ========================

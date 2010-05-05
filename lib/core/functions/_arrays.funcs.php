@@ -111,29 +111,18 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 	*/
 }
 
-
-if ( function_compare('array_hydrate', 1, true, __FILE__, __LINE__) ) {
-
-	function array_hydrate ( &$array, $clean = false ) {
-		if ( !is_traversable($array) ) $array = array();
-		foreach ( $array as $key => &$value ) {
-			if ( is_traversable($value) ) {
-				array_hydrate($value,$clean);
-			} else {
-				$value = real_value($value);
-			}
-		}
-		if ( $clean ) array_clean_form($array);
-		return $array;
-	}
-}
-
-
 if ( function_compare('array_prepare', 1, true, __FILE__, __LINE__) ) {
 
-	function array_prepare ( &$array, $clean = true ) {
+	/**
+	 * Perform array_clean, array_clean_form, and hydrate_value on the array
+	 * @version 1, May 05, 2010
+	 * @param array $arr
+	 * @return mixed
+	 */
+	function array_prepare ( &$array ) {
 		array_clean($array);
-		array_hydrate($array,$clean);
+		array_clean_form($array);
+		hyrdate_value($array);
 		return $array;
 	}
 	

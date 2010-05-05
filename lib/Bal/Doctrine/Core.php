@@ -56,6 +56,57 @@ abstract class Bal_Doctrine_Core {
 	}
 	
 	/**
+	 * Get the field type of a field, taking onto account special types
+	 * @param mixed $Table - can also be record is fine
+	 * @param string $fieldName
+	 * @return string
+	 */
+	public static function getFieldType ( $Table, $fieldName ) {
+		# Prepare
+		$Table = self::getTable($Table);
+		$type = null;
+		
+		# Fetch Table Information
+		if ( $Table->hasRelation($fieldName) ) {
+			# Relation Type
+			$type = 'relation';
+		}
+		elseif ( $Table->hasField($fieldName) ) {
+			# Field
+			$properties = $Table->getDefinitionOf($fieldName);
+			
+			# Determine Type
+			switch ( true ) {
+				case real_value(delve($properties,'extra.password')):
+					$type = 'password';
+					break;
+				
+				case real_value(delve($properties,'extra.rating')):
+					$type = 'rating';
+					break;
+				
+				case real_value(delve($properties,'extra.csv')):
+					$type = 'csv';
+					break;
+				
+				case real_value(delve($properties,'extra.currency')):
+					$type = 'currency';
+					break;
+				
+				default:
+					$type = $Table->getTypeOf($fieldName);
+					break;
+			}
+		}
+		else {
+			throw new Bal_Exception('Could not determine the field type for ['.$fieldName.']');
+		}
+		
+		# Return type
+		return $type;
+	}
+	
+	/**
 	 * Determines and returns the label field name for the passed $table
 	 * @version 1.1, April 12, 2010
 	 * @param mixed $Record
@@ -214,18 +265,57 @@ abstract class Bal_Doctrine_Core {
 	 * @param string $tableComponentName
 	 * @return mixed
 	 */
-	public static function fetchItemParam ( $tableComponentName ) {
+	public static function fetchItemParam ( $tableComponentName, $default = null ) {
 		# Prepare
 		$item = false;
 		
 		# Check
-		if ( !$tableComponentName ) return $item;
-		
-		# Fetch item
-		$item = Bal_App::fetchParam($tableComponentName, Bal_App::fetchParam(strtolower($tableComponentName), false));
+		if ( $tableComponentName ) {
+			# Fetch item
+			$item = Bal_App::fetchParam($tableComponentName, Bal_App::fetchParam(strtolower($tableComponentName), $default));
+		}
 		
 		# Return item
 		return $item;
+	}
+	
+	/**
+	 * Fetch the item param, but if not an array, clear it
+	 * @version 1.1, April 12, 2010
+	 * @param string $tableComponentName
+	 * @return array
+	 */
+	public static function fetchItemData ( $tableComponentName, $default = null ) {
+		# Prepare
+		$item = self::fetchItemParam($tableComponentName, $default);
+		
+		# Check
+		if ( !is_array($item) ) {
+			$item = array();
+		}
+		
+		# Return item
+		return $item;
+	}
+	
+	/**
+	 * Determines if the item data exists
+	 * @version 1.0, May 05, 2010
+	 * @param string $tableComponentName
+	 * @return mixed
+	 */
+	public static function hasItemData ( $tableComponentName ) {
+		# Prepare
+		$exists = false;
+		
+		# Check
+		if ( $tableComponentName ) {
+		 	# Fetch item
+			$exists = Bal_App::hasParam($tableComponentName, Bal_App::hasParam(strtolower($tableComponentName))) ? true : false;
+		}
+		
+		# Return exists
+		return $exists;
 	}
 	
 	/**
@@ -279,7 +369,7 @@ abstract class Bal_Doctrine_Core {
 		}
 		else {
 			# other
-			$result = delve($value,'id',delve($value,'code'));
+			$result = delve($value,'id');
 		}
 		
 		# Postpare
@@ -290,7 +380,7 @@ abstract class Bal_Doctrine_Core {
 	}
 	
 	/**
-	 * Resolve the ID or Code of a REcord
+	 * Resolve the ID or Code of a Record
 	 * @version 1.1, April 12, 2010
 	 * @return array
 	 */
@@ -315,6 +405,39 @@ abstract class Bal_Doctrine_Core {
 		
 		# Return result
 		return $result;
+	}
+	
+	/**
+	 * Grab the appropriate id or code, and return the value and type
+	 * @throws Bal_Exception
+	 * @version 1.0, May 05, 2010
+	 * @return array
+	 */
+	public static function resolveIdentifier ( $table, $value ) {
+		# Prepare
+		$Table = self::getTable($table);
+		$result = null;
+		
+		# Handle
+		$value = self::resolveIdOrCode($value);
+		if ( is_string($value) ) {
+			if ( $Table->hasField('code') || $Table->hasColumn('code') ) {
+				$column = 'code';
+			}
+			else {
+				throw new Bal_Exception(array(
+					'Could not resolve the identifier',
+					'table' => $table,
+					'value' => $value
+				));
+			}
+		}
+		else {
+			$column = 'id';
+		}
+		
+		# Return result
+		return compact('column','value');
 	}
 	
 	
@@ -420,7 +543,7 @@ abstract class Bal_Doctrine_Core {
 		if ( $limit === 1 && !$returnQuery ) {
 			# Return only one
 			$result = $Query->execute();
-			if ( !empty($result) ) {
+			if ( $result ) {
 				$result = $result[0];
 			}
 		}
@@ -478,16 +601,30 @@ abstract class Bal_Doctrine_Core {
 		}
 		else {
 			# Prepare
-			Bal_Doctrine_Core::prepareFetchParams($params);
+			self::prepareFetchParams($params);
 			
 			# Query
 			$Query = Doctrine_Query::create()
 				->select($tableComponentName.'.*')
 				->from($tableComponentName)
 				->orderBy($tableComponentName.'.'.$labelFieldName.' ASC');
-		
+			
+			# Basic Support
+			switch ( true ) {
+				case $item = delve($params,$tableComponentName):
+					$identifier = Bal_Doctrine_Core::resolveIdentifier($item);
+					$Query->andWhere(
+						$tableComponentName.'.'.$identifer['column'].' = ?',
+						$identifer['value']
+					);
+					break;
+				
+				default:
+					break;
+			}
+			
 			# Fetch
-			$result = Bal_Doctrine_Core::prepareFetchResult($params,$Query,$tableComponentName);
+			$result = self::prepareFetchResult($params,$Query,$tableComponentName);
 		}
 		
 		# Return result
@@ -566,48 +703,96 @@ abstract class Bal_Doctrine_Core {
 	# ========================
 	# CRUD RECORD
 	
+	/**
+	 * Get a Record by resolving, and verifying. We may also create if desired.
+	 * @version 1.1, April 12, 2010
+	 * @param mixed $table
+	 * @param mixed	$record
+	 * @param array $options [optional]		The following options are provided:
+	 * 											verify: If true, we will verify the Record, if array we will verify with options [false by default]
+	 * 										We also forward the options to
+	 * 											@see self::resolveRecord
+	 * @return Doctrine_Record
+	 */
+	public static function getRecord ( $tableComponentName, $record, array $options = array() ) {
+		# Prepare
+		$tableComponentName = self::getTableComponentName($tableComponentName);
+		$Record = null;
+		
+		# Prepare Options
+		array_keys_ensure($options,array('verify'),false);
+		
+		# Handle
+		try {
+			# Resolve
+			$Record = self::resolveRecord($tableComponentName, array($record), $options);
+			
+			# Verify
+			if ( $Record && $options['verify'] ) {
+				$verify = $options['verify'];
+				if ( !is_array($verify) ) $verify = array();
+				self::verifyRecord($Record, $verify);
+			}
+		}
+		catch ( Exception $Exception ) {
+			# Reset
+			$Item = false;
+		
+			# Log the Event and Continue
+			$Exceptor = new Bal_Exceptor($Exception);
+			$Exceptor->log();
+		}
+		
+		# Return Record
+		return $Record;
+	}
 	
 	/**
 	 * Get a Record determined by the series of passed arguments
 	 * @version 1.1, April 12, 2010
-	 * @param string $table The table/type of the record
-	 * @param mixed ... [optional] The input used to determine the record
+	 * @param string	$tableComponentName		The table/type of the record
+	 * @param array 	$inputs					The input used to determine the record
+	 * @param array 	$options [optional]		The following options are provided:
+	 * 											create: Create the Record if it wasn't found? [default=true]
 	 * @return Doctrine_Record
 	 */
-	public static function getRecord ( $table ) {
+	public static function resolveRecord ( $tableComponentName, array $inputs, array $options = array() ) {
 		# Prepare
 		$Record = null;
-		$args = func_get_args(); array_shift($args); // pop first (type)
-		$Table = self::getTable($table);
-		$tableComponentName = $Table->getComponentName();
+		$tableComponentName = self::getTableComponentName($tableComponentName);
+		
+		# Prepare Options
+		array_keys_ensure($options,array('create'),true);
 		
 		# Cycle through Arguments
-		foreach ( $args as $in ) {
+		foreach ( $inputs as $in ) {
 			
 			# Handle
 			if ( $in instanceof $tableComponentName ) {
 				# Is our Record
 				$Record = $in;
-			} elseif ( is_object($in) ) {
-				# Is some Record
-				if ( !empty($in->id) )
-					$Record = self::getRecord($tableComponentName, $in->id);
-			} elseif ( is_numeric($in) ) {
-				# Is a Record ID
-				$Record = Doctrine::getTable($tableComponentName)->find($in);
-			} elseif ( is_string($in) ) {
-				# Is a Record Code
-				if ( Doctrine::getTable($tableComponentName)->hasColumn($in) )
-					$Record = Doctrine::getTable($tableComponentName)->findByCode($in);
-			} elseif ( is_array($in) ) {
+			}
+			elseif ( is_numeric($in) || is_string($in) ) {
+				# Is a Record Identifier (hopefully)
+				$Record = self::fetchRecord($tableComponentName, array($tableComponentName=>$in));
+			}
+			elseif ( is_array($in) ) {
 				# Is a Array
 				if ( !empty($in['id']) ) {
 					# Which has a Record ID
-					$Record = self::getRecord($tableComponentName, $in['id']);
-				} elseif ( !empty($in['code']) ) {
-					# Which has a Record Code
-					$Record = self::getRecord($tableComponentName, $in['code']);
+					$Record = self::resolveRecord($tableComponentName, array($in['id']));
 				}
+				elseif ( !empty($in['code']) ) {
+					# Which has a Record Code
+					$Record = self::resolveRecord($tableComponentName, array($in['code']));
+				}
+			}
+			elseif ( is_object($in) ) {
+				# Is some other Record
+				throw new Bal_Exception(array(
+					'resolveRecord was passed a record that we did not desire',
+					'Record' => $in
+				));
 			}
 			
 			# Check Find
@@ -617,9 +802,13 @@ abstract class Bal_Doctrine_Core {
 			}
 		}
 		
-		# Create if Empty
-		if ( empty($Record) ) {
-			$Record = new $tableComponentName;
+		# Check
+		if ( $Record && $Record instanceof $tableComponentName ) {
+			# Good
+		}
+		else {
+			# Bad
+			$Record = $options['create'] ? new $tableComponentName() : null;
 		}
 		
 		# Return Record
@@ -629,36 +818,60 @@ abstract class Bal_Doctrine_Core {
 	/**
 	 * Apply $data properly to the doctrine $Record, with $options
 	 * @version 1.1, April 12, 2010
-	 * @param Doctrine_Record $Record
-	 * @param array $data
-	 * @param array $options [optional] - keep, remove, empty, ensure, clean
+	 * @param Doctrine_Record 	$Record
+	 * @param array 			$data
+	 * @param array 			$options [optional]
+	 * 							The following options are provided:
+	 * 								data:			Perhaps we pass data over here instead
+	 * 								keep: 			Keep only these keys for the data
+	 * 								remove: 		Remove these keys from the data
+	 * 								empty: 			Empty these keys from the data
+	 * 								ensure: 		Ensure these keys exist within the data (Useful for relations)
+	 * 								clean: 			If these keys are empty, remove them
+	 * 								always_save: 	Always save relations
+	 * 								apply: 			Force these field-values onto the data
+	 * 								default: 		If these field-values do not exist in the data, add them
 	 * @return Doctrine_Record
 	 */
 	public static function applyRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
 		# Prepare
 		$Table = $Record->getTable();
+		$data = delve($options,'data',$data);
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('keep','remove','empty','ensure','clean','always_save'));
+		array_keys_keep_ensure($options,array('keep','remove','empty','ensure','clean','always_save','apply','default'),null);
 		extract($options);
 		
 		# Prepare
-		if ( !empty($clean) )
+		if ( $clean )
 			array_keys_clean($data, $clean);
-		if ( !empty($keep) )
+		if ( $keep )
 			array_keys_keep($data, $keep);
-		if ( !empty($remove) )
+		if ( $remove )
 			array_keys_unset($data, $remove);
-		if ( !empty($empty) )
+		if ( $empty )
 			array_keys_unset_empty($data, $empty);
-		if ( !empty($ensure) )
+		if ( $ensure )
 			array_keys_ensure($data, $ensure);
 		
 		# Clean special values
 		array_clean_form($data);
 		
+		# Fetch extra item data
+		$apply = delve($options,'apply',array());
+		
+		# Fetch default item data
+		$default = delve($options,'default',array());
+		
+		# Merge
+		$data = array_merge($default,$data,$apply);
+		
+		# Check that we have something to do
+		if ( !$data ) {
+			return $Record;
+		}
+		
 		# Cycle through values applying each one
-		if ( !empty($data) ) 
 		foreach ( $data as $key => $value ) {
 			# Prepare
 			
@@ -670,7 +883,7 @@ abstract class Bal_Doctrine_Core {
 				if ( !is_object($value) ) {
 					if ( $Relation->getType() === Doctrine_Relation::MANY ) {
 						# Many Type, Needs Doctrine_Collection
-						if ( empty($value) ) {
+						if ( !$value ) {
 							# Empty
 							$value = new Doctrine_Collection($RelationTable);
 						}
@@ -682,7 +895,7 @@ abstract class Bal_Doctrine_Core {
 								foreach ( $value as $_value ) {
 									if ( delve($_value,'_delete_') ) continue;
 									unset($_value['_delete_']);
-									if ( empty($_value) ) continue;
+									if ( !$_value ) continue;
 									# Create
 									$valueRecord = self::getRecord($RelationTable, $_value);
 									self::applyRecord($valueRecord,$_value);
@@ -706,34 +919,39 @@ abstract class Bal_Doctrine_Core {
 						
 					} else {
 						# One Type, Needs Record
-						if ( empty($value) || delve($value,'_delete_') ) {
+						if ( !$value || delve($value,'_delete_') ) {
 							# Empty
 							$value = null;
 						}
-						else {
-							# Prepare
-							unset($value['_delete_']);
-							
-							# Check
-							if ( !empty($value) ) {
-								if ( is_array($value) && !delve($value,'_delete_') ) {
-									# Create
-									$valueRecord = self::getRecord($RelationTable, $value);
-									self::applyRecord($valueRecord,$value);
-									if ( $always_save || $valueRecord->id )
-										$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
-									$value = $valueRecord; 
-								}
-								else {
-									# Discover
-									$value = $RelationTable->find($value);
-								}
+						elseif ( $value ) {
+							# Type
+							if ( is_array($value) ) {
+								# Prepare
+								unset($value['_delete_']);
+								# Create
+								$valueRecord = self::getRecord($RelationTable, $value);
+								self::applyRecord($valueRecord,$value);
+								if ( $always_save || $valueRecord->id )
+									$valueRecord->save(); // save if exists, for some reason the values don't apply otherwise
+								$value = $valueRecord; 
+							}
+							else {
+								# Discover
+								$value = $RelationTable->find($value);
 							}
 						}
 						
 						# Done One
 					}
 				}
+			}
+			
+			# Check if we accept null
+			$properties = $Table->getDefinitionOf($key);
+			$notblank = real_value(delve($properties,'notblank',false));
+			$notnull = real_value(delve($properties,'notnull',$notblank));
+			if ( $value === '' && !$notnull ) {
+				$value = null;
 			}
 			
 			# Apply
@@ -748,284 +966,66 @@ abstract class Bal_Doctrine_Core {
 	
 	
 	/**
-	 * Apply $data properly to the doctrine $Record and save it, with $options
-	 * @version 1.1, April 12, 2010
-	 * @param Doctrine_Record $Record
-	 * @param array $data
-	 * @param array $options [optional] - apply, verify | keep, remove, empty
-	 * @return Doctrine_Record
-	 */
-	public static function saveRecord ( Doctrine_Record $Record, array $data, array $options = array() ) {
-		# Apply Required Data
-		self::applyRecord($Record, $data, $options);
-		
-		# Verify
-		$verify_options = delve($options,'verify',array());
-		self::verifyRecord($Record, $verify_options);
-		
-		# Save
-		$Record->save();
-		
-		# Return Record
-		return $Record;
-	}
-	
-	
-	
-	# ========================
-	# CRUD ITEM
-	
-	/**
-	 * Fetch a Item based upon it's fetchItemIdentifier result
-	 * If a Record was not found, create one depending on $create
-	 * A custom query can be passed via $Query
-	 * 
-	 * @version 1.1, April 12, 2010
-	 * @param string $table
-	 * @param Doctrine_Record $Record
-	 * @param array $options [optional] - Query, create, only
-	 * @return Doctrine_Record
-	 */
-	public static function getItem ( $table, $Record = null, array $options = array() ) {
-		# Prepare
-		$item = $Item = false;
-		$tableComponentName = self::getTableComponentName($table);
-		
-		# Prepare Options
-		array_keys_keep_ensure($options,array('verify','Query','create','only'));
-		extract($options);
-		
-		# Default
-		if ( $only === null ) $only = false;
-		if ( $create === null )  $create = true;
-		
-		# Check
-		if ( is_object($Record) && ($Record instanceOf $tableComponentName) ) {
-			return $Record;
-		}
-		
-		# Fetch Param
-		$item = self::fetchItemIdentifier($tableComponentName, $only);
-		
-		# Load
-		if ( $item ) {
-			# Prepare Query
-			if ( $Query === null ) {
-				$Query = self::fetchQuery($tableComponentName);
-			}
-			
-			# Search Query
-			$fetch = false;
-			if ( is_numeric($item) ) {
-				$Query->andWhere($tableComponentName.'.id = ?', $item);
-				$fetch = true;
-			}
-			elseif ( is_string($item) ) {
-				$Query->andWhere($tableComponentName.'.code = ?', $item);
-				$fetch = true;
-			}
-			
-			# Fetch
-			if ( $fetch ) {
-				$Item = $Query->fetchOne();
-			}
-			
-			# Check if we found what we were looking for
-			if ( !delve($Item,'id') ) {
-				throw new Zend_Exception('error-orm-404');
-			}
-		}
-		
-		# Create if empty?
-		if ( $create && !delve($Item,'id') && $tableComponentName ) {
-			$Item = new $tableComponentName();
-		}
-		
-		# Verify
-		if ( $Item ) {
-			try {
-				# Verify
-				if ( !is_array($verify) ) $verify = array();
-				self::verifyRecord($Item, $verify);
-			}
-			catch ( Exception $Exception ) {
-				# Reset
-				$Item = false;
-			
-				# Log the Event and Continue
-				$Exceptor = new Bal_Exceptor($Exception);
-				$Exceptor->log();
-			}
-		}
-		
-		# Return Item
-		return $Item;
-	}
-	
-	/**
-	 * Fetch a Item (AND REQUEST DATA) based upon it's fetchItemIdentifier result
-	 * If a Record was not found, create one depending on $create
-	 * A custom query can be passed via $Query
-	 * 
-	 * @version 1.1, April 12, 2010
-	 * @param string $table
-	 * @param Doctrine_Record $Record
-	 * @param array $options [optional] - keep, remove, empty | Query, create, only
-	 * @return Doctrine_Record
-	 */
-	public static function fetchItem ( $table, Doctrine_Record $Record = null, array $options = array() ) {
-		# Prepare
-		$Table = self::getTable($table);
-		$tableComponentName = self::getTableComponentName($table);
-		$tableComponentNameLower = strtolower($tableComponentName);
-		$Item = false;
-		$item = $data = $apply = array();
-		
-		# --------------------------
-		
-		# Get Item
-		$Item = self::getItem($table,$Record,$options);
-		
-		# --------------------------
-		
-		# Fetch item data
-		$data = 
-			array_key_exists('data',$options) && is_array($options['data'])
-			?	$options['data']
-			:	self::fetchItemParam($tableComponentName);
-
-		# Prepare data
-		if ( !is_array($data) ) {
-			// Clear it, no longer needed, and assign empty array
-			$data = array();
-		}
-		
-		# Fetch extra item data
-		$apply = delve($options,'apply',array());
-		
-		# Fetch default item data
-		$default = delve($options,'default',array());
-		
-		# Merge
-		$item = array_merge($default,$data,$apply);
-		
-		# Apply
-		if ( !empty($item) ) {
-			self::applyRecord($Item, $item, $options);
-		}
-		
-		# --------------------------
-		
-		# Return Item
-		return $Item;
-	}
-	
-	/**
-	 * Save the Item properly with $options
-	 * @version 1.1, April 12, 2010
-	 * @param string $table
-	 * @param Doctrine_Record $Record
-	 * @param array $options [optional] - keep, remove, empty | Query, create, only
-	 * @return Doctrine_Record
-	 */
-	public static function saveItem ( $table, Doctrine_Record $Record = null, array $options = array() ) {
-		# Prepare
-		$Connection = Bal_App::getDataConnection();
-		$Request = Bal_App::getRequest();
-		$Log = Bal_App::getLog();
-		$Table = self::getTable($table);
-		$tableComponentName = self::getTableComponentName($table);
-		$tableComponentNameLower = strtolower($tableComponentName);
-		$result = false;
-		$Item = false;
-		$item = $data = $apply = array();
-		
-		# Handle
-		try {
-			# Start
-			$Connection->beginTransaction();
-			
-			# --------------------------
-		
-			# Fetch Item
-			$Item = self::fetchItem($table,$Record,$options);
-			
-			# Check if Modified
-			if ( !$Item->isModified(true) ) {
-				# Nothing to do
-				return $Item;
-			}
-			
-			# Stop Duplicates
-			$Request->setPost($tableComponentName, $Item->id);
-			
-			# Finish
-			$Connection->commit();
-			
-			# Result
-			$result = $Item;
-			
-			# Log
-			$log_details = array(
-				$tableComponentName			=> $Item->toArray(),
-				$tableComponentName.'_url'	=> Bal_App::getActionControllerView()->url()->item($Item)->toString()
-			);
-			$Log->log(array('log-'.$tableComponentNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
-		}
-		catch ( Exception $Exception ) {
-			# Rollback
-			$Connection->rollback();
-			
-			# Log the Event and Continue
-			$Exceptor = new Bal_Exceptor($Exception);
-			$Exceptor->log();
-		}
-		
-		# Return result
-		return $result;
-	}
-	
-	/**
 	 * Delete the Item properly
 	 * @version 1.1, April 12, 2010
-	 * @param string $table
 	 * @param Doctrine_Record $Record
-	 * @return Doctrine_Record
+	 * @param array 			$options [optional]
+	 * 							The following options are provided:
+	 * 								verify: 		If true, we will verify the Record, if array we will verify with options [false by default]
+	 * 								transact: 		Whether or not to perform a transaction [true by default]
+	 * 								log: 			Whether or not to log [true by default]
+	 * @return bool 			Whether or not the record was deleted
 	 */
-	public static function deleteItem ( $table, Doctrine_Record $Record = null ) {
+	public static function deleteRecord ( Doctrine_Record $Record, array $options = array() ) {
 		# Prepare
-		$Connection = Bal_App::getDataConnection();
-		$Log = Bal_App::getLog();
-		$result = true;
-		$Table = self::getTable($table);
-		$tableComponentName = self::getTableComponentName($table);
+		$tableComponentName = self::getTableComponentName($Record);
 		$tableComponentNameLower = strtolower($tableComponentName);
+		$result = true;
 		
-		# Fetch
-		$Item = self::fetchItem($table, $Record);
-		$item = self::fetchItemParam($tableComponentName);
+		# Prepare Options
+		array_keys_keep_ensure($options,array('verify','transact','log'));
+		extract($options);
+		
+		# Default Options
+		if ( $transact === null )	$transact = true;
+		if ( $log === null )		$log = true;
+		
+		# Prepare
+		if ( $transact )
+			$Connection = Bal_App::getDataConnection();
+		if ( $log )
+			$Log = Bal_App::getLog();
+		
 		
 		# Handle
 		try {
-			# Start
-			$Connection->beginTransaction();
-			
 			# Handle
-			if ( $Item && $Item->exists() ) {
-				# Extract
+			if ( $Record && $Record->exists() ) {
+				# Start
+				if ( $transact )
+					$Connection->beginTransaction();
+				
+				# Verify
+				$verify_options = delve($options,'verify',array());
+				self::verifyRecord($Record, $verify_options);
+			
+				# Extract while we can
 				$ItemArray = $Item->toArray(true);
 		
 				# Delete
 				$Item->delete();
 			
 				# Commit
-				$Connection->commit();
+				if ( $transact ) 
+					$Connection->commit();
 		
 				# Log
-				$log_details = array(
-					$tableComponentName	=> $ItemArray
-				);
-				$Log->log(array('log-'.$tableComponentNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+				if ( $log ) {
+					$log_details = array(
+						$tableComponentName	=> $ItemArray
+					);
+					$Log->log(array('log-'.$tableComponentNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+				}
 			}
 			else {
 				throw new Zend_Exception('error-'.$tableComponentNameLower.'-missing');
@@ -1033,7 +1033,8 @@ abstract class Bal_Doctrine_Core {
 		}
 		catch ( Exception $Exception ) {
 			# Rollback
-			$Connection->rollback();
+			if ( $transact )
+				$Connection->rollback();
 			
 			# Log the Event and Continue
 			$Exceptor = new Bal_Exceptor($Exception);
@@ -1047,11 +1048,242 @@ abstract class Bal_Doctrine_Core {
 		return $result;
 	}
 	
+	/**
+	 * Save the Record properly with $options
+	 * @version 1.1, April 12, 2010
+	 * @param Doctrine_Record 	$Record
+	 * @param array 			$options [optional]
+	 * 							The following options are provided:
+	 * 								verify: 		If true, we will verify the Record, if array we will verify with options [false by default]
+	 * 								transact: 		Whether or not to perform a transaction [true by default]
+	 * 								log: 			Whether or not to log [true by default]
+	 * @return Doctrine_Record
+	 */
+	public static function saveRecord ( Doctrine_Record $Record, array $options = array() ) {
+		# Prepare
+		$tableComponentName = self::getTableComponentName($Record);
+		$tableComponentNameLower = strtolower($tableComponentName);
+		
+		# Prepare Options
+		array_keys_keep_ensure($options,array('verify','transact','log'));
+		extract($options);
+		
+		# Default Options
+		if ( $transact === null )	$transact = true;
+		if ( $log === null )		$log = true;
+		
+		# Prepare
+		if ( $transact )
+			$Connection = Bal_App::getDataConnection();
+		if ( $log )
+			$Log = Bal_App::getLog();
+		
+		
+		# Handle
+		try {
+			# Start
+			if ( $transact )
+				$Connection->beginTransaction();
+			
+			# Verify
+			$verify_options = delve($options,'verify',array());
+			self::verifyRecord($Record, $verify_options);
+			
+			# Save Record
+			$Record->save();
+			
+			# Finish
+			if ( $transact )
+				$Connection->commit();
+			
+			# Log
+			if ( $log ) {
+				$log_details = array(
+					$tableComponentName			=> $Record->toArray(true),
+					$tableComponentName.'_url'	=> Bal_App::getActionControllerView()->url()->item($Record)->toString()
+				);
+				$Log->log(array('log-'.$tableComponentNameLower.'-save',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
+			}
+		}
+		catch ( Exception $Exception ) {
+			# Reset
+			$Record = false;
+			
+			# Rollback
+			if ( $transact )
+				$Connection->rollback();
+			
+			# Log the Event and Continue
+			$Exceptor = new Bal_Exceptor($Exception);
+			$Exceptor->log();
+		}
+		
+		# Return Record
+		return $Record;
+	}
+	
+	# ========================
+	# CRUD ITEM
+	
+	/**
+	 * Fetch a Record based upon it's fetchItemIdentifier result
+	 * If a Record was not found, create one depending on $create
+	 * A custom query can be passed via $Query
+	 * 
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]
+	 * 								@see self::getRecord
+	 * @return Doctrine_Record
+	 */
+	public static function getItem ( $tableComponentName, $item = null, array $options = array() ) {
+		# Get Item
+		if ( $item === null ) {
+			$item = self::fetchItemIdentifier($tableComponentName, delve($options,'only'));
+		}
+		$Item = self::getRecord($tableComponentName, $item, $options);
+		
+		# Return Item
+		return $Item;
+	}
+	
+	/**
+	 * Fetch a Item (AND REQUEST DATA) based upon it's fetchItemIdentifier result
+	 * If a Record was not found, create one depending on $create
+	 * A custom query can be passed via $Query
+	 * 
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]
+	 * 								@see self::getItem
+	 * 								@see self::applyRecord
+	 * @return Doctrine_Record
+	 */
+	public static function fetchItem ( $tableComponentName, $item = null, array $options = array() ) {
+		# Get Item
+		$Item = self::getItem($tableComponentName,$item,$options);
+		
+		# Check
+		if ( $Item ) {
+			# Fetch item data
+			if ( !array_key_exists('data',$options) ) {
+				$options['data'] = self::fetchItemData($tableComponentName);
+			}
+			
+			# Apply Item
+			self::applyRecord($Item, array(), $options);
+		}
+		
+		# Return Item
+		return $Item;
+	}
+	
+	/**
+	 * Fetch the Item, and Save the Item if forced, or if POST detected
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]e
+	 * 								Additionally we pass the options to:
+	 * 									@see self::fetchItem
+	 * 									@see self::saveItem
+	 * @return Doctrine_Record
+	 */
+	public static function fetchAndSaveItem ( $tableComponentName, $item = null, array $options = array() ) {
+		# Prepare
+		$Item = self::fetchITem($tableComponentName, $item, $options);
+		
+		# Save the Item
+		self::saveItem($Item,$options);
+		
+		# Return Item
+		return $Item;
+	}
+	
+	/**
+	 * Save the Item if forced, or if POST detected
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]
+	 * 								We use the following options
+	 * 									force:	Whether or not to force the delete
+	 * 								Additionally we pass the options to:
+	 * 									@see self::saveRecord
+	 * @return bool					Whether or not we saved
+	 */
+	public static function saveItem ( Doctrine_Record $Record, array $options = array() ) {
+		# Prepare
+		$tableComponentName = self::getTableComponentName($Record);
+		$result = false;
+		
+		# Determine if we want to save
+		if ( !empty($options['force']) || self::hasItemData($tableComponentName) ) {
+			# Save Item
+			$result = self::saveRecord($Record, $options);
+		}
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Fetch the Item, and Delete the Item if forced, or if POST detected
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]e
+	 * 								Additionally we pass the options to:
+	 * 									@see self::fetchItem
+	 * 									@see self::saveItem
+	 * @return Doctrine_Record
+	 */
+	public static function fetchAndDeleteItem ( $tableComponentName, $item = null, array $options = array() ) {
+		# Prepare
+		$Item = self::fetchITem($tableComponentName, $item, $options);
+		
+		# Save the Item
+		self::deleteItem($Item,$options);
+		
+		# Return Item
+		return $Item;
+	}
+	
+	/**
+	 * Delete the Item if forced, or if POST detected
+	 * @version 1.1, April 12, 2010
+	 * @param mixed 				$tableComponentName
+	 * @param mixed		 			$item
+	 * @param array 				$options [optional]
+	 * 								We use the following options
+	 * 									force:	Whether or not to force the delete
+	 * 								Additionally we pass the options to:
+	 * 									@see self::deleteRecord
+	 * @return bool					Whether or not the record was deleted
+	 */
+	public static function deleteItem ( Doctrine_Record $Record, array $options = array() ) {
+		# Prepare
+		$tableComponentName = self::getTableComponentName($Record);
+		$result = false;
+		
+		# Determine if we want to save
+		if ( !empty($options['force']) || self::hasItemData($tableComponentName) ) {
+			# Save Item
+			$result = self::deleteRecord($Record, $options);
+		}
+		
+		# Return result
+		return $result;
+	}
+	
 	# ========================
 	# ENSURE HELPERS
 	
 	/**
 	 * Verify the Record by cycling through it's checks - Called from within the record
+	 * MADE for the soul purpose of being called by Doctrine_Record::verify()
 	 * @version 1.0, April 16, 2010
 	 * @param Doctrine_Record $Record
 	 * @param array $params
@@ -1090,6 +1322,7 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Verify the Record meets it's requirements before we save
+	 * MADE for the soul purpose of calling Doctrine_Record::verify
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Record $Record
 	 * @param array $options [optional] - Data to be passed to the verifier
@@ -1114,6 +1347,7 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Ensure Consistency
+	 * MADE for the soul purpose of being called by Doctrine_Record::ensure()
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $Event_type
@@ -1140,6 +1374,7 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Ensure a One Relation that has a cache
+	 * MADE for the soul purpose of being called by Doctrine_Record::ensureSomething()
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $relation
@@ -1171,6 +1406,7 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Ensure a Many Relation that has a cache
+	 * MADE for the soul purpose of being called by Doctrine_Record::ensureSomething()
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $relation
@@ -1206,6 +1442,7 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Ensure Tags
+	 * MADE for the soul purpose of being called by Doctrine_Record::ensureSomething()
 	 * @version 1.1, April 12, 2010
 	 * @param Doctrine_Event $Event
 	 * @param string $tagRelation

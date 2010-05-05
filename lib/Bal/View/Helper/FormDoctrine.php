@@ -76,7 +76,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$Locale = Bal_App::getLocale();
 		$result = '';
 		
-		# Custom
+		# Custom Inputs
 		if ( is_array($name) && func_num_args() === 1 ) {
 			# Apply
 			$custom = $name;
@@ -113,44 +113,9 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		
 		# Fetch Table Information
 		$Table = Bal_Doctrine_Core::getTable($table);
-		$properties = array();
-		if ( $Table->hasRelation($field) ) {
-			# Relation
-			$Relation = $Table->getRelation($field);
-			$RelationTable = $Relation->getTable();
-			$type = 'relation';
-		}
-		elseif ( $Table->hasField($field) ) {
-			# Field
-			$properties = $Table->getDefinitionOf($field);
-			array_keys_ensure($properties, array('length'), null);
-			
-			# Type
-			$type = $Table->getTypeOf($field);
-		
-			# Custom Types
-			switch ( true ) {
-				case real_value(delve($properties,'extra.password')):
-					$type = 'password';
-					$value = null;
-					break;
-				
-				case real_value(delve($properties,'extra.rating')):
-					$type = 'rating';
-					break;
-				
-				case real_value(delve($properties,'extra.csv')):
-					$type = 'csv';
-					break;
-				
-				case real_value(delve($properties,'extra.currency')):
-					$type = 'currency';
-					break;
-				
-				default:
-					break;
-			}
-		}
+		$type = Bal_Doctrine_Core::getFieldType($Table,$field);
+		$properties = $Table->getDefinitionOf($field);
+		array_keys_ensure($properties, array('length'), null);
 		
 		# Extract Attributes
 		$notblank	= delve($attribs,	'notblank',	delve($properties,'notblank'));
@@ -160,7 +125,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$relationStatus = delve($attribs,'relationStatus');
 		array_keys_unset($attribs, array('notblank','notnull','auto','length','relationStatus'));
 		
-		# Formify
+		# Prepare lowers for il8ns indexes
 		$tableLower = strtolower($table);
 		$fieldLower = strtolower($field);
 		
@@ -172,6 +137,10 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		# Discover
 		switch ( $type ) {
 			case 'relation':
+				# Prepare
+				$Relation = $Table->getRelation($field);
+				$RelationTable = $Relation->getTable();
+				
 				# Determine
 				$text_field = Bal_Doctrine_Core::getTableLabelFieldName($RelationTable);
 				
@@ -275,6 +244,10 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				break;
 				
 			case 'password':
+				# Prepare
+				$value = null; // We never want to output a password
+				
+				# Handle
 				if ( $length && $length <= 255 ) {
 					$attribs['maxlength'] = $length;
 				}

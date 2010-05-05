@@ -526,12 +526,29 @@ class Bal_App {
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function fetchParam ( $param = null, $default = false ) {
+	public static function fetchParam ( $param, $default = null ) {
 		# Prepare
 		$Request = self::getRequest();
 		
 		# Fetch result
 		$result = fetch_param($param, $Request->getParam($param, $default));
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Determines it the param exists
+	 * @version 1.1, April 12, 2010
+	 * @param string $param
+	 * @return mixed
+	 */
+	public static function hasParam ( $param ) {
+		# Prepare
+		$Request = self::getRequest();
+		
+		# Fetch result
+		$result = has_param($param) ? true : ($Request->getParam($param) !== null);
 		
 		# Return result
 		return $result;

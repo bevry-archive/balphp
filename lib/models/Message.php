@@ -363,20 +363,32 @@ class Bal_Message extends Base_Bal_Message
 		
 		# Criteria
 		if ( $User ) {
-			$User = Bal_Doctrine_Core::resolveId($User);
-			$Query->andWhere('Message.UserFor.id = ? OR Message.UserFrom.id = ?', array($User,$User));
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
+			$Query->andWhere(
+				'Message.UserFor.'.$identifer['column'].' = ? OR Message.UserFrom.'.$identifer['column'].' = ?',
+				array($identifer['value'],$identifer['value'])
+			);
 		}
 		if ( $UserFor ) {
-			$UserFor = Bal_Doctrine_Core::resolveId($UserFor);
-			$Query->andWhere('Message.UserFor.id = ?', $UserFor);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFor);
+			$Query->andWhere(
+				'Message.UserFor.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		if ( $UserFrom ) {
-			$UserFrom = Bal_Doctrine_Core::resolveId($UserFrom);
-			$Query->andWhere('Message.UserFrom.id = ?', $UserFrom);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFrom);
+			$Query->andWhere(
+				'Message.UserFrom.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		if ( $Message ) {
-			$Message = Bal_Doctrine_Core::resolveId($Message);
-			$Query->andWhere('Message.id = ?', $Message);
+			$identifier = Bal_Doctrine_Core::resolveIdentifier('Message',$Message);
+			$Query->andWhere(
+				'Message.'.$identifer['column'].' = ?',
+				$identifer['value']
+			);
 		}
 		
 		# Fetch

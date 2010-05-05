@@ -50,7 +50,7 @@ if ( function_compare('populate', 1, true, __FILE__, __LINE__) ) {
 		else {
 			# Populate advanced
 			$result = ' '.$text;
-			$result = preg_replace('/([^\\\\])\\$([a-zA-Z0-9_.]+)/ie', 'preg_unescape("${1}") . delve(\\$params, preg_unescape("${2}"))', $result);
+			$result = preg_replace('/([^\\\\])?\\$([a-zA-Z0-9_.]+)/ie', 'preg_unescape("${1}") . delve(\\$params, preg_unescape("${2}"))', $result);
 			$result = substr($result,1);
 			$result = str_replace(array('\\$','\\.'), array('$','.'), $result);
 		}
