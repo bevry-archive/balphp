@@ -365,29 +365,29 @@ class Bal_Message extends Base_Bal_Message
 		if ( $User ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
 			$Query->andWhere(
-				'Message.UserFor.'.$identifer['column'].' = ? OR Message.UserFrom.'.$identifer['column'].' = ?',
-				array($identifer['value'],$identifer['value'])
+				'Message.UserFor.'.$identifier['column'].' = ? OR Message.UserFrom.'.$identifier['column'].' = ?',
+				array($identifier['value'],$identifier['value'])
 			);
 		}
 		if ( $UserFor ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFor);
 			$Query->andWhere(
-				'Message.UserFor.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Message.UserFor.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		if ( $UserFrom ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFrom);
 			$Query->andWhere(
-				'Message.UserFrom.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Message.UserFrom.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		if ( $Message ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('Message',$Message);
 			$Query->andWhere(
-				'Message.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Message.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		

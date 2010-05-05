@@ -616,7 +616,7 @@ class Bal_User extends Base_Bal_User {
 	 */
 	public static function fetch ( array $params = array() ) {
 		# Prepare
-		Bal_Doctrine_Core::prepareFetchParams($params,array('fetch','Identity','User','UserFor','UserFrom'));
+		Bal_Doctrine_Core::prepareFetchParams($params,array('User','Identity'));
 		extract($params);
 		
 		# Query
@@ -653,8 +653,8 @@ class Bal_User extends Base_Bal_User {
 		if ( $User ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
 			$Query->andWhere(
-				'User.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'User.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		

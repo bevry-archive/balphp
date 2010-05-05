@@ -384,15 +384,15 @@ class Bal_File extends Base_Bal_File {
 		if ( $Author ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$Author);
 			$Query->andWhere(
-				'File.Author.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'File.Author.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		if ( $File ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('File',$File);
 			$Query->andWhere(
-				'File.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'File.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		

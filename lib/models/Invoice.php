@@ -587,6 +587,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 		
 		# Adjust Keys
 		$keys = $PaymentInvoice->getKeys(); array_keys_keep($invoice, $keys);
+		$invoice['id'] = $Invoice->code;
 		
 		# Apply the Payer
 		$invoice['Payer'] = $Invoice->UserFor->generatePaymentModel();
@@ -649,29 +650,29 @@ class Bal_Invoice extends Base_Bal_Invoice
 		if ( $User ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$User);
 			$Query->andWhere(
-				'Invoice.UserFor.'.$identifer['column'].' = ? OR Invoice.UserFrom.'.$identifer['column'].' = ?',
-				array($identifer['value'],$identifer['value'])
+				'Invoice.UserFor.'.$identifier['column'].' = ? OR Invoice.UserFrom.'.$identifier['column'].' = ?',
+				array($identifier['value'],$identifier['value'])
 			);
 		}
 		if ( $UserFor ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFor);
 			$Query->andWhere(
-				'Invoice.UserFor.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Invoice.UserFor.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		if ( $UserFrom ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('User',$UserFrom);
 			$Query->andWhere(
-				'Invoice.UserFrom.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Invoice.UserFrom.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		if ( $Invoice ) {
 			$identifier = Bal_Doctrine_Core::resolveIdentifier('Invoice',$Invoice);
 			$Query->andWhere(
-				'Invoice.'.$identifer['column'].' = ?',
-				$identifer['value']
+				'Invoice.'.$identifier['column'].' = ?',
+				$identifier['value']
 			);
 		}
 		
