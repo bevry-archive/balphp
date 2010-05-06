@@ -1010,10 +1010,10 @@ abstract class Bal_Doctrine_Core {
 				self::verifyRecord($Record, $verify_options);
 			
 				# Extract while we can
-				$ItemArray = $Item->toArray(true);
+				$RecordArray = $Record->toArray(true);
 		
 				# Delete
-				$Item->delete();
+				$Record->delete();
 			
 				# Commit
 				if ( $transact ) 
@@ -1022,7 +1022,7 @@ abstract class Bal_Doctrine_Core {
 				# Log
 				if ( $log ) {
 					$log_details = array(
-						$tableComponentName	=> $ItemArray
+						$tableComponentName	=> $RecordArray
 					);
 					$Log->log(array('log-'.$tableComponentNameLower.'-delete',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 				}
@@ -1238,17 +1238,17 @@ abstract class Bal_Doctrine_Core {
 	 * 								Additionally we pass the options to:
 	 * 									@see self::fetchItem
 	 * 									@see self::saveItem
-	 * @return Doctrine_Record
+	 * @return bool
 	 */
 	public static function fetchAndDeleteItem ( $tableComponentName, $item = null, array $options = array() ) {
 		# Prepare
-		$Item = self::fetchITem($tableComponentName, $item, $options);
+		$Item = self::getItem($tableComponentName, $item, $options);
 		
 		# Save the Item
-		self::deleteItem($Item,$options);
+		$result = self::deleteItem($Item,$options);
 		
-		# Return Item
-		return $Item;
+		# Return result
+		return $result;
 	}
 	
 	/**
@@ -1269,7 +1269,7 @@ abstract class Bal_Doctrine_Core {
 		$result = false;
 		
 		# Determine if we want to save
-		if ( !empty($options['force']) || self::hasItemData($tableComponentName) ) {
+		if ( $Record->id && (!empty($options['force']) || self::hasItemData($tableComponentName)) ) {
 			# Save Item
 			$result = self::deleteRecord($Record, $options);
 		}
