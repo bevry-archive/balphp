@@ -208,7 +208,7 @@ Bal_InvoiceItem:
             foreign: id
             foreignAlias: InvoiceItems
             foreignType: many
-            onDelete: "CASCADE"
+            onDelete: "CASCADE" # If Invoice is deleted, delete InvoiceItem
 
 Bal_Invoice:
     actAs:
@@ -352,17 +352,19 @@ Bal_Invoice:
             foreign: id
             foreignAlias: Invoices
             foreignType: many
-            onDelete: "CASCADE"
+            onDelete: "SET NULL" # If File is deleted, set null
         UserFor:
             class: User
             local: UserFor_id
             foreign: id
             foreignAlias: InvoicesFor
+            onDelete: "SET NULL" # If UserFor is deleted, set null
         UserFrom:
             class: User
             local: UserFrom_id
             foreign: id
             foreignAlias: InvoicesFrom
+            onDelete: "SET NULL" # If UserFrom is deleted, set null
 
 
 InvoiceDataBackup:
@@ -388,5 +390,5 @@ InvoiceDataBackup:
             foreign: id
             #foreignAlias: InvoiceDataBackups
             foreignType: many
-            onDelete: "CASCADE"
+            onDelete: "CASCADE" # If Invoice is deleted, delete InvoiceDataBackup
 

@@ -129,19 +129,21 @@ Bal_User:
             local: Avatar_id
             foreign: id
             foreignAlias: UserList
-            onDelete: "SET NULL"
+            onDelete: "SET NULL" # If Avatar is deleted, set to null
         Permissions:
             class: Permission
             local: User_id
             foreign: Permission_id
             foreignAlias: Users
             refClass: PermissionAndUser
+            onDelete: "NO ACTION" # If User is deleted, don't do anything to the Permissions
         Roles:
             class: Role
             local: User_id
             foreign: Role_id
             foreignAlias: Users
             refClass: RoleAndUser
+            onDelete: "NO ACTION" # If User is deleted, don't do anything to the Roles
 
 # ==============================================
 # BAL PERMISSIONS
@@ -170,6 +172,7 @@ Bal_Role:
             foreign: Permission_id
             foreignAlias: Roles
             refClass: PermissionAndRole
+            onDelete: "NO ACTION" # If Role is deleted, don't do anything to the Permissions
 
 Bal_PermissionAndRole:
     columns:
@@ -190,9 +193,11 @@ Bal_PermissionAndRole:
         Role:
             local: Role_id
             foreign: id
+            onDelete: "CASCADE" # If Role is deleted, delete reference
         Permission:
             local: Permission_id
             foreign: id
+            onDelete: "CASCADE" # If Permission is deleted, delete reference
         
 Bal_Permission:
     columns:
@@ -219,7 +224,6 @@ Bal_RoleAndUser:
             
         UserFrom_id:
             type: integer(2)
-            notnull: false
             unsigned: true
         User_id:
             type: integer(2)
@@ -234,12 +238,15 @@ Bal_RoleAndUser:
             class: User
             local: UserFrom_id
             foreign: id
+            onDelete: "SET NULL" # If UserFrom is deleted, set to null
         User:
             local: User_id
             foreign: id
+            onDelete: "CASCADE" # If User is deleted, delete reference
         Role:
             local: Role_id
             foreign: id
+            onDelete: "CASCADE" # If Role is deleted, delete reference
 
 Bal_PermissionAndUser:
     columns:
@@ -269,9 +276,12 @@ Bal_PermissionAndUser:
             class: User
             local: UserFrom_id
             foreign: id
+            onDelete: "SET NULL" # If UserFrom is deleted, set to null
         User:
             local: User_id
             foreign: id
+            onDelete: "CASCADE" # If User is deleted, delete reference
         Permission:
             local: Permission_id
             foreign: id
+            onDelete: "CASCADE" # If Permission is deleted, delete reference

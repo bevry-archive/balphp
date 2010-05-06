@@ -65,14 +65,17 @@ Bal_Message:
             local: MessageTo_id
             foreign: id
             foreignAlias: MessagesFrom
+            onDelete: "CASCADE" # If MessageTo is deleted, cascade
         UserFor:
             class: User
             local: UserFor_id
             foreign: id
             foreignAlias: MessagesFor
+            onDelete: "CASCADE" # If UserFor is deleted, cascade
         UserFrom:
             class: User
             local: UserFrom_id
             foreign: id
             foreignAlias: MessagesFrom
+            onDelete: "CASCADE" # If UserFrom is deleted, cascade
     
