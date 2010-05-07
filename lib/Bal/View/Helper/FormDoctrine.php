@@ -77,11 +77,11 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$result = '';
 		
 		# Custom Inputs
-		if ( is_array($name) && func_num_args() === 1 ) {
+		if ( is_array($name) ) {
 			# Apply
 			$custom = $name;
 			# Extract
-			$name = $target = $source = null;
+			array_keys_keep_ensure($custom, array('name','target','source'));
 			extract($custom);
 			# Target
 			if ( !empty($target) ) {
@@ -113,7 +113,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		
 		# Fetch Table Information
 		$Table = Bal_Doctrine_Core::getTable($table);
-		$type = Bal_Doctrine_Core::getFieldType($Table,$field);
+		if ( !$type ) $type = Bal_Doctrine_Core::getFieldType($Table,$field);
 		$properties = $Table->getDefinitionOf($field);
 		array_keys_ensure($properties, array('length'), null);
 		

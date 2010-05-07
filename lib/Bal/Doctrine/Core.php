@@ -421,7 +421,7 @@ abstract class Bal_Doctrine_Core {
 		# Handle
 		$value = self::resolveIdOrCode($value);
 		if ( is_string($value) ) {
-			if ( $Table->hasField('code') || $Table->hasColumn('code') ) {
+			if ( $Table->hasField('code') || $Table->hasColumn('code') || $Table->hasTemplate('Sluggable') ) {
 				$column = 'code';
 			}
 			else {
@@ -974,19 +974,21 @@ abstract class Bal_Doctrine_Core {
 	 * 								verify: 		If true, we will verify the Record, if array we will verify with options [false by default]
 	 * 								transact: 		Whether or not to perform a transaction [true by default]
 	 * 								log: 			Whether or not to log [true by default]
+	 * 								throw: 			Whether or not to throw errors [false by default]
 	 * @return bool 			Whether or not the record was deleted
 	 */
 	public static function deleteRecord ( Doctrine_Record $Record, array $options = array() ) {
 		# Prepare
 		$tableComponentName = self::getTableComponentName($Record);
 		$tableComponentNameLower = strtolower($tableComponentName);
-		$result = true;
+		$result = false;
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('verify','transact','log'));
+		array_keys_keep_ensure($options,array('verify','transact','log','throw'));
 		extract($options);
 		
 		# Default Options
+		if ( $throw === null )		$throw = false;
 		if ( $transact === null )	$transact = true;
 		if ( $log === null )		$log = true;
 		
@@ -1016,8 +1018,10 @@ abstract class Bal_Doctrine_Core {
 				$Record->delete();
 			
 				# Commit
-				if ( $transact ) 
+				if ( $transact ) {
 					$Connection->commit();
+				}
+				$result = true;
 		
 				# Log
 				if ( $log ) {
@@ -1036,12 +1040,15 @@ abstract class Bal_Doctrine_Core {
 			if ( $transact )
 				$Connection->rollback();
 			
-			# Log the Event and Continue
-			$Exceptor = new Bal_Exceptor($Exception);
-			$Exceptor->log();
-			
-			# Error
-			$result = false;
+			# Handle
+			if ( $throw ) {
+				throw $Exception;
+			}
+			else {
+				# Log the Event and Continue
+				$Exceptor = new Bal_Exceptor($Exception);
+				$Exceptor->log();
+			}
 		}
 		
 		# Return result
@@ -1057,18 +1064,21 @@ abstract class Bal_Doctrine_Core {
 	 * 								verify: 		If true, we will verify the Record, if array we will verify with options [false by default]
 	 * 								transact: 		Whether or not to perform a transaction [true by default]
 	 * 								log: 			Whether or not to log [true by default]
-	 * @return Doctrine_Record
+	 * 								throw: 			Whether or not to throw errors [false by default]
+	 * @return bool
 	 */
 	public static function saveRecord ( Doctrine_Record $Record, array $options = array() ) {
 		# Prepare
 		$tableComponentName = self::getTableComponentName($Record);
 		$tableComponentNameLower = strtolower($tableComponentName);
+		$result = false;
 		
 		# Prepare Options
-		array_keys_keep_ensure($options,array('verify','transact','log'));
+		array_keys_keep_ensure($options,array('verify','transact','log','throw'));
 		extract($options);
 		
 		# Default Options
+		if ( $throw === null )		$throw = false;
 		if ( $transact === null )	$transact = true;
 		if ( $log === null )		$log = true;
 		
@@ -1093,8 +1103,10 @@ abstract class Bal_Doctrine_Core {
 			$Record->save();
 			
 			# Finish
-			if ( $transact )
+			if ( $transact ) {
 				$Connection->commit();
+			}
+			$result = true;
 			
 			# Log
 			if ( $log ) {
@@ -1113,13 +1125,19 @@ abstract class Bal_Doctrine_Core {
 			if ( $transact )
 				$Connection->rollback();
 			
-			# Log the Event and Continue
-			$Exceptor = new Bal_Exceptor($Exception);
-			$Exceptor->log();
+			# Handle
+			if ( $throw ) {
+				throw $Exception;
+			}
+			else {
+				# Log the Event and Continue
+				$Exceptor = new Bal_Exceptor($Exception);
+				$Exceptor->log();
+			}
 		}
 		
-		# Return Record
-		return $Record;
+		# Return result
+		return $result;
 	}
 	
 	# ========================
@@ -1193,10 +1211,10 @@ abstract class Bal_Doctrine_Core {
 	 */
 	public static function fetchAndSaveItem ( $tableComponentName, $item = null, array $options = array() ) {
 		# Prepare
-		$Item = self::fetchITem($tableComponentName, $item, $options);
+		$Item = self::fetchItem($tableComponentName, $item, $options);
 		
 		# Save the Item
-		self::saveItem($Item,$options);
+		if ( $Item ) self::saveItem($Item,$options);
 		
 		# Return Item
 		return $Item;
@@ -1300,9 +1318,9 @@ abstract class Bal_Doctrine_Core {
 		# Ensure
 		foreach ( $checks as $check ) {
 			# Fetch
-			$check_params = delve($params,$check);
+			$check_params = delve($params,$check,true);
 			# Fire?
-			if ( $verify_all || $check_params ) {
+			if ( $verify_all && $check_params ) {
 				# Prepare
 				if ( !is_array($check_params) ) {
 					// for instance if it was true, to signify the check should run
