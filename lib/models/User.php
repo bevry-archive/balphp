@@ -626,7 +626,7 @@ class Bal_User extends Base_Bal_User {
 		switch ( $fetch ) {
 			case 'Subscribers':
 				$Query
-					->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, Avatar.url')
+					->select('User.id, User.displayname, User.fullname, User.username, User.created_at, User.email, User.type, User.status, User.created_at, User.paypal, Avatar.url')
 					->addSelect('User.subscriptions, SubscriptionTag.name, COUNT(MessagesPublishedFor.id) as subscription_published_count')
 					->from('User.SubscriptionTags SubscriptionTag')
 					->where('User.status = ?', 'published')
