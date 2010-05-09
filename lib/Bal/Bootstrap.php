@@ -260,6 +260,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initDefaults ( ) {
 		# Prepare
 		$this->bootstrap('autoload');
+		$this->bootstrap('config');
 		
 		# Load Front Controller
 		$FrontController = Zend_Controller_Front::getInstance();
@@ -270,7 +271,11 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Error Handler
 		$FrontController = Zend_Controller_Front::getInstance();
 		$FrontController->registerPlugin(new Zend_Controller_Plugin_ErrorHandler(array('module' => 'default', 'controller' => 'error', 'action' => 'error')));
-		$FrontController->throwExceptions(true);
+		
+		# Exceptions
+		$applicationConfig = Zend_Registry::get('applicationConfig');
+		$throw_exceptions = $applicationConfig['bal']['error']['throw'];
+		$FrontController->throwExceptions($throw_exceptions);
 		
 		# Module Specific Error Controllers
 		# $FrontController->registerPlugin(new Bal_Controller_Plugin_ErrorControllerSelector());

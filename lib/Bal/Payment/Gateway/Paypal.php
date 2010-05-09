@@ -11,6 +11,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	
     const RESPONSE_PDT = 1;
 	const RESPONSE_IPN = 2;
+	const RESPONSE_STANDARD = 3;
 	
 	
 	# ========================
@@ -124,7 +125,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 */
 	protected $validates = array(
 		'config' => array(
-			'url', 'token', 'business', 'notify_url', 'return'
+			'url', 'business', 'notify_url', 'return'
+			// token is optional, as we support standard responses
 		),
 		'invoice' => array(
 			'id', 'currency_code', 'price_total', 'shipping_all_total', 'handling_all_total', 'tax_all_total'
@@ -287,8 +289,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		
 		
 		# --------------------------
-		# Append Extra Information
-		
+		# Request Type
 		
 		# Determine Type
 		if ( sizeof($Invoice->InvoiceItems) > 1 ) {
@@ -316,6 +317,10 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				break;
 		}
 		
+		
+		# --------------------------
+		# Config
+		
 		# Add some config variables to request if they are set
 		$params = $this->validates['request'];
 		foreach ( $params as $param ) {
@@ -325,17 +330,16 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			}
 		}
 		
+		
+		# --------------------------
+		# Done
+		
 		# Store our Request
-		$this->store('paypal-request-'.$Invoice->id, array(
+		$this->store('paypal-'.$Invoice->id.'-request', array(
 			'Invoice' => $Invoice,
 			'request' => $request,
 			'Config' => $Config
 		));
-		
-		
-		
-		# --------------------------
-		# Done
 		
 		# Return request
 		return $request;
@@ -346,29 +350,92 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	# Responses
 	
 	/**
+	 * Determine the response from the $response_type
+	 * @param mixed $response_type
+	 * @return mixed
+	 */
+	public static function fetchResponse ( $response_type ) {
+		# Prepare
+		$response = false;
+		
+		# Determine
+		switch ( $response_type ) {
+			case self::RESPONSE_PDT:
+			case self::RESPONSE_STANDARD:
+				$response = $_GET;
+				break;
+			
+			case self::RESPONSE_IPN:
+				$response = $_POST;
+				break;
+			
+			default:
+				throw new Bal_Exception(array(
+					'Unsupported response type passed',
+					'response_type' => $response_type
+				));
+				break;
+		}
+		
+		# Return response
+		return $response;
+	}
+	
+	/**
+	 * Determine the response type from the _POST and _GET
+	 * @return mixed
+	 */
+	public static function fetchResponseType ( ) {
+		# Prepare
+		$response_type = false;
+		
+		# Determine
+		if ( empty($_POST) && !empty($_GET) ) {
+			if ( !empty($_GET['tx']) ) {
+				$response_type = self::RESPONSE_PDT;
+			}
+			elseif ( !empty($_GET['txn_id']) ) {
+				$response_type = self::RESPONSE_STANDARD;
+			}
+		}
+		elseif ( !empty($_POST) && empty($_GET) ) {
+			$response_type = self::RESPONSE_IPN;
+		}
+		else {
+			throw new Bal_Exception(array(
+				'Could not determine the response type',
+				'POST' => $_POST,
+				'GET' => $_GET
+			));
+		}
+		
+		# Return response_type
+		return $response_type;
+	}
+	
+	/**
 	 * Handle a PayPal Response
 	 * Receives an $response array and then passes to the appropriate handler for the response type
 	 * @throws Bal_Exception
 	 * @param array $response
+	 * @param mixed $response_type
 	 * @return Bal_Payment_Model_Invoice
 	 */
-	public function handleResponse ( array $response = array() ) {
+	public function handleResponse ( array $response = array(), $response_type = null ) {
 		# Prepare
 		$Invoice = null;
-		if ( empty($response) ) {
-			$response = !empty($_POST) ? $_POST : $_GET;
-		}
+		
+		# Defaults
+		if ( empty($response_type) )	$response_type = self::fetchResponseType();
+		if ( empty($response) )			$response = self::fetchResponse($response_type);
 		
 		# Check
 		if ( empty($response['tx']) && empty($response['txn_id']) ) {
 			throw new Bal_Exception(array(
-				'Response received is not a valid paypal response',
+				'The received response is not a valid paypal response',
 				'response' => $response
 			));
 		}
-		
-		# Determine Response Type
-		$response_type = !empty($response['tx']) ? self::RESPONSE_PDT : self::RESPONSE_IPN;
 		
 		# Handle Appropriatly
 		switch ( $response_type ) {
@@ -377,8 +444,18 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				break;
 				
 			case self::RESPONSE_IPN:
-			default:
 				$Invoice = $this->handleResponseIpn($response);
+				break;
+				
+			case self::RESPONSE_STANDARD:
+				$Invoice = $this->handleResponseStandard($response);
+				break;
+			
+			default:
+				throw new Bal_Exception(array(
+					'Unknown response type',
+					'response' => $response
+				));
 				break;
 		}
 		
@@ -407,42 +484,88 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		}
 		
 		# Send a request to paypal to receive the Authentic Reponse for that transaction
-		$response_authentic = $this->fetchResponse($response_pdt['tx']);
+		$reply_pdt = $this->fetchReplyPdt($response_pdt);
 		
 		# Fetch the Authentc Response's Data
-		$response_authentic_data = $response_authentic["httpParsedResponseAr"];
+		$response_authentic = $reply_pdt['httpParsedResponseAr'];
 		
-		# Check that the Authentic Responses's Transaction ID does not differ from that of our original PDT Response
-		if ( $response_authentic_data['txn_id'] !== $response_pdt['tx'] ) {
-			// Error
+		# Check that the reply succeded
+		if ( !begins_with($reply_pdt['httpResponse'], 'SUCCESS') ) {
 			throw new Bal_Exception(array(
-				'Transaction IDs do not match.',
-				'response_authentic_data' => $response_authentic_data,
+				'The PDT reply did not succeed.',
+				'reply' => $reply_pdt,
+				'response_authentic' => $response_authentic,
 				'response_pdt' => $response_pdt
 			));
-			exit;
+		}
+		
+		# Check that the Authentic Responses's Transaction ID does not differ from that of our original PDT Response
+		if ( $response_authentic['txn_id'] !== $response_pdt['tx'] ) {
+			throw new Bal_Exception(array(
+				'The PDT reply did not match the transaction ID.',
+				'reply' => $reply_pdt,
+				'response_authentic' => $response_authentic,
+				'response_pdt' => $response_pdt
+			));
 		}
 		
 		# Merge the PDT and Authentic Response Data to generate a complete valid response
-		$response_complete = array_merge($response_pdt, $response_authentic_data);
+		$response_complete = array_merge($response_pdt, $response_authentic);
 		
-		# Now continue as if we were an IPN request
-		$Invoice = $this->handleResponseIpn($response_complete);
+		# Now continue to handle the response
+		$Invoice = $this->handleResponseStandard($response_complete);
 		
 		# Return Invoice
 		return $Invoice;
 	}
 	
 	/**
-	 * Handle a IPN Request
+	 * Handle a IPN Response
 	 * As soon as a update to the payment is performed, PayPal will try to send us a notification request (IPN) to inform us
 	 * This may however occur before or after the PDT request due to network slowdowns
-	 * Therefor we also trigger this in our @handlePDT function
+	 * @throws Bal_Exception
+	 * @param array $response_ipn
+	 * @return $this
+	 */
+	public function handleResponseIpn ( array $response_ipn ) {
+		# Prepare
+		$Invoice = null;
+		
+		# Check we have a transaction id
+		if ( empty($response_ipn['txn_id']) ) {
+			# Error
+			throw new Bal_Exception(array(
+				'The IPN response was received without a transaction ID.',
+				'response' => $response_ipn
+			));
+		}
+		
+		# Send a request to paypal to determine if the response is authentic
+		$reply_ipn = $this->fetchReplyIpn($response_ipn);
+		
+		# Check that the reply was valid
+		if ( !begins_with($reply_ipn['httpResponse'], 'VERIFIED') ) {
+			throw new Bal_Exception(array(
+				'The IPN reply came back invalid.',
+				'reply_ipn' => $reply_ipn,
+				'response_ipn' => $response_ipn
+			));
+		}
+		
+		# Now continue to handle the response
+		$Invoice = $this->handleResponseStandard($response_ipn);
+		
+		# Return Invoice
+		return $Invoice;
+	}
+	
+	/**
+	 * Handle a Response (For both IPN and PDT Responses)
 	 * @throws Bal_Exception
 	 * @param array $response
 	 * @return Bal_Payment_Model_Invoice
 	 */
-	public function handleResponseIpn ( array $response ) {
+	public function handleResponseStandard ( array $response ) {
 		# Prepare
 		$Config = $this->GetConfig();
 		$maps = $this->maps['response'];
@@ -451,7 +574,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		if ( empty($response['txn_id']) ) {
 			# Error
 			throw new Bal_Exception(array(
-				'IPN received without a transaction ID.',
+				'Response received without a transaction ID.',
 				'response' => $response
 			));
 		}
@@ -460,21 +583,22 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		if ( empty($response['invoice']) ) {
 			# Error
 			throw new Bal_Exception(array(
-				'IPN received without a invoice ID.',
+				'Response received without a invoice ID.',
 				'response' => $response
 			));
 		}
 		
 		# Fetch the local Invoice
-		$local_Store = $this->store('paypal-request-'.$response['invoice']);
+		$local_Store = $this->store('paypal-'.$response['invoice'].'-request');
 		$local_Invoice = delve($local_Store, 'Invoice');
+		$request = $local_Store['request'];
 		
 		
 		# --------------------------
 		# Check the Response
 		
 		# Validate
-		$this->validateResponse($response);
+		$this->validateResponse($response, $request);
 		
 		# Build an Invoice from the Response
 		$remote_Invoice = $this->fetchInvoice($response);
@@ -494,7 +618,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		// - paid_at
 		
 		# Store the remote Invoice
-		$this->store('paypal-response-'.$remote_Invoice->id, array(
+		$this->store('paypal-'.$remote_Invoice->id.'-response-'.time(), array(
 			'Invoice' => $remote_Invoice,
 			'response' => $response,
 			'Config' => $Config
@@ -515,31 +639,86 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param int $tx - transaction id
 	 * @return array
 	 */
-	public function fetchResponse ( $tx ) {
+	public function fetchReplyPdt ( array $response ) {
 		# Prepare
 		$Config = $this->getConfig();
 		
-		# Send a request to paypal to receive the Authentic Reponse for that transaction
-		$response = $this->PPHttpPost(delve($Config,'url'), array(
-			'cmd' => '_notify-synch',
-			'tx' => $tx,
-			'at' => delve($Config,'token'),
-		), true);
+		# Prepare
+		$url = delve($Config,'url');
+		$token = delve($Config,'token');
 		
-		# Check the status
-		if( empty($response['status']) ) {
-			// Error
+		# Check the token
+		if( !$token ) {
 			throw new Bal_Exception(array(
-				'There was an error processing the authentic response for the PDT request',
-				'response_error' => $response['error_no'].': '.$response['error_msg'],
-				'response' => $response
+				'We were not supplied a token for PDT. Perhaps you want to try a STANDARD response instead.',
+				'Config' => $Config
 			));
 		}
 		
-		# Return response_authentic
-		return $response;
+		# Prepare Request
+		$request = array(
+			'cmd' => '_notify-synch',
+			'tx' => delve($response,'tx'),
+			'at' => $token,
+		);
+		
+		# Send a request to paypal to receive the Authentic Reponse for that transaction
+		$reply = $this->PPHttpPost($url, $request, true);
+		
+		# Check the reply
+		if( empty($reply['status']) ) {
+			throw new Bal_Exception(array(
+				'There was an error processing the authentic reply for the PDT request',
+				'error' => $reply['error_no'].': '.$reply['error_msg'],
+				'reply' => $reply
+			));
+		}
+		
+		# Return reply
+		return $reply;
 	}
 	
+	/**
+	 * Send off a request to paypal and return a response
+	 * @throws Bal_Exception
+	 * @param array $response
+	 * @return array
+	 */
+	public function fetchReplyIpn ( array $response ) {
+		# Prepare
+		$Config = $this->getConfig();
+		
+		# Prepare
+		$url = delve($Config,'url');
+		
+		# Prepare Request
+		$request = array(
+			'cmd' => '_notify-validate'
+		);
+		$request += $response;
+		
+		# Send a request to paypal to receive the Authentic Reponse for that transaction
+		$reply = $this->PPHttpPost($url, $request, true);
+		
+		# Check the reply
+		if( empty($reply['status']) ) {
+			throw new Bal_Exception(array(
+				'There was an error processing the authentic reply for the IPN request',
+				'error' => $reply['error_no'].': '.$reply['error_msg'],
+				'reply' => $reply
+			));
+		}
+		
+		# Return reply
+		return $reply;
+	}
+	
+	/**
+	 * Fetch the Invoice Model representation from our Response
+	 * @throws Bal_Exception
+	 * @param array $response
+	 * @return Bal_Payment_Model_Invoice
+	 */
 	protected function fetchInvoice ( array $response ) {
 		# Prepare
 		$map = $this->maps['response']['invoice'];
@@ -636,6 +815,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		return $Invoice;
 	}
 	
+	/**
+	 * Fetch the Payer Model representation from our Response
+	 * @throws Bal_Exception
+	 * @param array $response
+	 * @return Bal_Payment_Model_Invoice
+	 */
 	protected function fetchPayer ( array $response ) {
 		# Prepare
 		$map = $this->maps['response']['payer'];
@@ -648,6 +833,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		return $Payer;
 	}
 	
+	/**
+	 * Fetch the InvoiceItems Model representation from our Response
+	 * @throws Bal_Exception
+	 * @param array $response
+	 * @return Bal_Payment_Model_Invoice
+	 */
 	protected function fetchInvoiceItems ( array $response ) {
 		# Prepare
 		$map = $this->maps['response']['item'];
@@ -655,17 +846,24 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		
 		# Check for num_cart_items
 		if( empty($response['num_cart_items']) ) {
-			// Error
-			throw new Bal_Exception(array(
-				'Response received however did not included num_cart_items',
-				'response' => $response
-			));
+			if ( empty($response['item_name']) ) {
+				// We don't have an item or item count
+				throw new Bal_Exception(array(
+					'Response received however did not include any item(s) information',
+					'response' => $response
+				));
+			}
+			else {
+				// We have an item, but no count, which means we only have one item
+				$InvoiceItems_count = 1;
+			}
+		}
+		else {
+			// We have a item count
+			$InvoiceItems_count = $response['num_cart_items'];
 		}
 		
 		# Check if we have a single or multiple items
-		$InvoiceItems_count = $response['num_cart_items'];
-		
-		# Handle Appropriatly
 		if ( $InvoiceItems_count === 1 ) {
 			# Single Item
 			
@@ -679,8 +877,14 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				
 			# Merge mapped Item to request
 			$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
-			//$InvoiceItem->applyTotals();
-			//$InvoiceItem->validate();
+			
+			# Adjust Total
+			// as we only have one item, paypal doesn't return it's mc_gross/price_all_total_dhs, instead only the cart total
+			// so we must calculate it by removing the cart total from the tax total
+			// we are using the already assigned values rather than the response values here
+			$InvoiceItem->price_all_total_dhs -= $InvoiceItem->tax_all_total;
+			
+			# Append to Items
 			$InvoiceItems[] = $InvoiceItem;
 		}
 		else {
@@ -698,8 +902,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 				
 				# Merge mapped Item to request
 				$InvoiceItem = new Bal_Payment_Model_InvoiceItem(array_keys_map($response, array_flip_deep($maps_item)));
-				//$InvoiceItem->applyTotals();
-				//$InvoiceItem->validate();
+				
+				# Append to Items
 				$InvoiceItems[] = $InvoiceItem;
 			}
 		}
@@ -718,13 +922,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 	 * @param array $response
 	 * @return true
 	 */
-	protected function validateResponse ( array $response ) {
-		# Prepare
-		$Config = $this->getConfig();
-		$local_response = array(
-			'business' => delve($Config,'business')
-		);
-		
+	protected function validateResponse ( array $response, array $request ) {
 		# Check Payment Date
 		if ( !delve($response,'payment_date') ) {
 			throw new Bal_Exception(array(
@@ -736,8 +934,8 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		# Validate Response
 		$this->validateCompare(
 			$this->validates['response'],
-			$local_response, $response,
-			'A response local VS remote check failed'
+			$request, $response,
+			'A request VS response check failed'
 		);
 		
 		# Return true
@@ -852,7 +1050,7 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 		//setting the curl parameters.
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		curl_setopt($ch, CURLOPT_VERBOSE, 0);
 		
 		//turning off the server and peer verification(TrustManager Concept).
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -885,12 +1083,12 @@ class Bal_Payment_Gateway_Paypal extends Bal_Payment_Gateway_Abstract {
 			}
 		}
 		
-		if(0 == sizeof($httpParsedResponseAr)) {
+		if( 0 == sizeof($httpParsedResponseAr) && !$httpResponse ) {
 			$error = "Invalid HTTP Response for POST request($fields) to $url.";
-			return array("status" => false, "error_msg" => $error, "error_no" => 0);
+			return array("status" => false, "error_msg" => $error, "error_no" => 0, "httpResponse" => $httpResponse);
 		}
 		
-		return array("status" => true, "httpParsedResponseAr" => $httpParsedResponseAr);
+		return array("status" => true, "httpParsedResponseAr" => $httpParsedResponseAr, "httpResponse" => $httpResponse);
 	}
 
 }

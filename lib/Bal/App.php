@@ -133,7 +133,7 @@ class Bal_App {
 		switch ( $mode ) {
 			
 			case 'install':
-				$ensure = array('createindex', 'cleanmodels', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'resecure');
+				$ensure = array('createindex', 'cleanmodels', 'clear', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'resecure');
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
@@ -214,6 +214,29 @@ class Bal_App {
 		}
 		
 		
+		# Clear: clear
+		if ( delve($args,'clear') ) {
+			echo '- [clear] -'."\n";
+			echo 'Clear: Clearing old data'."\n";
+			# Delete the contents of media dirs; uploads and images
+			$logs_path = LOGS_PATH;
+	
+			# Check
+			if ( empty($logs_path) ) {
+				throw new Zend_Exception('You must first create your logs paths');
+			}
+	
+			# Scan directories
+			$scan = scan_dir($logs_path,array('return_dirs'=>false));
+	
+			# Wipe files
+			foreach ( $scan as $filepath => $filename ) {
+				echo 'Clear: Deleted the file ['.$filepath.']'."\n";
+				unlink($filepath);
+			}
+		}
+		
+		
 		# Media: media
 		if ( delve($args,'media') ) {
 			echo '- [media] -'."\n";
@@ -232,7 +255,7 @@ class Bal_App {
 	
 			# Wipe files
 			foreach ( $scan as $filepath => $filename ) {
-				echo 'Media: Deleted the File ['.$filepath.']'."\n";
+				echo 'Media: Deleted the file ['.$filepath.']'."\n";
 				unlink($filepath);
 			}
 		}

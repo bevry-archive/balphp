@@ -1,5 +1,6 @@
 <?php
 require_once 'core/functions/_arrays.funcs.php';
+require_once 'core/functions/_strings.funcs.php';
 require_once 'core/functions/_validate.funcs.php';
 require_once 'core/functions/_datetime.funcs.php';
  
@@ -58,6 +59,11 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
      * @depends testRequest
      */
     public function testResponseIpn ( ) {
+		# Check
+		if ( defined('PaypalTest_testResponseIpn') && !PaypalTest_testResponseIpn ) {
+			return $this->markTestSkipped('Configuration has specified to skip this test.');
+		}
+		
 		# Prepare
 		$Invoice = Bal_Payment_Model_InvoiceTest::generateInvoice();
 		$Paypal = self::generatePaypal();
@@ -72,6 +78,30 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 		$Paypal->handleResponseIpn($response);
     }
 	
+	
+    /**
+     * @depends testRequest
+     */
+    public function testResponsePdt ( ) {
+		# Check
+		if ( defined('PaypalTest_testResponsePdt') && !PaypalTest_testResponsePdt ) {
+			return $this->markTestSkipped('Configuration has specified to skip this test.');
+		}
+		
+		# Prepare
+		$Invoice = Bal_Payment_Model_InvoiceTest::generateInvoice();
+		$Paypal = self::generatePaypal();
+		
+		# Request
+		$request = self::generateRequest();
+		
+		# Response
+		$response = self::generateResponsePdt();
+		
+		# Response
+		$Paypal->handleResponsePdt($response);
+    }
+
 
 	# ========================
 	# Providers
@@ -82,7 +112,7 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 		$Paypal = self::generatePaypal();
 		
 		# Request
-		$Invoice->id = 145;
+		$Invoice->id = 'invoice-1273420490';
 		$request = $Paypal->generateRequest($Invoice);
 		
 		# Return request
@@ -91,17 +121,10 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 	
 	public static function generateResponsePdt ( ) {
 		# Create
-		$response = array(
-			'tx' => '4A412521A3541820E',
-			'st' => 'Completed',
-			'amt' => '25.12',
-			'cc' => 'AUD',
-			'cm' => '',
-			'item_number' => '',
-		);
+		$response = unserialize('a:6:{s:2:"tx";s:17:"6TH130142R8402737";s:2:"st";s:9:"Completed";s:3:"amt";s:5:"23.54";s:2:"cc";s:3:"AUD";s:2:"cm";s:0:"";s:11:"item_number";s:0:"";}');
 		
 		# Hydrate
-		array_hydrate($response);
+		//hydrate_value($response);
 		
 		# Return response
 		return $response;
@@ -109,71 +132,10 @@ class Bal_Payment_Gateway_PaypalTest extends PHPUnit_Framework_TestCase {
 	
 	public static function generateResponseIpn ( ) {
 		# Create
-		$response = array(
-			'mc_gross' => '25.12',
-			'invoice' => '145',
-			'protection_eligibility' => 'Ineligible',
-			'address_status' => 'unconfirmed',
-			'item_number1' => '1',
-			'tax' => '6.02',
-			'item_number2' => '2',
-			'payer_id' => 'SCZ8ZGE8F9NPG',
-			'item_number3' => '3',
-			'address_street' => '1 Cheeseman Ave - East',
-			'item_number4' => '4',
-			'payment_date' => '08:41:51 May 02, 2010 PDT',
-			'payment_status' => 'Completed',
-			'charset' => 'windows-1252',
-			'address_zip' => '3001',
-			'mc_shipping' => '4.00',
-			'mc_handling' => '6.00',
-			'first_name' => 'Test',
-			'mc_fee' => '0.90',
-			'address_country_code' => 'AU',
-			'address_name' => 'Test User',
-			'custom' => '',
-			'payer_status' => 'verified',
-			'business' => 'seller_1249741848_biz@balupton.com',
-			'address_country' => 'Australia',
-			'num_cart_items' => '4',
-			'mc_handling1' => '0.00',
-			'mc_handling2' => '0.00',
-			'mc_handling3' => '3.00',
-			'address_city' => 'Melbourne',
-			'mc_handling4' => '3.00',
-			'payer_email' => 'buyer_1272803352_per@balupton.com',
-			'mc_shipping1' => '0.00',
-			'mc_shipping2' => '0.00',
-			'mc_shipping3' => '2.00',
-			'mc_shipping4' => '2.00',
-			'txn_id' => '4A412521A3541820E',
-			'payment_type' => 'instant',
-			'last_name' => 'User',
-			'address_state' => 'Victoria',
-			'item_name1' => 'My First Item',
-			'receiver_email' => 'seller_1249741848_biz@balupton.com',
-			'item_name2' => 'My Second Item',
-			'payment_fee' => '',
-			'item_name3' => 'My Third Item',
-			'item_name4' => 'My Fourth Item',
-			'quantity1' => '1',
-			'quantity2' => '3',
-			'receiver_id' => '7NR6AHFVJDSEQ',
-			'quantity3' => '3',
-			'txn_type' => 'cart',
-			'quantity4' => '3',
-			'mc_gross_1' => '1.00',
-			'mc_currency' => 'AUD',
-			'mc_gross_2' => '3.00',
-			'mc_gross_3' => '7.70',
-			'residence_country' => 'AU',
-			'mc_gross_4' => '7.40',
-			'transaction_subject' => 'Shopping Cart',
-			'payment_gross' => '',
-		);
+		$response = unserialize('a:53:{s:8:"mc_gross";s:5:"23.54";s:7:"invoice";s:18:"invoice-1273420490";s:22:"protection_eligibility";s:10:"Ineligible";s:14:"address_status";s:11:"unconfirmed";s:12:"item_number1";s:1:"5";s:3:"tax";s:4:"3.59";s:12:"item_number2";s:1:"6";s:8:"payer_id";s:13:"SCZ8ZGE8F9NPG";s:14:"address_street";s:22:"1 Cheeseman Ave - East";s:12:"payment_date";s:25:"08:56:22 May 09, 2010 PDT";s:14:"payment_status";s:9:"Completed";s:7:"charset";s:12:"windows-1252";s:7:"mc_tax1";s:4:"1.80";s:11:"address_zip";s:4:"3001";s:11:"mc_shipping";s:4:"0.00";s:7:"mc_tax2";s:4:"1.79";s:11:"mc_handling";s:4:"0.00";s:10:"first_name";s:4:"Test";s:6:"mc_fee";s:4:"0.86";s:20:"address_country_code";s:2:"AU";s:12:"address_name";s:9:"Test User";s:14:"notify_version";s:3:"2.9";s:6:"custom";s:0:"";s:12:"payer_status";s:8:"verified";s:8:"business";s:34:"seller_1249741848_biz@balupton.com";s:15:"address_country";s:9:"Australia";s:14:"num_cart_items";s:1:"2";s:12:"mc_handling1";s:4:"0.00";s:12:"mc_handling2";s:4:"0.00";s:12:"address_city";s:9:"Melbourne";s:11:"verify_sign";s:56:"AXHsxBiCsbDXrqtLaH4rmL6Yapz1ABnCX8bYEQAfscPMAa7Ei-WZYYB1";s:11:"payer_email";s:33:"buyer_1272803352_per@balupton.com";s:12:"mc_shipping1";s:4:"0.00";s:12:"mc_shipping2";s:4:"0.00";s:6:"txn_id";s:17:"6TH130142R8402737";s:12:"payment_type";s:7:"instant";s:9:"last_name";s:4:"User";s:13:"address_state";s:8:"Victoria";s:10:"item_name1";s:30:"invoice-buyer_system-fee-title";s:14:"receiver_email";s:34:"seller_1249741848_biz@balupton.com";s:10:"item_name2";s:37:"invoice-buyer_system-commission-title";s:11:"payment_fee";s:0:"";s:9:"quantity1";s:1:"1";s:9:"quantity2";s:1:"1";s:11:"receiver_id";s:13:"7NR6AHFVJDSEQ";s:8:"txn_type";s:4:"cart";s:10:"mc_gross_1";s:5:"10.00";s:11:"mc_currency";s:3:"AUD";s:10:"mc_gross_2";s:4:"9.95";s:17:"residence_country";s:2:"AU";s:8:"test_ipn";s:1:"1";s:19:"transaction_subject";s:13:"Shopping Cart";s:13:"payment_gross";s:0:"";}');
 		
 		# Hydrate
-		array_hydrate($response);
+		//hydrate_value($response);
 		
 		# Return response
 		return $response;

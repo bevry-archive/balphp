@@ -7,6 +7,8 @@
     <php>
     	<ini name="include_path"
 			value="../lib:../../doctrine-1.2.2-lib:/usr/local/zend/share/ZendFramework/library:/usr/local/zend/share/pear"/>
+		<const name="PaypalTest_testResponsePdt" value="false"/>
+		<const name="PaypalTest_testResponseIpn" value="false"/>
     </php>
 
     <filter>

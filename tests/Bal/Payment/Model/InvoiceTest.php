@@ -1,5 +1,6 @@
 <?php
 require_once 'core/functions/_arrays.funcs.php';
+require_once 'core/functions/_strings.funcs.php';
 require_once 'core/functions/_validate.funcs.php';
  
 class Bal_Payment_Model_InvoiceTest extends PHPUnit_Framework_TestCase {
