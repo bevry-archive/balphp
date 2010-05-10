@@ -322,13 +322,20 @@ abstract class Bal_Doctrine_Core {
 	 * Determine and return the value of the param associated with the item $tableComponentName
 	 * We also check the code and id params by default ($only=false)
 	 * @version 1.1, April 12, 2010
-	 * @param string $tableComponentName
-	 * @param bool $only [optional]
+	 * @param string 			$tableComponentName
+	 * @param array 			$options [optional]
+	 * 							The following options are provided:
+	 * 								only: 		If true, we will only attempt to fetch the identifier from the standard item param, and not id and code params
+	 * 								param: 		If specified, we use this as the item param
 	 * @return mixed
 	 */
-	public static function fetchItemIdentifier ( $tableComponentName, $only = false ) {
+	public static function fetchItemIdentifier ( $tableComponentName, array $options = array() ) {
+		# Prepare
+		$only = delve($options,'only',false);
+		$param = delve($options,'param',$tableComponentName);
+		
 		# Fetch item
-		$item = self::fetchItemParam($tableComponentName);
+		$item = self::fetchItemParam($param);
 		
 		# Handle Array
 		if ( is_array($item) ) {
@@ -611,6 +618,7 @@ abstract class Bal_Doctrine_Core {
 			
 			# Basic Support
 			switch ( true ) {
+				// array('User'=>3), $item = 3;
 				case $item = delve($params,$tableComponentName):
 					$identifier = Bal_Doctrine_Core::resolveIdentifier($item);
 					$Query->andWhere(
@@ -754,6 +762,7 @@ abstract class Bal_Doctrine_Core {
 	 * @param array 	$inputs					The input used to determine the record
 	 * @param array 	$options [optional]		The following options are provided:
 	 * 											create: Create the Record if it wasn't found? [default=true]
+	 * 											fetch: Options to pass to fetch
 	 * @return Doctrine_Record
 	 */
 	public static function resolveRecord ( $tableComponentName, array $inputs, array $options = array() ) {
@@ -774,7 +783,7 @@ abstract class Bal_Doctrine_Core {
 			}
 			elseif ( is_numeric($in) || is_string($in) ) {
 				# Is a Record Identifier (hopefully)
-				$Record = self::fetchRecord($tableComponentName, array($tableComponentName=>$in));
+				$Record = self::fetchRecord($tableComponentName, array($tableComponentName=>$in)+delve($options,'fetch',array()));
 			}
 			elseif ( is_array($in) ) {
 				# Is a Array
@@ -1165,7 +1174,7 @@ abstract class Bal_Doctrine_Core {
 	public static function getItem ( $tableComponentName, $item = null, array $options = array() ) {
 		# Get Item
 		if ( $item === null ) {
-			$item = self::fetchItemIdentifier($tableComponentName, delve($options,'only'));
+			$item = self::fetchItemIdentifier($tableComponentName, $options);
 		}
 		$Item = self::getRecord($tableComponentName, $item, $options);
 		

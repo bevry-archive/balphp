@@ -71,63 +71,62 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
      *
      * @return string The element XHTML.
      */
-    public function formDoctrine($name, $value = null, $attribs = null, $table = null, $field = null) {
+    public function formDoctrine( array $args ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$result = '';
 		
-		# Custom Inputs
-		if ( is_array($name) ) {
-			# Apply
-			$custom = $name;
-			# Extract
-			array_keys_keep_ensure($custom, array('name','target','source'));
-			extract($custom);
-			# Target
-			if ( !empty($target) ) {
-				# Name <- Target
-				if ( empty($name) ) {
-					$name = make_field_name($target);
-				}
-				# Value <- Target, Source
-				if ( !empty($source)) {
-					$value = delve($source,$target);
-				}
-				# Table, Field <- Target
-				if ( empty($table) && empty($field) && count($target) === 2 ) {
-					$table = $target[0];
-					$field = $target[1];
-				}
+		# Extract
+		array_keys_keep_ensure($args, array(
+			'target','source',
+			'name','value',
+			'table','field',
+			'type','notnull','notblank','auto','length','relationStatus',
+			'attribs','options',
+			'listsep','disable','escape'
+		));
+		extract($args);
+		
+		# Target
+		if ( !empty($target) ) {
+			# Name <- Target
+			if ( empty($name) ) {
+				$name = make_field_name($target);
+			}
+			# Value <- Target, Source
+			if ( !empty($source)) {
+				$value = delve($source,$target);
+			}
+			# Table, Field <- Target
+			if ( empty($table) && empty($field) && count($target) === 2 ) {
+				$table = $target[0];
+				$field = $target[1];
 			}
 		}
 		
 		# Fetch Info
         $info = $this->_getInfo($name, $value, $attribs);
-        extract($info); // name, id, value, attribs, options, listsep, disable
-		
-		# Prepare Attributes
-		array_keys_ensure($attribs, array('table','field','class','notnull','notblank','auto','relationStatus'));
-		if ( !$table ) $table = $attribs['table'];
-		if ( !$field ) $field = $attribs['field'];
-		$type = delve($attribs,'type');
+        extract($info); // name, id, value, attribs, options, [listsep, disable, escape]
 		
 		# Fetch Table Information
 		$Table = Bal_Doctrine_Core::getTable($table);
-		if ( !$type ) $type = Bal_Doctrine_Core::getFieldType($Table,$field);
+		if ( $type === null )		$type = Bal_Doctrine_Core::getFieldType($Table,$field);
 		$properties = $Table->getDefinitionOf($field);
 		array_keys_ensure($properties, array('length'), null);
-		
-		# Extract Attributes
-		$notblank	= delve($attribs,	'notblank',	delve($properties,'notblank'));
-		$notnull 	= delve($attribs,	'notnull',	delve($properties,'notnull',$notblank));
-		$auto 		= delve($attribs,	'auto',		delve($properties,'extra.auto'));
-		$length 	= delve($attribs,	'length',	delve($properties,'length'));
-		$relationStatus = delve($attribs,'relationStatus');
-		array_keys_unset($attribs, array('notblank','notnull','auto','length','relationStatus'));
 		
 		# Prepare lowers for il8ns indexes
 		$tableLower = strtolower($table);
 		$fieldLower = strtolower($field);
+		
+		# Extract Args
+		if ( $notblank === null )			$notblank = delve($properties,'notblank');
+		if ( $notnull === null )			$notnull = delve($properties,'notnull');
+		if ( $auto === null )				$auto = delve($properties,'auto');
+		if ( $length === null )				$length = delve($properties,'length');
+		if ( $relationStatus === null )		$relationStatus = delve($properties,'relationStatus');
+		
+		# Prepare Attributes
+		array_keys_ensure($attribs, array('class'), '');
 		
 		# Prepare value
 		if ( is_array($value) || is_object($value) ) {
@@ -173,16 +172,19 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				}
 				
 				# Options
-				$options = array();
+				if ( empty($options) ) {
+					# Pprepare
+					$options = array();
 				
-				# Options: Empty Value
-				if ( !$notnull ) {
-					$options['null'] = $Locale->translate('select-empty');
-				}
+					# Options: Empty Value
+					if ( !$notnull ) {
+						$options['null'] = $Locale->translate('select-empty');
+					}
 				
-				# Options: Relations
-				foreach ( $relations as $relation ) {
-					$options[$relation['id']] = $relation['text'];
+					# Options: Relations
+					foreach ( $relations as $relation ) {
+						$options[$relation['id']] = $relation['text'];
+					}
 				}
 				
 				# Display
@@ -212,21 +214,24 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 				}
 				
 				# Options
-				$options = array();
+				if ( empty($options) ) {
+					# Prepare
+					$options = array();
 				
-				# Options: Empty Value
-				if ( !$notnull && empty($attribs['multiple']) ) {
-					$options['null'] = $Locale->translate('select-empty');
+					# Options: Empty Value
+					if ( !$notnull && empty($attribs['multiple']) ) {
+						$options['null'] = $Locale->translate('select-empty');
+					}
+				
+					# options: Enum Values
+					$options = array_merge($options, $enumValues);
 				}
 				
-				# options: Enum Values
-				$options = array_merge($options, $enumValues);
-				
-				# Adjust Options
+				# Handle Options
 				if ( count($options) === 1 ) {
 					$attribs['disabled'] = $attribs['readonly'] = true;
 				}
-				
+			
 				# Display
 				$result .= $this->view->formSelect($name, $value, $attribs, $options);
 				break;
