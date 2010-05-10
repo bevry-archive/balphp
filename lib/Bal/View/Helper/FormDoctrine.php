@@ -130,8 +130,24 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$fieldLower = strtolower($field);
 		
 		# Prepare value
-		if ( is_object($value) ) {
-			$value = delve($value,'id',$value);
+		if ( is_array($value) || is_object($value) ) {
+			if ( is_numeric(delve($value,'id')) ) { // for some reason a doctrine collection actually returns an ID value
+				$value = delve($value,'id');
+			}
+			elseif ( is_traversable($value) ) {
+				$values = array();
+				foreach ( $value as $_value ) {
+					$values[] = delve($_value,'id');
+				}
+				$value = $values;
+			}
+			else {
+				throw new Bal_Exception(array(
+					'Could not convert the high level value into a series of low level values that ZF can understand',
+					'value' => $value,
+					'field' => $name
+				));
+			}
 		}
 		
 		# Discover

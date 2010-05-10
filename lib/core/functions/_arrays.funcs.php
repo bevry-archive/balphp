@@ -454,7 +454,7 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 						||	(	($holder instanceOf Doctrine_Record)
 								&&	($holder->hasAccessor($key)
 										||	$holder->getTable()->hasField($key)
-										||	($holder->hasRelation($key) && ($holder->refreshRelated($key) /* < returns null, hence the OR and extra check > */ || isset($holder->$key)) ) // && $holder->$key->exists())
+										||	($holder->hasRelation($key) && (!empty($holder->$key) || $holder->refreshRelated($key) /* < returns null, hence the OR and extra check > */ || isset($holder->$key)) ) // && $holder->$key->exists())
 									)
 							)
 						/* Is normal object */

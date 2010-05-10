@@ -874,6 +874,7 @@ abstract class Bal_Doctrine_Core {
 		# Cycle through values applying each one
 		foreach ( $data as $key => $value ) {
 			# Prepare
+			$skip = false;
 			
 			# Check Relation
 			if ( $Table->hasRelation($key) ) {
@@ -881,7 +882,11 @@ abstract class Bal_Doctrine_Core {
 				$Relation = $Table->getRelation($key);
 				$RelationTable = $Relation->getTable();
 				if ( !is_object($value) ) {
+					// We are a scalar
 					if ( $Relation->getType() === Doctrine_Relation::MANY ) {
+						# Clear all previously, will re-apply on set
+						$Record->unlink($key);
+						
 						# Many Type, Needs Doctrine_Collection
 						if ( !$value ) {
 							# Empty
@@ -908,12 +913,12 @@ abstract class Bal_Doctrine_Core {
 							else {
 								# Find Multiple
 								if ( !is_array($value) ) $value = array($value);
-								$value = $RelationTable->createQuery()->select('*')->whereIn('id', $value)->execute();
+								$skip = true;
+								$Record->link($key, $value);
+								// $value = $RelationTable->createQuery()->select('*')->whereIn('id', $value)->execute();
+								// ^ should be an array of ids, so use link instead, doesn't really matter
 							}
 						}
-						
-						# Clear all previously, will re-apply on set
-						$Record->unlink($key);
 						
 						# Done Multiple
 						
@@ -955,7 +960,9 @@ abstract class Bal_Doctrine_Core {
 			}
 			
 			# Apply
-			$Record->set($key, $value);
+			if ( !$skip ) {
+				$Record->set($key, $value);
+			}
 		}
 		// $Item->merge($item);
 		// ^ Always fires special setters this way
