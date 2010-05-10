@@ -10,7 +10,6 @@ Bal_User:
             fields: [username]
         Taggable:
             tagAlias: "SubscriptionTags"
-        SoftDelete:
         Timestampable:
         Bal_Doctrine_Template_Addressable:
             # This can only be listed once due to bug in doctrine

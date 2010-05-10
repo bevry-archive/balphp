@@ -3,8 +3,6 @@
 # BAL INVOICE
 
 Bal_InvoiceItem:
-    actAs:
-        SoftDelete:
     columns:
         id:
             type: integer(2)
@@ -212,7 +210,6 @@ Bal_InvoiceItem:
 
 Bal_Invoice:
     actAs:
-        SoftDelete:
         Timestampable:
     columns:
         id:
@@ -369,7 +366,6 @@ Bal_Invoice:
 
 InvoiceDataBackup:
     actAs:
-        SoftDelete:
         Timestampable:
     columns:
         id:
