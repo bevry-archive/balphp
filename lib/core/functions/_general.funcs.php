@@ -181,3 +181,27 @@ if ( function_compare('get_backtrace_slim', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+
+if ( function_compare('pass_by_copy', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Pass all the arguments by copy to the function
+	 * @version 1, May 02, 2010
+	 * @param string $function
+	 * @param mixed ...
+	 * @return mixed
+	 */
+	function pass_by_copy ( $function ) {
+		# Prepare
+		$args = func_get_args(); array_shift($args); // trim function
+		$args_illusion = array();
+		foreach ( $args as $key => &$arg ) {
+			$args_illusion[$key] = &$arg;
+		}
+		
+		# Call function with args
+		$result = call_user_func_array($function, $args_illusion);
+		
+		# Return result
+		return $result;
+	}
+}

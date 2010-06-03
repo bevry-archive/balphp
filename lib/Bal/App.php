@@ -132,30 +132,66 @@ class Bal_App {
 		$mode = delve($args,'mode');
 		switch ( $mode ) {
 			
+			# Install with default data
 			case 'install':
-				$ensure = array('createindex', 'cleanmodels', 'clear', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'resecure');
+				$ensure = array(
+					'perm-init',
+					'log-clean',
+					'media-clean',
+					'index-create',
+					'data-model-clean',
+					'data-schema-create',
+					'data-model-create',
+					'data-create',
+					'data-import',
+					'data-migrate-clean',
+					'data-migrate-create',
+					'index-update',
+					'perm-secure'
+				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
+			# Install with the dump data
 			case 'install-dump':
-				$ensure = array('createindex', 'cleanmodels', 'usedump', 'regenschema', 'reload', 'optimiseindex', 'media', 'permissions', 'rescure');
+				$ensure = array(
+					'perm-init',
+					'log-clean',
+					'media-clean',
+					'index-create',
+					'data-model-clean',
+					'data-schema-create',
+					'data-model-create',
+					'data-dump-use', // difference to install
+					'data-create',
+					'data-import',
+					'data-migrate-clean',
+					'data-migrate-create',
+					'index-update',
+					'perm-secure'
+				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
 				break;
 			
-			case 'refresh':
-				$ensure = array('createindex', 'usedump', 'makedump', 'regenschema', 'reload', 'optimiseindex', 'permissions', 'rescure');
-				array_keys_ensure($args, $ensure, true);
-				echo 'Setup: mode: reload ['.implode(array_keys($args),',').']'."\n";
-				break;
-				
+			# Install with the same data
 			case 'update':
-				$ensure = array('optimiseindex');
+				$ensure = array(
+					'perm-init',
+					'data-model-clean',
+					'data-schema-create',
+					'data-model-create',
+					'data-migrate-update',
+					'data-migrate-install',
+					'schema-create',
+					'index-update',
+					'perm-secure'
+				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: update ['.implode(array_keys($args),',').']'."\n";
 				break;
-			
+				
 			case 'cancel':
 			case null:
 				echo 'Setup has been cancelled.'."\n\n";
@@ -181,10 +217,10 @@ class Bal_App {
 		}
 		
 		
-		# Permissions: permissions
-		if ( delve($args,'permissions') ) {
-			echo '- [permissions] -'."\n";
-			echo 'Permissions: Setting up Permissions'."\n";
+		# Permissions: perm-init
+		if ( delve($args,'perm-init') ) {
+			echo '- [perm-init] -'."\n";
+			echo 'Permissions: Initialise Permissions'."\n";
 			# Run a Bunch of Command Line Stuff
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
@@ -214,10 +250,10 @@ class Bal_App {
 		}
 		
 		
-		# Clear: clear
-		if ( delve($args,'clear') ) {
-			echo '- [clear] -'."\n";
-			echo 'Clear: Clearing old data'."\n";
+		# Clear: log-clean
+		if ( delve($args,'log-clean') ) {
+			echo '- [log-clean] -'."\n";
+			echo 'Log: Cleaning Logs'."\n";
 			# Delete the contents of media dirs; uploads and images
 			$logs_path = LOGS_PATH;
 	
@@ -237,10 +273,10 @@ class Bal_App {
 		}
 		
 		
-		# Media: media
-		if ( delve($args,'media') ) {
-			echo '- [media] -'."\n";
-			echo 'Media: Preparing Media'."\n";
+		# Media: media-clean
+		if ( delve($args,'media-clean') ) {
+			echo '- [media-clean] -'."\n";
+			echo 'Media: Cleaning Media'."\n";
 			# Delete the contents of media dirs; uploads and images
 			$images_path = IMAGES_PATH;
 			$upload_path = UPLOADS_PATH;
@@ -265,9 +301,9 @@ class Bal_App {
 		$data_index_path = delve($applicationConfig,'data.index_path');
 		$data_lucence = $data_index_path ? true : false;
 		
-		# Lucence: createindex
-		if ( delve($args,'createindex') && $data_index_path ) {
-			echo '- [createindex] -'."\n";
+		# Lucence: index-create
+		if ( delve($args,'index-create') && $data_index_path ) {
+			echo '- [index-create] -'."\n";
 			echo 'Lucene: Create Lucence Index ['.$data_index_path.']'."\n";
 			$Index = Zend_Search_Lucene::create(
 				$data_index_path
@@ -282,6 +318,7 @@ class Bal_App {
 		$data_compile_generate = delve($applicationConfig,'data.compile.generate',false);
 		$data_fixtures_path = delve($applicationConfig,'data.fixtures_path');
 		$data_dump_path = delve($applicationConfig,'data.dump_path');
+		$data_migrations_path = delve($applicationConfig,'data.migrations_path');
 		$data_path_to_use = $data_fixtures_path;
 		$data_yaml_schema_path = delve($applicationConfig,'data.yaml_schema_path');
 		$data_yaml_schema_file_path = delve($applicationConfig,'data.yaml_schema_file_path');
@@ -289,21 +326,21 @@ class Bal_App {
 		$data_models_path = delve($applicationConfig,'data.models_path');
 		$data_models_generate = delve($applicationConfig,'data.models.generate',false);
 		
-		# Doctrine: compile
-		if ( delve($args,'compile') && !empty($data_compile_generate) ) {
+		# Doctrine: data-compile
+		if ( delve($args,'data-compile') && !empty($data_compile_generate) ) {
 			$data_compile_drivers = delve($applicationConfig,'data.compile.drivers',array());
 			$data_compile_path = delve($applicationConfig,'data.compile.path');
-			echo '- [compile] -'."\n";
+			echo '- [data-compile] -'."\n";
 			echo 'Doctrine: Compiling Doctrine to ['.$data_compile_path.'] with drivers ['.implode(',',$data_compile_drivers).']'."\n";
-			Doctrine::compile($data_compile_path, $data_compile_drivers);
+			Doctrine_Core::compile($data_compile_path, $data_compile_drivers);
 		}
 		
-		# Doctrine: cleanmodels
-		if ( delve($args,'cleanmodels') ) {
-			echo '- [cleanmodels] -'."\n";
+		# Doctrine: data-model-clean
+		if ( delve($args,'data-model-clean') ) {
+			echo '- [data-model-clean] -'."\n";
 			if ( $data_models_generate ) {
 				echo 'Doctrine: Cleaning Models from Base directory'."\n";
-			
+				
 				# Scan directory
 				$scan = scan_dir($data_models_path.'/Base',array('return_dirs'=>false));
 	
@@ -317,34 +354,23 @@ class Bal_App {
 			}
 		}
 		
-		# Doctrine: usedump
-		if ( delve($args,'usedump') ) {
-			$data_path_to_use = $data_dump_path;
-			echo '- [usedump] -'."\n";
-			echo 'Doctrine: Using the Dump Path ['.$data_path_to_use.']'."\n";
+		# Doctrine: data-migrate-clean
+		if ( delve($args,'data-migrate-clean') ) {
+			echo '- [data-migrate-clean] -'."\n";
+			echo 'Doctrine: Cleaning the Migrations ['.$data_migrations_path.']'."\n";
+			# Scan directory
+			$scan = scan_dir($data_migrations_path,array('return_dirs'=>false));
+	
+			# Wipe files
+			foreach ( $scan as $filepath => $filename ) {
+				echo 'Doctrine: Deleted the Migration File ['.$filepath.']'."\n";
+				unlink($filepath);
+			}
 		}
 		
-		# Doctrine: makedump
-		if ( delve($args,'makedump') ) {
-			echo '- [makedump] -'."\n";
-			# Import Models
-			echo 'Doctrine: Load Models...'."\n";
-			Doctrine::loadModels(
-				$data_models_path
-			);
-			# Overrides
-			require_once ('Doctrine/Task/DumpData.php');
-			# Perform the Dump
-			echo 'Doctrine: Performing the Dump ['.$data_dump_path.']'."\n";
-			Doctrine::dumpData(
-				$data_dump_path,
-				false
-			);
-		}
-		
-		# Doctrine: regenschema
-		if ( delve($args,'regenschema') ) {
-			echo '- [regenschema] -'."\n";
+		# Doctrine: data-schema-create
+		if ( delve($args,'data-schema-create') ) {
+			echo '- [data-schema-create] -'."\n";
 			echo 'Doctrine: Regenerating YAML Schema ['.$data_yaml_schema_file_path.']'."\n";
 			echo "\t".implode("\n\t",$data_yaml_schema_includes)."\n";
 			$yaml_schema = '';
@@ -354,14 +380,31 @@ class Bal_App {
 			file_put_contents($data_yaml_schema_file_path, $yaml_schema);
 		}
 		
-		# Doctrine: reload
-		if ( delve($args,'reload') ) {
-			echo '- [reload] -'."\n";
-			echo 'Doctrine: Re-Installing the Database ['.$data_path_to_use.']'."\n";
-			# Reset Database
-			echo 'Doctrine: Reseting Database...'."\n";
-			Doctrine::dropDatabases();
-			Doctrine::createDatabases();
+		# Doctrine: data-dump-create
+		if ( delve($args,'data-dump-create') ) {
+			echo '- [data-dump-create] -'."\n";
+			# Import Models
+			$this->doctrineModels();
+			# Overrides
+			require_once ('Doctrine/Task/DumpData.php');
+			# Perform the Dump
+			echo 'Doctrine: Performing the Dump ['.$data_dump_path.']'."\n";
+			Doctrine_Core::dumpData(
+				$data_dump_path,
+				false
+			);
+		}
+		
+		# Doctrine: data-dump-use
+		if ( delve($args,'data-dump-use') ) {
+			$data_path_to_use = $data_dump_path;
+			echo '- [data-dump-use] -'."\n";
+			echo 'Doctrine: Using the Dump Path ['.$data_path_to_use.']'."\n";
+		}
+		
+		# Doctrine: data-model-create
+		if ( delve($args,'data-model-create') ) {
+			echo '- [data-model-create] -'."\n";
 			# Check Generate Models
 			if ( $data_models_generate ) {
 				echo 'Doctrine: Generating Models...'."\n";
@@ -373,39 +416,73 @@ class Bal_App {
 					'yml',
 					$data_models_path
 				);
-				//non pear style: Doctrine::generateModelsFromYaml($applicationConfig['data']['yaml_schema_path'],$applicationConfig['data']['models_path']);
+				//non pear style: Doctrine_Core::generateModelsFromYaml($applicationConfig['data']['yaml_schema_path'],$applicationConfig['data']['models_path']);
 			}
 			else {
 				echo 'Doctrine: Generate Models Skipped...'."\n";
 			}
+		}
+		
+		# Doctrine: data-create
+		if ( delve($args,'data-create') ) {
+			echo '- [data-create] -'."\n";
+			# Reset Database
+			echo 'Doctrine: Create Database...'."\n";
+			Doctrine_Core::dropDatabases();
+			Doctrine_Core::createDatabases();
+		}
+		
+		# Doctrine: data-import
+		if ( delve($args,'data-import') ) {
+			echo '- [data-import] -'."\n";
 			# Import Models
-			echo 'Doctrine: Load Models...'."\n";
-			Doctrine::loadModels(
-				$data_models_path
-			);
+			$this->doctrineModels();
 			# Create Tables
 			echo 'Doctrine: Create Tables...'."\n";
-			Doctrine::createTablesFromModels();
-			# Import Data
-			echo 'Doctrine: Import Data...'."\n";
-			Doctrine::loadData(
+			Doctrine_Core::createTablesFromModels();
+			# Import Data to Database
+			echo 'Doctrine: Import Data to Database...'."\n";
+			Doctrine_Core::loadData(
 				$data_path_to_use
 			);
 		}
 		
-		# Lucene: index
-		if ( delve($args,'optimiseindex') && $data_lucence ) {
-			echo '- [optimiseindex] -'."\n";
-			echo 'Lucene: Optimising the Lucence Index ['.$data_index_path.']'."\n";
+		# Doctrine: data-migrate-create
+		if ( delve($args,'data-migrate-create') ) {
+			echo '- [data-migrate-create] -'."\n";
+			# Initialise Migrations
+			echo 'Doctrine: Creating Initial Migration...'."\n";
+			$this->doctrineTask('GenerateMigrationsDb');
+		}
+		
+		# Doctrine: data-migrate-update
+		if ( delve($args,'data-migrate-update') ) {
+			echo '- [data-migrate-update] -'."\n";
+			# Update Migrations
+			echo 'Doctrine: Update Migrations...'."\n";
+			$this->doctrineTask('GenerateMigrationsDiff');
+		}
+		
+		# Doctrine: data-migrate-install
+		if ( delve($args,'data-migrate-install') ) {
+			echo '- [data-migrate-install] -'."\n";
+			# Perform Migrations
+			echo 'Doctrine: Performing Migration ['.$data_migrations_path.']'."\n";
+			Doctrine_Core::migrate($data_migrations_path);
+		}
+		
+		# Lucene: index-update
+		if ( delve($args,'index-update') && $data_lucence ) {
+			echo '- [index-update] -'."\n";
+			echo 'Lucene: Optimising the Lucene Index ['.$data_index_path.']'."\n";
 			$Index = Zend_Registry::get('Index');
 			$Index->optimize();
 		}
 		
-		
-		# Permissions: permissions
-		if ( delve($args,'resecure') ) {
-			echo '- [resecure] -'."\n";
-			echo 'Permissions: Re-Securing Permissions'."\n";
+		# Permissions: perm-secure
+		if ( delve($args,'perm-secure') ) {
+			echo '- [perm-secure] -'."\n";
+			echo 'Permissions: Securing Permissions'."\n";
 			# Run a Bunch of Command Line Stuff
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
@@ -426,16 +503,46 @@ class Bal_App {
 		return $this;
 	}
 	
-	public function doctrineCli ( ) {
+	public function doctrineModels ( ) {
+		echo 'Doctrine: Load Models...'."\n";
+		Doctrine_Core::loadModels(
+			self::getConfig('data.models_path')
+		);
+	}
+	
+	public function doctrineTask ( $task, array $args = array() ) {
 		# Prepare
 		$Application = $this->getApplication();
 		$this->bootstrapCli();
 		
 		# Prepare Config
-		$applicationConfig = Zend_Registry::get('applicationConfig');
 		
 		# Store Config for Cli and Copy some values to make b/c
-		$doctrineConfig = $applicationConfig['data'];
+		$doctrineConfig = self::getConfig('data');
+		$doctrineConfig['data_dump_path'] = $doctrineConfig['dump_path'];
+		$doctrineConfig['data_fixtures_path'] = $doctrineConfig['fixtures_path'];
+		unset($doctrineConfig['generate_models']);
+		
+		# Load Cli
+		$task_class = 'Doctrine_Task_'.$task;
+		$Task = new $task_class();
+        $Task->setArguments(array_merge($doctrineConfig,$args));
+        if ( !$Task->validate() ) {
+            throw new Doctrine_Cli_Exception('Required arguments missing');
+        }
+        $Task->execute();
+		
+		# Chain
+		return $this;
+	}
+	
+	public function doctrineCli ( ) {
+		# Prepare
+		$Application = $this->getApplication();
+		$this->bootstrapCli();
+		
+		# Store Config for Cli and Copy some values to make b/c
+		$doctrineConfig = self::getConfig('data');
 		$doctrineConfig['data_dump_path'] = $doctrineConfig['dump_path'];
 		$doctrineConfig['data_fixtures_path'] = $doctrineConfig['fixtures_path'];
 		unset($doctrineConfig['generate_models']);

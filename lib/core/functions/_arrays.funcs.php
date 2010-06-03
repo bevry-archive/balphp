@@ -670,7 +670,7 @@ if ( function_compare('array_keys_unset', 1.1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_unset ( &$array, array $keys ) {
 		# Prepare
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		$keys = array_flat($keys);
 		
 		# Unsets
@@ -712,7 +712,7 @@ if ( function_compare('array_keys_keep', 1.1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_keep ( &$array, $keys ) {
 		# Prepare
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		$keys = array_flat($keys);
 		
 		# Prepare Keys
@@ -756,7 +756,7 @@ if ( function_compare('array_key_ensure', 1.1, true, __FILE__, __LINE__) ) {
 	function array_key_ensure ( &$array, $key, $value = null ) {
 		# Prepare
 		if ( is_traversable($key) ) return array_keys_ensure($array, $key, $value);
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		# Apply
 		if ( !array_key_exists($key, $array) ) $array[$key] = $value;
 		# Done
@@ -775,7 +775,7 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_ensure ( &$array, $keys, $value = null ) {
 		# Prepare
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		$keys = array_flat($keys);
 		# Apply
 		foreach ( $keys as $key ) {
@@ -787,6 +787,46 @@ if ( function_compare('array_keys_ensure', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('array_value_ensure', 1.1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Ensure the value exists in the array
+	 * @version 1.0, May 12, 2010
+	 * @param array $array
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	function array_value_ensure ( &$array, $value ) {
+		# Prepare
+		if ( is_traversable($value) ) return array_values_ensure($array, $value);
+		force_traversable($array);
+		# Apply
+		if ( !in_array($value,$array) ) $array[] = $value;
+		# Done
+		return $array;
+	}
+}
+
+if ( function_compare('array_values_ensure', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Ensure the values exists in the array
+	 * @version 1.0, May 12, 2010
+	 * @param array $array
+	 * @param array $values
+	 * @return mixed
+	 */
+	function array_values_ensure ( &$array, $values ) {
+		# Prepare
+		force_traversable($array);
+		$values = array_flat($values);
+		# Apply
+		foreach ( $values as $value ) {
+			# Ensure
+			array_value_ensure($array, $value);
+		}
+		# Done
+		return $array;
+	}
+}
 
 if ( function_compare('array_keys_clean', 1, true, __FILE__, __LINE__) ) {
 	/**
@@ -798,7 +838,7 @@ if ( function_compare('array_keys_clean', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_keys_clean ( &$array, $keys ) {
 		# Prepare
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		$keys = array_flat($keys);
 		# Apply
 		foreach ( $keys as $key ) {
@@ -823,7 +863,7 @@ if ( function_compare('array_flat', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function array_flat ( $array ) {
 		# Prepare
-		if ( !is_traversable($array) ) $array = array($array);
+		force_traversable($array);
 		$result = array();
 		# Apply
 		foreach ( $array as $key => $value ) {
@@ -1228,8 +1268,22 @@ if ( function_compare('force_array', 1, true, __FILE__, __LINE__) ) {
 	 * @param array $array
 	 * @return mixed
 	 */
-	function force_array ( $array ) {
-		return is_array($array) ? $array : array($array);
+	function force_array ( &$array ) {
+		$array = is_array($array) ? $array : array($array);
+		return $array;
+	}
+}
+
+if ( function_compare('force_traversable', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * If value is not traversable, make it one
+	 * @version 1, April 11, 2010
+	 * @param array $array
+	 * @return mixed
+	 */
+	function force_traversable ( &$array ) {
+		$array = is_traversable($array) ? $array : array($array);
+		return $array;
 	}
 }
 
@@ -1254,22 +1308,6 @@ if ( function_compare('to_array_deep', 1, true, __FILE__, __LINE__) ) {
 				}
 			}
 		}
-		
-		# Return array
-		return $array;
-	}
-}
-
-if ( function_compare('to_array_deep_copy', 1, true, __FILE__, __LINE__) ) {
-	/**
-	 * Convert a value into an array
-	 * @version 1, May 02, 2010
-	 * @param array|object $array
-	 * @return mixed
-	 */
-	function to_array_deep_copy ( $array ) {
-		# Determine
-		to_array_deep($array);
 		
 		# Return array
 		return $array;
