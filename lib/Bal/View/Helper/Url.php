@@ -144,6 +144,10 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 		return $this->param('action',$value);
 	}
 	
+	public function controller ( $value ) {
+		return $this->param('controller',$value);
+	}
+	
 	public function renege ( $what, $value ) {
 		$var = '_default_'.$what;
 		$this->$var = $value;
@@ -237,7 +241,20 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 			$route = $this->_route ? $this->_route : $this->_default_route;
 			$reset = $this->_reset;
 			$encode = $this->_encode;
-        	$url = $Router->assemble($params, $route, $reset, $encode);
+			try {
+        		$url = $Router->assemble($params, $route, $reset, $encode);
+			}
+			catch ( Exception $e ) {
+				$Exceptor = new Bal_Exceptor($e);
+				$Exceptor->log();
+				throw new Bal_Exception(array(
+					'Could not assemble URL',
+					'params' => $params,
+					'route' => $route,
+					'reset' => $reset,
+					'encode' => $encode
+				));
+			}
 		}
 		
 		# Return

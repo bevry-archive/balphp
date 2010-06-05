@@ -503,3 +503,16 @@ if ( function_compare('sanitize', 1, true, __FILE__, __LINE__) ) {
 
 }
 
+function DOMinnerHTML($element) 
+{
+	// http://www.php.net/manual/en/book.dom.php#89718
+    $innerHTML = ""; 
+    $children = $element->childNodes; 
+    foreach ($children as $child) 
+    { 
+        $tmp_dom = new DOMDocument(); 
+        $tmp_dom->appendChild($tmp_dom->importNode($child, true)); 
+        $innerHTML.=trim($tmp_dom->saveHTML()); 
+    } 
+    return $innerHTML; 
+} 
