@@ -231,15 +231,16 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Options
 		$default = array(
-			'jquery' => 20,
-			'jquery_ui' => 30,
-			'json' => 40,
-			'jquery_plugins' => 50,
-			'jquery_sparkle' => 60,
-			'jquery_ajaxy' => 70,
-			'editor' => 80,
-			'script' => 90,
-			'theme' => 100 
+			'modernizr'			=> 30,
+			'jquery' 			=> 40,
+			'jquery_ui' 		=> 50,
+			'json' 				=> 60,
+			'jquery_plugins' 	=> 70,
+			'jquery_sparkle' 	=> 80,
+			'jquery_ajaxy' 		=> 90,
+			'editor' 			=> 100,
+			'script' 			=> 110,
+			'theme' 			=> 120 
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
@@ -249,6 +250,11 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$back_url = $App->getAreaUrl('back');
 		$front_url = $App->getAreaUrl('front');
 		$script_url = $public_url.'/scripts';
+		
+		# Modernizr
+		if ( $modernizr ) {
+			$headScript->offsetSetFile($modernizr, $public_url.'/scripts/modernizr-1.1.min.js');
+		}
 	
 		# jQuery
 		if ( $jquery ) {
