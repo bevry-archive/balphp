@@ -571,7 +571,7 @@ abstract class Bal_Doctrine_Core {
 				} elseif ( is_array($paging) ) {
 					$paging = array_merge($_paging, $paging);
 				} else {
-					throw new Zend_Exception('Unkown $paging type');
+					throw new Zend_Exception('Unknown $paging type');
 				}
 				# Fetch
 				$result = self::getPaging($Query, $paging['page'], $paging['items'], $paging['chunk']);

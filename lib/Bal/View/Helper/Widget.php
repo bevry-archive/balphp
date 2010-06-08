@@ -86,7 +86,7 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		}
 		
 		# Clean
-		$params = array_unique($params);
+		//$params = array_unique($params);
 		
 		# Handle
 		$render = $this->view->getHelper($helper)->$action($params);
@@ -117,7 +117,7 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		}
 		
 		# Apply
-		$params += $attrs;
+		$params = array_merge($params,$attrs);
 		
 		# Render
 		$render =

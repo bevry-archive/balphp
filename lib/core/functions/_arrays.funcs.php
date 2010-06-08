@@ -595,11 +595,11 @@ if ( function_compare('array_from_attributes', 1, true, __FILE__, __LINE__) ) {
 		
 		# Handle
 		foreach ( $matches['name'] as $match => $name ) {
-			$value = $matches['value'][$match];
+			$value = real_value($matches['value'][$match]);
 			$array[$name] = $value;
 		}
 		
-		# Done
+		# Return array
 		return $array;
 	}
 }
