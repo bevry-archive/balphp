@@ -338,7 +338,7 @@ class Bal_File extends Base_Bal_File {
 				$File = null;
 			}
 		}
-		elseif ( $file === null ) {
+		elseif ( $file === null || $file instanceOf Doctrine_Null ) {
 			$File = null;
 		}
 		
