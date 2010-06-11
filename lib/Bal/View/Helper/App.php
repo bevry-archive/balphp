@@ -331,10 +331,46 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$file = 'browser/'.$GLOBALS['BROWSER']['browser'].$GLOBALS['BROWSER']['version'].'.css';
 		$url = $this->getStylesheetUrl($file);
 		
-		# Done
+		# Return url
 		return $url;
 	}
 	
+	public function footer ( ) {
+		# Prepare
+		$analytics_code = $this->app()->getConfig('bal.analytics.code');
+		$reinvigorate_code = $this->app()->getConfig('bal.reinvigorate.code');
+		
+		# Render
+		if ( $analytics_code ) : ?>
+			<script type="text/javascript">
+			//<![CDATA[
+			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+			//]]>
+			</script><script type="text/javascript">
+			//<![CDATA[
+			var pageTracker = _gat._getTracker("<?=$analytics_code?>");
+			pageTracker._initData();
+			pageTracker._trackPageview();
+			//]]>
+			</script>
+			<?
+		endif;
+		if ( $reinvigorate_code ) : ?>
+			<script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
+			<script type="text/javascript">
+			//<![CDATA[
+			try {
+			reinvigorate.track("<?=$reinvigorate_code?>");
+			} catch(err) {}
+			//]]>
+			</script>
+			<?
+		endif;
+		
+		# Done
+		return;
+	}
 	
 	# ========================
 	# GETTERS
