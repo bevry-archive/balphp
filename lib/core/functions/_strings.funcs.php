@@ -343,9 +343,24 @@ if ( !function_exists('format_to_output') && function_compare('format_to_output'
 				break;
 			
 			case 'html':
+				// Raw html allowed, should convert special characters
+				$value = str_replace(
+					array(
+						'<?',
+						"?>"
+					),
+					array(
+						'&lt;?',
+						"?&gt;"
+					),
+					$value
+				);
+				break;
+			
+			case 'text':
 			case 'htmlbody':
-				// Convert special chars not including quotes
-				$value = htmlspecialchars($value);
+				// Convert special chars including double quotes
+				$value = htmlspecialchars($value, ENT_COMPAT);
 				break;
 			
 			case 'jsattr':
@@ -372,7 +387,7 @@ if ( !function_exists('format_to_output') && function_compare('format_to_output'
 			case 'htmlattr':
 			case 'value':
 			case 'formvalue':
-				// Convert special chars including quotes
+				// Convert special chars including double and single quotes
 				$value = htmlspecialchars($value, ENT_QUOTES);
 				break;
 			
@@ -390,6 +405,7 @@ if ( !function_exists('format_to_output') && function_compare('format_to_output'
 				$Config->set('HTML.AllowedAttributes', '');
 				$Config->set('AutoFormat.AutoParagraph', true);
 				$Config->set('AutoFormat.Linkify', true);
+				$Config->set('Core.LexerImpl', 'PH5P');
 				$Purifier = HTMLPurifier::getInstance();
 				$value = $Purifier->purify($value, $Config);
 				break;
@@ -402,6 +418,7 @@ if ( !function_exists('format_to_output') && function_compare('format_to_output'
 				$Config->set('HTML.AllowedAttributes', null);
 				$Config->set('AutoFormat.AutoParagraph', false);
 				$Config->set('AutoFormat.Linkify', false);
+				$Config->set('Core.LexerImpl', 'PH5P');
 				$Purifier = HTMLPurifier::getInstance();
 				$value = $Purifier->purify($value, $Config);
 				break;
