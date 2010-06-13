@@ -321,39 +321,98 @@ if ( function_compare('append_or_set', 2.1, true, __FILE__, __LINE__) ) {
 	}
 }
 
-if ( !function_exists('format_to_output') && function_compare('format_to_output', 1, true, __FILE__, __LINE__) ) {
+if ( !function_exists('format_to_output') && function_compare('format_to_output', 1.1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Format a string to specific output
 	 *
-	 * @version 1, April 21, 2008
+	 * @version 1.1, June 13, 2010 - Added HTMLPurifer
+	 * @since 1, April 21, 2008
 	 *
 	 * @param	string	$value
-	 * @param	string	$display	'raw'|'htmlbody'|'htmlattr','formvalue'|'urlencoded'
+	 * @param	string	$display	'raw'|'html'|'attr'|'url'|'simple'|'normal'|'text'
 	 *
 	 * @return    bool
 	 */
 	function format_to_output ( $value, $display ) {
 		$value = to_string($value);
 		switch ( $display ) {
-			case 'raw' :
+	
+			case 'raw':
+				// Allow for raw html
 				break;
 			
-			case 'htmlbody' :
-				// Convert special chars not including 's
+			case 'html':
+			case 'htmlbody':
+				// Convert special chars not including quotes
 				$value = htmlspecialchars($value);
 				break;
 			
-			case 'htmlattr' :
-			case 'formvalue' :
-				// Convert special chars including 's
+			case 'jsattr':
+				// Addslashes to quotes
+				// Turn newlines into literals
+				$value = str_replace(
+					array(
+						'"',
+						"'",
+						"\r",
+						"\n",
+					),
+					array(
+						'\\"',
+						"\\'",
+						'',
+						'\\n'
+					),
+					$value
+				);
+				break;
+			
+			case 'attr':
+			case 'htmlattr':
+			case 'value':
+			case 'formvalue':
+				// Convert special chars including quotes
 				$value = htmlspecialchars($value, ENT_QUOTES);
 				break;
 			
-			case 'urlencoded' :
+			case 'url':
+			case 'urlencoded':
 				// Encode string to be passed as part of an URL
 				$value = rawurlencode($value);
 				break;
+				
+			case 'simple':
+				// Allow html
+				// Only allow simple tags without attributes
+				// strip javascript and other malicious code
+				$Config = HTMLPurifier_Config::createDefault();
+				$Config->set('HTML.AllowedAttributes', '');
+				$Config->set('AutoFormat.AutoParagraph', true);
+				$Config->set('AutoFormat.Linkify', true);
+				$Purifier = HTMLPurifier::getInstance();
+				$value = $Purifier->purify($value, $Config);
+				break;
+				
+			case 'rich':
+			case 'normal':
+				// Allow html
+				// strip javascript and other malicious code
+				$Config = HTMLPurifier_Config::createDefault();
+				$Config->set('HTML.AllowedAttributes', null);
+				$Config->set('AutoFormat.AutoParagraph', false);
+				$Config->set('AutoFormat.Linkify', false);
+				$Purifier = HTMLPurifier::getInstance();
+				$value = $Purifier->purify($value, $Config);
+				break;
+			
+			case 'text':
+			case 'none':
+			default:
+				// No html
+				$value = strip_tags($value);
+				break;
+			
 		}
 		return $value;
 	}

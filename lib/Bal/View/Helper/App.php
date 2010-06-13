@@ -152,15 +152,19 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$headLink = $this->view->headLink();
 		
 		# Options
-		$default = array(
-			'csscaffold'	=> false,
-			'locale'		=> 10,
-			'browser'		=> 20,
-			'jquery_ui'		=> 30,
-			'editor'		=> 40,
-			'style'			=> 50,
-			'theme'			=> 60,
-			'favicon'		=> true
+		$default = array_merge(
+			array(
+				'csscaffold'			=> false,
+				'favicon'				=> true,
+				'locale'				=> 100,
+				'browser'				=> 110,
+				'jquery_ui'				=> 210,
+				'syntax_highlighter'	=> 300,
+				'editor'				=> 400,
+				'style'					=> 500,
+				'theme'					=> 600
+			),
+			$App->getConfig('bal.headLink', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
@@ -184,8 +188,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery UI
 		if ( $jquery_ui ) {
 			$jquery_ui_url = $script_url.'/jquery-ui-1.7.2';
-			if ( $url )	$headLink->offsetSetStylesheet($jquery_ui, $jquery_ui_url.'/css/cupertino/jquery-ui-1.7.2.custom.css');
+			$headLink->offsetSetStylesheet($jquery_ui, $jquery_ui_url.'/css/cupertino/jquery-ui-1.7.2.custom.css');
 		}
+		
+		# Syntax Highlighter
+		/*if ( $syntax_highlighter ) {
+			$sh_url = $script_url.'/syntaxhighlighter-2.1.364/styles/sh.min.css';
+			$headLink->offsetSetStylesheet($syntax_highlighter, $sh_url);
+		}*/
 		
 		# Editor
 		if ( $editor ) {
@@ -230,17 +240,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$headScript = $this->view->headScript();
 		
 		# Options
-		$default = array(
-			'modernizr'			=> 30,
-			'jquery' 			=> 40,
-			'jquery_ui' 		=> 50,
-			'json' 				=> 60,
-			'jquery_plugins' 	=> 70,
-			'jquery_sparkle' 	=> 80,
-			'jquery_ajaxy' 		=> 90,
-			'editor' 			=> 100,
-			'script' 			=> 110,
-			'theme' 			=> 120 
+		$default = array_merge(
+			array(
+				'modernizr'				=> 100,
+				'json' 					=> 110,
+				'jquery' 				=> 200,
+				'jquery_ui' 			=> 210,
+				'jquery_plugins' 		=> 220,
+				'jquery_sparkle' 		=> 230,
+				'jquery_ajaxy' 			=> 240,
+				'syntax_highlighter'	=> 300,
+				'editor' 				=> 400,
+				'script' 				=> 500,
+				'theme' 				=> 600
+			),
+			$App->getConfig('bal.headScript', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
@@ -289,6 +303,24 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$jquery_ajaxy_url = $script_url.'/scripts/ajaxy/js';
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/jquery.history.js');
 			$headScript->offsetSetFile($jquery_ajaxy+1, $jquery_ajaxy_url.'/jquery.ajaxy.js');
+		}
+		
+		# Syntax Highlighter
+		/*if ( $syntax_highlighter ) {
+			$sh_url = $script_url.'/syntaxhighlighter-2.1.364/scripts';
+			$headScript->offsetSetFile($syntax_highlighter, $sh_url.'/sh.min.js');
+			$headScript->offsetSetScript($syntax_highlighter+1,'SyntaxHighlighter.config.clipboardSwf = "'.$sh_url.'/clipboard.swf";');
+		}*/
+		if ( $syntax_highlighter ) {
+			$sh_url = $script_url.'/jquery.beautyOfCode.js';
+			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
+			$headScript->offsetSetScript($syntax_highlighter+1,
+				'$.beautyOfCode.init({
+			        baseUrl: "http://alexgorbatchev.com/pub/sh/current/",
+			        defaults: { gutter: true },
+			        brushes: ["Php", "Plain", "Xml", "Css", "JScript"]
+			    });'
+			);
 		}
 		
 		# Editor
