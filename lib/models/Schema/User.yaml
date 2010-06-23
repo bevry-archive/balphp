@@ -67,6 +67,8 @@ Bal_User:
         description:
             # Bio
             type: string
+            extra:
+                html: html
         
         level:
             # Permission Level - Calculated by highest role
