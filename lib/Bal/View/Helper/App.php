@@ -201,8 +201,16 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $editor ) {
 			switch ( $this->getConfig('bal.editor') ) {
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.7.3';
-					$headLink->offsetSetStylesheet($editor, $bespin_url.'/BespinEmbedded.compressed.css');
+					$bespin_url = $script_url.'/bespin-0.8.0-custom';
+					$headLink->headLink(
+						array(
+							'id' => 'bespin_base',
+							'rel' => '',
+							'href' => $bespin_url
+						),
+						'PREPEND'
+					);
+					$headLink->offsetSetStylesheet($editor, $bespin_url.'/BespinEmbedded.css');
 					break;
 				
 				default:
@@ -316,7 +324,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
 			$headScript->offsetSetScript($syntax_highlighter+1,
 				'$.beautyOfCode.init({
-			        baseUrl: "http://alexgorbatchev.com/pub/sh/current/",
+			        baseUrl: "http://alexgorbatchev.com.s3.amazonaws.com/pub/sh/2.1.364/",
 			        defaults: { gutter: true },
 			        brushes: ["Php", "Plain", "Xml", "Css", "JScript"]
 			    });'
@@ -333,7 +341,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					break;
 					
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.7.3';
+					$bespin_url = $script_url.'/bespin-0.8.0-custom';
 					$headScript->offsetSetFile($editor,$bespin_url.'/BespinEmbedded.js');
 					break;
 				

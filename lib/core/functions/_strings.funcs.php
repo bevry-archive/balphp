@@ -321,6 +321,20 @@ if ( function_compare('append_or_set', 2.1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('html4ize', 1.0, true, __FILE__, __LINE__) ) {
+	/**
+	 * Converts HTML5 code to HTML4
+	 * @version 1, June 13, 2010
+	 * @since 1, June 13, 2010
+	 * @param string $content
+	 * @return bool
+	 */
+	function html4ize ( $content ) {
+		$content = preg_replace('/(<\\/?)(article|aside|audio|canvas|command|datalist|details|embed|figcaption|figure|footer|header|hgroup|keygen|mark|meter|nav|output|progress|rp|rt|ruby|section|source|summary|time|video)(>?)/i', '$1div$3', $content);
+		return $content;
+	}
+}
+
 if ( !function_exists('format_to_output') && function_compare('format_to_output', 1.1, true, __FILE__, __LINE__) ) {
 
 	/**
@@ -344,17 +358,6 @@ if ( !function_exists('format_to_output') && function_compare('format_to_output'
 			
 			case 'html':
 				// Raw html allowed, should convert special characters
-				$value = str_replace(
-					array(
-						'<?',
-						"?>"
-					),
-					array(
-						'&lt;?',
-						"?&gt;"
-					),
-					$value
-				);
 				break;
 			
 			case 'text':
