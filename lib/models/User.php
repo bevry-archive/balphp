@@ -489,16 +489,23 @@ class Bal_User extends Base_Bal_User {
 				}
 				else {
 					// We are a valid Identity
-		
+					
 					# Check Permission
 					if ( !$Identity->hasPermission('user') ) {
 						// Does not have permission, will need to perform other checks
 		
 						# Prepare
 						$User_id = delve($User,'id');
+						$User_level = delve($User,'level');
 						
+						# Check Level
+						if ( $User_level > $Identity->level ) {
+							// we are trying to edit someone of higher authority than us
+							throw new Doctrine_Exception('error-user-verifyaccess-indentity-level');
+							$result = false;
+						}
 						# Check Ownership
-						if ( $User_id && $User_id !== $Identity->id ) {
+						elseif ( $User_id && $User_id !== $Identity->id ) {
 							// this is not our brief to edit
 							throw new Doctrine_Exception('error-user-verifyaccess-indentity-ownership');
 							$result = false;

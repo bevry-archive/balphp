@@ -367,8 +367,8 @@ class Bal_File extends Base_Bal_File {
 		# Handle
 		if ( $fetch === 'list' ) {
 			$Query
-				->select('File.id, File.type, File.humantype, File.code, File.size, Author.id, Author.code, Author.displayname')
-				->from('File')
+				->select('File.id, File.type, File.title, File.humantype, File.code, File.size, File.url, Author.id, Author.code, Author.displayname')
+				->from('File, File.Author Author')
 				->orderBy('File.code ASC')
 				;
 		}
