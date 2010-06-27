@@ -71,23 +71,43 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
      *
      * @return string The element XHTML.
      */
-    public function formDoctrine( array $args ) {
+    public function formDoctrine( $name, $value = null, $attribs = null, $options = null, $listsep = null ) {
 		# Prepare
 		$Locale = Bal_App::getLocale();
 		$result = '';
-		
-		# Extract
-		array_keys_keep_ensure($args, array(
-			'target','source',
+		$custom_args_keys = array(
 			'name','value',
+			'target','source',
 			'table','field',
-			'type','notnull','notblank','auto','length','relationStatus',
-			'attribs','options',
-			'listsep','disable','escape'
-		));
-		extract($args);
+			'type','notnull','notblank','auto','length','relationStatus'
+		);
 		
-		# Target
+		# --------------------------
+		
+		# Attempt to Extract Custom Info
+		if ( is_array($name) ) {
+			$custom_args = array_keys_keep($name, $custom_args_keys);
+		}
+		elseif ( is_array($attribs) ) {
+			$custom_args = array_keys_keep($attribs, $custom_args_keys);
+		}
+		else {
+			$custom_args = array();
+		}
+		
+		# Fetch Info
+		$info = array_merge(
+			$this->_getInfo($name, $value, $attribs, $options, $listsep),
+				/* ^ generates: name, id, value, attribs, options, [listsep, disable, escape] */
+			$custom_args
+		);
+		$info = array_keys_ensure($info, $custom_args_keys);
+        extract($info);
+		
+		# --------------------------
+		
+		# Handle Target Shortcut
+		// perhaps instead of passing in name and value, we pass target and source
 		if ( !empty($target) ) {
 			# Name <- Target
 			if ( empty($name) ) {
@@ -104,9 +124,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			}
 		}
 		
-		# Fetch Info
-        $info = $this->_getInfo($name, $value, $attribs);
-        extract($info); // name, id, value, attribs, options, [listsep, disable, escape]
+		# --------------------------
 		
 		# Fetch Table Information
 		$Table = Bal_Doctrine_Core::getTable($table);
@@ -118,7 +136,9 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		$tableLower = strtolower($table);
 		$fieldLower = strtolower($field);
 		
-		# Extract Args
+		# --------------------------
+		
+		# Extract Field Properties
 		if ( $notblank === null )			$notblank = delve($properties,'notblank');
 		if ( $notnull === null )			$notnull = delve($properties,'notnull');
 		if ( $auto === null )				$auto = delve($properties,'auto');
@@ -128,6 +148,8 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 		# Prepare Attributes
 		array_keys_ensure($attribs, array('class'), '');
 		
+		# --------------------------
+		
 		# Prepare value
 		if ( is_array($value) || is_object($value) ) {
 			if ( is_numeric(delve($value,'id')) ) { // for some reason a doctrine collection actually returns an ID value
@@ -136,7 +158,7 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			elseif ( is_traversable($value) ) {
 				$values = array();
 				foreach ( $value as $_value ) {
-					$values[] = delve($_value,'id');
+					$values[] = delve($_value,'id',$_value);
 				}
 				$value = $values;
 			}
@@ -149,7 +171,9 @@ class Zend_View_Helper_FormDoctrine extends Zend_View_Helper_FormElement
 			}
 		}
 		
-		# Discover
+		# --------------------------
+		
+		# Handle
 		switch ( $type ) {
 			case 'relation':
 				# Prepare

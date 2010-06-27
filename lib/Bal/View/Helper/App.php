@@ -159,6 +159,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'locale'				=> 100,
 				'browser'				=> 110,
 				'jquery_ui'				=> 210,
+				'jquery_lightbox'		=> 250,
 				'syntax_highlighter'	=> 300,
 				'editor'				=> 400,
 				'style'					=> 500,
@@ -187,8 +188,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 		# jQuery UI
 		if ( $jquery_ui ) {
-			$jquery_ui_url = $script_url.'/jquery-ui-1.7.2';
-			$headLink->offsetSetStylesheet($jquery_ui, $jquery_ui_url.'/css/cupertino/jquery-ui-1.7.2.custom.css');
+			$jquery_ui_url = $script_url.'/jquery-ui-1.8.2';
+			$headLink->offsetSetStylesheet($jquery_ui, $jquery_ui_url.'/css/cupertino/jquery-ui-1.8.2.custom.css');
+		}
+		
+		# jQuery Lightbox
+		if ( $jquery_lightbox ) {
+			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
+			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.packed.css');
 		}
 		
 		# Syntax Highlighter
@@ -257,6 +264,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'jquery_plugins' 		=> 220,
 				'jquery_sparkle' 		=> 230,
 				'jquery_ajaxy' 			=> 240,
+				'jquery_lightbox' 		=> 250,
 				'syntax_highlighter'	=> 300,
 				'editor' 				=> 400,
 				'script' 				=> 500,
@@ -285,8 +293,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery UI
 		if ( $jquery_ui ) {
-			$jquery_ui_url = $script_url.'/jquery-ui-1.7.2';
-			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.7.2.custom.min.js');
+			$jquery_ui_url = $script_url.'/jquery-ui-1.8.2';
+			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.8.2.custom.min.js');
 	    }
 		
 		# JSON
@@ -308,9 +316,15 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
-			$jquery_ajaxy_url = $script_url.'/scripts/ajaxy/js';
+			$jquery_ajaxy_url = $script_url.'/ajaxy/js';
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/jquery.history.js');
 			$headScript->offsetSetFile($jquery_ajaxy+1, $jquery_ajaxy_url.'/jquery.ajaxy.js');
+		}
+		
+		# jQuery Lightbox
+		if ( $jquery_lightbox ) {
+			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
+			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox.js');
 		}
 		
 		# Syntax Highlighter

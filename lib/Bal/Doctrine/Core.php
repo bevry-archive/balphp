@@ -333,9 +333,13 @@ abstract class Bal_Doctrine_Core {
 		# Prepare
 		$only = delve($options,'only',false);
 		$param = delve($options,'param',$tableComponentName);
+		$item = null;
 		
 		# Fetch item
-		$item = self::fetchItemParam($param);
+		if ( $tableComponentName ) {
+			# Fetch item
+			$item = Bal_App::fetchParam(strtolower($tableComponentName), Bal_App::fetchParam($tableComponentName, null));
+		}
 		
 		# Handle Array
 		if ( is_array($item) ) {

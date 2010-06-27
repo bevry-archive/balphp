@@ -51,7 +51,8 @@ if ( function_compare('implode_querystring', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Do something
 	 *
-	 * @version 1
+	 * @version 1.1, June 24, 2010 - added urlencode
+	 * @since 1
 	 *
 	 * @todo figure out what the hell this does
 	 *
@@ -59,7 +60,7 @@ if ( function_compare('implode_querystring', 1, true, __FILE__, __LINE__) ) {
 	function implode_querystring ( $query_string, $amp = '&amp;' ) {
 		$params = '';
 		foreach ( $query_string as $key => $value ) {
-			$params .= $key . '=' . $value . $amp;
+			$params .= urlencode($key) . '=' . urlencode($value) . $amp;
 		}
 		return $params;
 	}

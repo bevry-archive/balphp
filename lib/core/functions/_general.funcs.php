@@ -147,6 +147,14 @@ if ( function_compare('baltrace', 1, true, __FILE__, __LINE__) ) {
 	}
 }
 
+if ( function_compare('baltraceslim', 1, true, __FILE__, __LINE__) ) {
+	function baltraceslim ( ) {
+		echo '<pre>';
+		echo get_backtrace_slim();
+	 	echo '</pre><br/>';
+	}
+}
+
 if ( function_compare('get_backtrace', 1, true, __FILE__, __LINE__) ) {
 	function get_backtrace ( ) {
 		ob_start();

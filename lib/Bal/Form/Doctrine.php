@@ -222,7 +222,7 @@ class Bal_Form_Doctrine
 	}
 	
 	/**
-	 * Generate a element  of $table $fieldName to $Element
+	 * Generate a element of $table $fieldName to $Element
 	 * @version 1.1, April 12, 2010
 	 * @param Zend_Form_Element &$Element - The form element to apply to
 	 * @param mixed $table - The table/type to use

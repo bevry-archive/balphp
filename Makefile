@@ -21,6 +21,7 @@ doc:
 	
 tests:
 	rm -Rf $(DIRTESTS)/log/*
+	mkdir $(DIRTESTS)/log/report
 	$(PHPUNIT)
 
 report:

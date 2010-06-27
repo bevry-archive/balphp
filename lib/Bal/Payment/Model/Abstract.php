@@ -156,7 +156,8 @@ abstract class Bal_Payment_Model_Abstract {
 	 * @return array
 	 */
 	public function toArray ( ) {
-		return to_array_deep_copy($this->_data);
+		$data = $this->_data;
+		return to_array_deep($this->_data);
 	}
 	
 	/**
