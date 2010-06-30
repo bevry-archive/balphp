@@ -159,6 +159,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'locale'				=> 100,
 				'browser'				=> 110,
 				'jquery_ui'				=> 210,
+				'jquery_sparkle'		=> 230,
 				'jquery_lightbox'		=> 250,
 				'syntax_highlighter'	=> 300,
 				'editor'				=> 400,
@@ -192,6 +193,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$headLink->offsetSetStylesheet($jquery_ui, $jquery_ui_url.'/css/cupertino/jquery-ui-1.8.2.custom.css');
 		}
 		
+		# jQuery Sparkle
+		if ( $jquery_sparkle ) {
+			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
+			$headLink->offsetSetStylesheet($jquery_sparkle, $jquery_sparkle_url.'/styles/jquery.sparkle.min.css');
+		}
+		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
 			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
@@ -208,7 +215,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $editor ) {
 			switch ( $this->getConfig('bal.editor') ) {
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.8.0-custom';
+					$bespin_url = $script_url.'/bespin-0.9a1-custom';
 					$headLink->headLink(
 						array(
 							'id' => 'bespin_base',
@@ -310,7 +317,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
 			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
-			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle.js');
+			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle.min.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.applyConfig("default",{icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
@@ -324,7 +331,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
 			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
-			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox.js');
+			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox.min.js');
 		}
 		
 		# Syntax Highlighter
@@ -355,7 +362,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					break;
 					
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.8.0-custom';
+					$bespin_url = $script_url.'/bespin-0.9a1-custom';
 					$headScript->offsetSetFile($editor,$bespin_url.'/BespinEmbedded.js');
 					break;
 				
