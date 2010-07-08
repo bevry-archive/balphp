@@ -147,10 +147,10 @@ if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
 }
 
 
-if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
+if ( function_compare('get_browser_info', 1, true, __FILE__, __LINE__) ) {
 	/**
 	 * Get Browser Information
-	 * @version 1, February 24, 2010
+	 * @version 1, July 08, 2010
 	 * @return array [browser, engine, version]
 	 */
 	function get_browser_info ( ) {
