@@ -693,7 +693,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$result = false;
 		
 		# Handle
-		if ( file_exists($publicPath . DIRECTORY_SEPARATOR . $file) ) {
+		$path = $publicPath . DIRECTORY_SEPARATOR . $file;
+		if ( file_exists($path) && filesize($path) ) {
 			$result = $publicUrl . '/' . $file;
 		}
 		
@@ -708,7 +709,8 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$result = false;
 		
 		# Handle
-		if ( file_exists($themePath . DIRECTORY_SEPARATOR . $file) ) {
+		$path = $themePath . DIRECTORY_SEPARATOR . $file;
+		if ( file_exists($path) && filesize($path) ) {
 			$result = $themeUrl . '/' . $file;
 		}
 		

@@ -130,7 +130,7 @@ if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
 	/**
 	 * Checks internet connection
 	 * @author http://www.weberdev.com/get_example-4025.html
-	 * @copyright Unkown
+	 * @copyright Unknown
 	 * @version 1, February 24, 2010
 	 * @return string
 	 * @todo figure out what the hell this does
@@ -143,5 +143,77 @@ if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
 	        fclose($connected); 
 	    }
 	    return $result; 
+	}
+}
+
+
+if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
+	/**
+	 * Get Browser Information
+	 * @version 1, February 24, 2010
+	 * @return array [browser, engine, version]
+	 */
+	function get_browser_info ( ) {
+		// IE8: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.2; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)
+		// Firefox: Mozilla/5.0 (Windows; U; Windows NT 6.1; it; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6 ( .NET CLR 3.5.30729)
+		// Safari: Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16
+		// Chrome: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.2 (KHTML, like Gecko) Chrome/6.0.451.0 Safari/534.2
+		// abreviation asd
+	
+		# Check if we need ot define
+		if ( !array_key_exists('BROWSER', $GLOBALS) ) {
+			$GLOBALS['BROWSER'] = array(
+				'ie' => false,
+				'firefox' => false,
+				'opera' => false,
+				'chrome' => false,
+				'safari' => false,
+				'other' => false,
+				'version' => false
+			);
+			global $BROWSER;
+	
+			$BROWSER['browser'] = $h_u_a = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MSIE';
+			
+			if ( strstr($h_u_a,'Firefox') ) {
+				$BROWSER['browser'] 		= 'firefox';
+				$BROWSER['engine'] 			= 'moz';
+				$BROWSER['firefox'] 		= true;
+				$BROWSER['version'] 		= (strstr($h_u_a,'Firefox/3') ? 3 : (strstr($h_u_a,'Firefox/2') ? 2 : 1));
+			}
+			elseif ( strstr($h_u_a,'Opera') ) {
+				$BROWSER['browser'] 		= 'opera';
+				$BROWSER['engine'] 			= 'o';
+				$BROWSER['opera'] 			= true;
+				$BROWSER['version']			= (strstr($h_u_a,'Opera/10') ? 10 : (strstr($h_u_a,'Opera/9') ? 9 : 8));
+			}
+			elseif ( strstr($h_u_a,'Chrome') ) {
+				$BROWSER['browser'] 		= 'chrome';
+				$BROWSER['engine'] 			= 'webkit';
+				$BROWSER['chrome'] 			= true;
+				$BROWSER['version']			= (strstr($h_u_a,'Chrome/6') ? 6 : (strstr($h_u_a,'Opera/5') ? 5 : 4));
+			}
+			elseif( strstr($h_u_a,'Safari') ) {
+				$BROWSER['browser'] 		= 'safari';
+				$BROWSER['engine'] 			= 'webkit';
+				$BROWSER['safari'] 			= true;
+				$BROWSER['version']			= 99;
+			}
+			elseif( strstr($h_u_a,'MSIE') ) {
+				$BROWSER['browser'] 		= 'ie';
+				$BROWSER['engine'] 			= 'trident';
+				$BROWSER['ie'] 				= true;
+				$BROWSER['version']			= (strstr($h_u_a,'MSIE 8') ? 8 : (strstr($h_u_a,'MSIE 7') ? 7 : 6));
+			}
+			else {
+				$BROWSER['browser'] 		= 'other';
+				$BROWSER['engine'] 			= 'other';
+				$BROWSER['other'] 			= true;
+				$BROWSER['version'] 		= 99;
+			}
+		}
+		
+		# Return $GLOBALS['BROWSER']
+		return $GLOBALS['BROWSER'];
 	}
 }
