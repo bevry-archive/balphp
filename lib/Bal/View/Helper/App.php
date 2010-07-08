@@ -307,7 +307,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# JSON
 		if ( $json ) {
-			$headScript->offsetSetScript($json, 'if ( typeof JSON === "undefined" ) $.appendScript("'.$script_url.'/json2.js");');
+			$headScript->offsetSetScript($json, 'if ( typeof JSON === "undefined" ) $.appendScript("'.$script_url.'/json2.min.js");');
 	    }
 		
 		# jQuery Plugins
