@@ -196,13 +196,13 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
 			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
-			$headLink->offsetSetStylesheet($jquery_sparkle, $jquery_sparkle_url.'/styles/compiled/all.min.css');
+			$headLink->offsetSetStylesheet($jquery_sparkle, $jquery_sparkle_url.'/styles/jquery.sparkle.min.css');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
 			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
-			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.packed.css');
+			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.min.css');
 		}
 		
 		# Syntax Highlighter
@@ -290,7 +290,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Modernizr
 		if ( $modernizr ) {
-			$headScript->offsetSetFile($modernizr, $public_url.'/scripts/modernizr-1.1.min.js');
+			$headScript->offsetSetFile($modernizr, $public_url.'/scripts/modernizr-1.5.min.js');
 		}
 	
 		# jQuery
@@ -312,21 +312,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery Plugins
 		if ( $jquery_plugins ) {
-			$headScript->offsetSetFile($jquery_plugins, $public_url.'/scripts/jquery.autogrow.js');
+			$headScript->offsetSetFile($jquery_plugins, $public_url.'/scripts/jquery.autogrow.min.js');
 	    }
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
 			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
-			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/compiled/all.min.js');
+			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
-			$jquery_ajaxy_url = $script_url.'/ajaxy/js';
-			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/jquery.history.js');
-			$headScript->offsetSetFile($jquery_ajaxy+1, $jquery_ajaxy_url.'/jquery.ajaxy.js');
+			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
+			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.history.min.js');
+			$headScript->offsetSetFile($jquery_ajaxy+1, $jquery_ajaxy_url.'/scripts/jquery.ajaxy.min.js');
 		}
 		
 		# jQuery Lightbox
@@ -342,7 +342,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$headScript->offsetSetScript($syntax_highlighter+1,'SyntaxHighlighter.config.clipboardSwf = "'.$sh_url.'/clipboard.swf";');
 		}*/
 		if ( $syntax_highlighter ) {
-			$sh_url = $script_url.'/jquery.beautyOfCode.js';
+			$sh_url = $script_url.'/jquery.beautyOfCode.min.js';
 			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
 			$headScript->offsetSetScript($syntax_highlighter+1,
 				'$.beautyOfCode.init({

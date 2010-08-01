@@ -34,7 +34,7 @@ if ( function_compare('ensure_timestamp', 1, true, __FILE__, __LINE__) ) {
 		if ( $value === null ) $result = time();
 		elseif ( is_numeric($value) ) $result = $value;
 		elseif ( is_string($value) ) $result = strtotime($value);
-		else throw new Exception('Unkown timestamp type.');
+		else throw new Exception('Unknown timestamp type.');
 		
 		return $result;
 	}
