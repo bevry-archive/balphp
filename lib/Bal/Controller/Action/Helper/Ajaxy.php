@@ -1,39 +1,11 @@
 <?php
-/**
- * AJAXY Zend Plugin
- * Copyright (C) 2009 Benjamin Arthur Lupton
- * http://www.balupton.com/projects/ajaxy/
- *
- * This file is part of Balupton's Resource Library (balPHP).
- *
- * Balupton's Resource Library (balPHP) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * Balupton's Resource Library (balPHP)is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Balupton's Resource Library (balPHP).  If not, see <http://www.gnu.org/licenses/>.
- *
- * @uses Zend_Controller_Action_Helper_Abstract
- * @package balphp
- * @version 0.1.0-final, August 3, 2009
- * @since 0.1.0-final, August 3, 2009
- * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
- * @copyright Copyright (c) 2009, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
- * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
- */
 class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Abstract
 {
 	# ========================
 	# VARIABLES
 	
-	protected $_json = null;
-	protected $_session = null;
+	protected $_Json = null;
+	protected $_Session = null;
 	protected $_xhr = null;
 	
 	protected $_data = array(
@@ -65,10 +37,10 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 		$this->_Session = $Session;
 		
 		# Store whether we are a ajax request
-		$this->_session->xhr = $this->isAjax();
-		$this->_session->served = false;
-		$this->_session->last_url = $this->getURL();
-		$this->_session->last_hit = time();
+		$this->_Session->xhr = $this->isAjax();
+		$this->_Session->served = false;
+		$this->_Session->last_url = $this->getURL();
+		$this->_Session->last_hit = time();
 		
 		# Done
 		return method_exists(get_parent_class($this),$parent_method = __FUNCTION__) ? parent::$parent_method($options) : $result;
@@ -126,18 +98,29 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 	 * @param array $ajaxy_levels
 	 * @return
 	 */
-    public function render($html_view, $ajaxy_levels, $ajaxy_data = array()){
-		# Render
+    public function render ( $params ) {
+		# Prepare Params
+		if ( !is_array($params) ) {
+			$params = array(
+				'template' => $params
+			);
+		}
+		$params = array_keys_keep_ensure($params, array('template','routes','controller','data'));
 		
-		# Cycle through levels independent arrays
-		$routes = $controllers = array();
-		foreach ( $ajaxy_levels as $route => $controller ) {
-			# Populate with view variables
+		# Extract
+		$controller = $params['controller'];
+		$template = $params['template'];
+		$ajaxy_data = $params['data'];
+		
+		# Populate Routes
+		$routes = array();
+		force_array($params['routes']);
+		foreach ( $params['routes'] as $route => $routeData ) {
 			$route = preg_replace('/:(\w+)/ie', '\$this->getActionControllerView()->${1}', $route);
-			$controller = preg_replace('/:(\w+)/ie', '\$this->getActionControllerView()->${1}', $controller);
-			# Update
-			$routes[] = $route;
-			$controllers[] = $controller;
+			$routeData['route'] = $route;
+			if ( empty($routeData['controller']) ) $routeData['controller'] = $params['controller'];
+			if ( empty($routeData['template']) ) $routeData['template'] = $params['template'];
+			$routes[] = $routeData;
 		}
 		
 		# Fetch
@@ -147,33 +130,11 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 		$routes_old = $this->_Session->ajaxy_routes;
 		$this->_Session->ajaxy_routes = $routes;
 		$this->_Session->served = true;
-		
 		$xhr = $this->isAjax();
 		if ( $xhr ) {
 			# JSON
 			
-			# Discover controller
-			$controller = '';
-			foreach ( $routes as $i => $route ) {
-				# Check old part
-				if ( !isset($routes_old[$i]) ) {
-					break;
-				}
-				
-				# Save the current controller
-				$controller = $controllers[$i];
-				
-				# We have the old part
-				$route_old = $routes_old[$i];
-				
-				# Compare old with new
-				if ( $route_old != $route ) {
-					# Mismatch
-					break;
-				}
-			}
-			
-			# Data
+			# Extract Data
 			if ( is_string($ajaxy_data) ) {
 				$ajaxy_data = explode(',', $ajaxy_data);
 				$ajaxy_data_new = array();
@@ -185,18 +146,41 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 			}
 			$ajaxy_data['Ajaxy'] = $this->_data;
 			
-			# Dispatch
-            $zend_controller = $this->getActionControllerRequest()->getControllerName();
-            $viewScript = $zend_controller.DIRECTORY_SEPARATOR.$controller.'.'.$this->getActionController()->viewSuffix;
+			# Discover controller
+			foreach ( $routes as $i => $routeData ) {
+				# Check old part
+				if ( !isset($routes_old[$i]) ) {
+					break;
+				}
+				
+				# Route
+				$route = $routeData['route'];
+				$route_old = $routes_old[$i]['route'];
+				
+				# Extract
+				$controller = $routeData['controller'];
+				$template = $routeData['template'];
+				
+				# Compare old with new
+				if ( $route_old != $route ) {
+					# Mismatch
+					break;
+				}
+			}
 			
-			# Perform
-			$zend_view = $this->getActionControllerView()->render($viewScript);
-			$zend_title = html_entity_decode(strip_tags($this->getActionControllerView()->headTitle()->toString()));
-			$data = array_merge(array(
+			# Check Template
+			if ( !ends_with($template,'.phtml') ) $template .= '.phtml';
+			$template = $this->getActionControllerRequest()->getControllerName().DIRECTORY_SEPARATOR.$template;
+			
+			# Perform Render
+			$View = $this->getActionControllerView();
+			$content = $View->render($template);
+			$title = html_entity_decode(strip_tags($View->headTitle()->toString()));
+			$data = array_merge($ajaxy_data,array(
 				'controller' => $controller,
-				'title' => $zend_title,
-				'view' => $zend_view,
-			), $ajaxy_data);
+				'title' => $title,
+				'content' => $content,
+			));
 			
 			# Send
 			if ( !empty($ajaxy_options['form'])) {
@@ -223,7 +207,7 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 			
 		} else {
 			# HTML
-			$this->getActionController()->render($html_view);
+			$this->getActionController()->render($template);
 		}
     }
 }

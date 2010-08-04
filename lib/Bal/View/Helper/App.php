@@ -325,8 +325,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
 			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
-			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.history.min.js');
-			$headScript->offsetSetFile($jquery_ajaxy+1, $jquery_ajaxy_url.'/scripts/jquery.ajaxy.min.js');
+			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy.min.js');
 		}
 		
 		# jQuery Lightbox

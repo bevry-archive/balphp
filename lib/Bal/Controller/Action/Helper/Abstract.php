@@ -40,7 +40,9 @@ abstract class Bal_Controller_Action_Helper_Abstract extends Zend_Controller_Act
 	 * @return
 	 */
 	public function getActionControllerRequest ( ) {
-		return $this->getActionController()->getRequest();
+		// $Request = $this->getActionController()->getRequest();
+		$Request = Bal_App::getRequest();
+		return $Request;
 	}
 	
 	# ========================
