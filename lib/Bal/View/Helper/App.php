@@ -301,7 +301,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery UI
 		if ( $jquery_ui ) {
 			$jquery_ui_url = $script_url.'/jquery-ui-1.8.2';
-			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.8.2.custom.min.js');
+			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.8.2.custom.js');
 	  		$headScript->offsetSetScript($jquery_ui+1,'$.datepicker.setDefaults({dateFormat: "yy-mm-dd"});');
 	    }
 		
@@ -318,25 +318,25 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
 			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
-			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle.js');
+			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
 			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
-			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy.min.js');
+			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
 			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
-			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox.min.js');
+			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
 		# Syntax Highlighter
 		if ( $syntax_highlighter ) {
-			$sh_url = 'http://github.com/balupton/jQuery-SyntaxHighlighter/raw/master/scripts/jquery.syntaxhighlighter.min.js';
+			$sh_url = 'http://github.com/balupton/jQuery-SyntaxHighlighter/raw/master/scripts/jquery.syntaxhighlighter'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js';
 			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
 			$headScript->offsetSetScript($syntax_highlighter+1,
 				'$.SyntaxHighlighter.init({
