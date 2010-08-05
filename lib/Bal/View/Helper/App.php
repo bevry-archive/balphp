@@ -335,20 +335,15 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		}
 		
 		# Syntax Highlighter
-		/*if ( $syntax_highlighter ) {
-			$sh_url = $script_url.'/syntaxhighlighter-2.1.364/scripts';
-			$headScript->offsetSetFile($syntax_highlighter, $sh_url.'/sh.min.js');
-			$headScript->offsetSetScript($syntax_highlighter+1,'SyntaxHighlighter.config.clipboardSwf = "'.$sh_url.'/clipboard.swf";');
-		}*/
 		if ( $syntax_highlighter ) {
-			$sh_url = $script_url.'/jquery.beautyOfCode.min.js';
+			$sh_url = 'http://github.com/balupton/jQuery-SyntaxHighlighter/raw/master/scripts/jquery.syntaxhighlighter.min.js';
 			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
 			$headScript->offsetSetScript($syntax_highlighter+1,
-				'$.beautyOfCode.init({
-			        baseUrl: "http://alexgorbatchev.com.s3.amazonaws.com/pub/sh/2.1.364/",
-			        defaults: { gutter: true },
-			        brushes: ["Php", "Plain", "Xml", "Css", "JScript"]
-			    });'
+				'$.SyntaxHighlighter.init({
+					"defaults": {
+						"toolbar":false
+					}
+				});'
 			);
 		}
 		
