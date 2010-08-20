@@ -121,9 +121,9 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		
 		# Render
 		$render =
-			'<!--['.$code.']-->'.
-				$this->renderWidget($code, $params).
-			'<!--[/'.$code.']-->';
+			//'<!--['.$code.']-->'.
+				$this->renderWidget($code, $params);
+			//'<!--[/'.$code.']-->';
 		
 		# Done
 		return $render;
