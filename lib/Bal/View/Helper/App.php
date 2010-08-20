@@ -156,15 +156,15 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			array(
 				'csscaffold'			=> false,
 				'favicon'				=> true,
-				'locale'				=> 100,
-				'browser'				=> 110,
 				'jquery_ui'				=> 210,
 				'jquery_sparkle'		=> 230,
 				'jquery_lightbox'		=> 250,
 				'syntax_highlighter'	=> 300,
 				'editor'				=> 400,
 				'style'					=> 500,
-				'theme'					=> 600
+				'theme'					=> 600,
+				'locale'				=> 700,
+				'browser'				=> 800,
 			),
 			$App->getConfig('bal.headLink', array())
 		);
@@ -185,8 +185,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $browser ) {
 			$url = $this->getBrowserStylesheetUrl();
 			if ( $url )	$headLink->offsetSetStylesheet($browser, $url);
+			$url = $this->getMobileStylesheetUrl();
+			if ( $url )	$headLink->offsetSetStylesheet($browser, $url);
 		}
-	
+		
 		# jQuery UI
 		if ( $jquery_ui ) {
 			$jquery_ui_url = $script_url.'/jquery-ui-1.8.2';
@@ -382,9 +384,52 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		return $headScript;
 	}
 	
+	public function getBrowserInfo() {
+		return get_browser_info();
+	}
+	
+	public function isBrowser($browser, $version = null, $mobile = null){
+		$browserInfo = $this->getBrowserInfo();
+		return $browserInfo['browser'] === $browser && (!$version || $browserInfo['version'] === $version) && (!$mobile || $browserInfo['mobile'] === $mobile);
+	}
+	
+	public function getHtmlClassAttribute ( ) {
+		$browserInfo = $this->getBrowserInfo();
+		$class = array();
+		$class[] = $browserInfo['browser'];
+		$class[] = $browserInfo['environment'];
+		if ( $browserInfo['version'] ) $class[] = $browserInfo['browser'].$browserInfo['version'];
+		return implode(' ',$class);
+	}
+	
+	public function getMobileStylesheetUrl ( ) {
+		# Prepare
+		$browser = $this->getBrowserInfo();
+		$url = false;
+		
+		if ( $browser['mobile'] ) {
+			# Attempt Browser with Version
+			$file = 'browser/'.$browser['browser'].$browser['version'].'mobile.css';
+			$url = $this->getStylesheetUrl($file);
+			if ( !$url ) {
+				# Attempt Browser without Version
+				$file = 'browser/'.$browser['browser'].'mobile.css';
+				$url = $this->getStylesheetUrl($file);
+				if ( !$url ) {
+					# Attempt Just Mobile
+					$file = 'browser/mobile.css';
+					$url = $this->getStylesheetUrl($file);
+				}
+			}
+		}
+		
+		# Return url
+		return $url;
+	}
+	
 	public function getBrowserStylesheetUrl ( ) {
 		# Prepare
-		$browser = get_browser_info();
+		$browser = $this->getBrowserInfo();
 		
 		# Attempt Browser with Version
 		$file = 'browser/'.$browser['browser'].$browser['version'].'.css';

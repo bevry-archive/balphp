@@ -169,7 +169,10 @@ if ( function_compare('get_browser_info', 1, true, __FILE__, __LINE__) ) {
 				'chrome' => false,
 				'safari' => false,
 				'other' => false,
-				'version' => false
+				'version' => false,
+				'mobile' => false,
+				'desktop' => true,
+				'environment' => 'desktop'
 			);
 			global $BROWSER;
 	
@@ -211,6 +214,10 @@ if ( function_compare('get_browser_info', 1, true, __FILE__, __LINE__) ) {
 				$BROWSER['other'] 			= true;
 				$BROWSER['version'] 		= 99;
 			}
+			
+			$BROWSER['mobile'] = strstr($h_u_a, 'Mobile');
+			$BROWSER['desktop'] = !$BROWSER['mobile'];
+			$BROWSER['environment'] = $BROWSER['mobile'] ? 'mobile' : 'desktop';
 		}
 		
 		# Return $GLOBALS['BROWSER']
