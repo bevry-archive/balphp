@@ -197,13 +197,13 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
-			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
+			$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/master';
 			$headLink->offsetSetStylesheet($jquery_sparkle, $jquery_sparkle_url.'/styles/jquery.sparkle.min.css');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
-			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
+			$jquery_lightbox_url = 'http://github.com/balupton/jquery-lightbox/raw/master';
 			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.min.css');
 		}
 		
@@ -326,20 +326,20 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
-			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
+			$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/master';
 			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
-			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
+			$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/master';
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
-			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
+			$jquery_lightbox_url = 'http://github.com/balupton/jquery-lightbox/raw/master';
 			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
