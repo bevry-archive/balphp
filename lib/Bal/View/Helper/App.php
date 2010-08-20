@@ -301,7 +301,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery UI
 		if ( $jquery_ui ) {
 			$jquery_ui_url = $script_url.'/jquery-ui-1.8.2';
-			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.8.2.custom.js');
+			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js' : $jquery_ui_url.'/js/jquery-ui-1.8.2.custom.min.js');
 	  		$headScript->offsetSetScript($jquery_ui+1,'$.datepicker.setDefaults({dateFormat: "yy-mm-dd"});');
 	    }
 		
