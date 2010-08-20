@@ -262,12 +262,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
 		$headScript = $this->view->headScript();
+		$browserInfo = $this->getBrowserInfo();
 		
 		# Options
 		$default = array_merge(
 			array(
 				'modernizr'				=> 100,
 				'json' 					=> 110,
+				'ie9_js'				=> 120,
 				'jquery' 				=> 200,
 				'jquery_ui' 			=> 210,
 				'jquery_plugins' 		=> 220,
@@ -311,6 +313,11 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $json ) {
 			$headScript->offsetSetScript($json, 'if ( typeof JSON === "undefined" ) $.appendScript("'.$script_url.'/json2.min.js");');
 	    }
+		
+		# IE9_JS
+		//if ( $ie9_js && $browserInfo['ie'] && $browserInfo['version'] < 9 ) {
+		//	$headScript->offsetSetFile($ie9_js, $script_url.'/ie7-js-2.1-beta4/'.(APPLICATION_ENV === 'production' ? '' : 'src/').'IE9.js');
+	    //}
 		
 		# jQuery Plugins
 		if ( $jquery_plugins ) {
@@ -390,7 +397,16 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 	public function isBrowser($browser, $version = null, $mobile = null){
 		$browserInfo = $this->getBrowserInfo();
-		return $browserInfo['browser'] === $browser && (!$version || $browserInfo['version'] === $version) && (!$mobile || $browserInfo['mobile'] === $mobile);
+		$result = $browserInfo['browser'] === $browser && (!$mobile || $browserInfo['mobile'] === $mobile);
+		if ( $version ) {
+			if ( is_array($version) ) {
+				$result = $result && version_compare($browserInfo['version'], $version[1], $version[0]);
+			}
+			else {
+				$result = $result && ($browserInfo['version'] === $version);
+			}
+		}
+		return $result;
 	}
 	
 	public function getHtmlClassAttribute ( ) {
