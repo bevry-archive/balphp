@@ -147,7 +147,7 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 				'\[\/' . '\1' . '\]' .
 			')?'.
 		'/e';
-		$replace = '\$this->renderAllReplace( "${1}", "${5}", "${3}", $params )';
+		$replace = '\$this->renderAllReplace( preg_unescape(\'${1}\'), preg_unescape(\'${5}\'), preg_unescape(\'${3}\'), $params )';
 		
 		# Replace
 		$render = preg_replace($search, $replace, $content);
