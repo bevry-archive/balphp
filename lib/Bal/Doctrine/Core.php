@@ -532,8 +532,8 @@ abstract class Bal_Doctrine_Core {
 		}
 		if ( $search ) {
 			# Add Search
-			if ( method_exists($Table,'search') ) {
-				$Query = Doctrine::getTable($tableComponentName)->search($search, $Query);
+			if ( $Table->hasTemplate('Searchable') ) {
+				$Query = $Table->search($search, $Query);
 			} else {
 				$Query = $Query->andWhere($labelFieldName.' LIKE ?', '%'.$search.'%');
 			}
