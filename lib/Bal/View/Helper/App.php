@@ -465,7 +465,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$analytics_code = $this->app()->getConfig('bal.analytics.code');
 		$reinvigorate_code = $this->app()->getConfig('bal.reinvigorate.code');
 		
-		# Render
+		# Analytics
 		if ( $analytics_code ) : ?>
 			<script type="text/javascript">
 			//<![CDATA[
@@ -481,6 +481,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			</script>
 			<?
 		endif;
+		
+		# ReInvigorate
 		if ( $reinvigorate_code ) : ?>
 			<script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
 			<script type="text/javascript">

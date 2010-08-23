@@ -185,6 +185,9 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	
 	public function search ( $query = null, $code = null ) {
 		# Apply
+		if ( is_array($query) ) {
+			extract($query);
+		}
 		if ( $query ) {
 			$this->param('query',$query);
 		}
