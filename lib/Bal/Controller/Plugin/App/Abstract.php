@@ -809,14 +809,21 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	public function fetchSearch ( $code = null ) {
 		# Prepare
 		$Request = $this->getRequest();
+		$Session = $this->fetchSearchSession();
 		
 		# Fetch
-		if ( $code === null)
+		if ( $code === null) {
 			$code = fetch_param('search.code', $Request->getParam('code', null));
+		}
 		$create = fetch_param('search.create', false);
-		
-		# Session
-		$Session = $this->fetchSearchSession();
+		$query = fetch_param('search.query', $Request->getParam('query', null));
+		if ( is_array($query) ) {
+			array_hydrate($query);
+		}
+		$search = $code ? delve($Session->searches, $code) : null;
+		if ( $query && $search && $search['query'] !== $query ) {
+			$create = true;
+		}
 		
 		# Do we want to fetch the last code?
 		if ( $code === 'last' ) {
@@ -824,20 +831,16 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			$code = $Session->searches['last'];
 		}
 		
+		# oldCode
+		$oldCode = $code;
+		
 		# Discover
-		if ( empty($code) || delve($Session->searches, $code) === null || $create ) {
+		if ( empty($code) || !$search || $create ) {
 			# Create Search Query
 			
 			# Create
-			if ( !$code ) $code = $this->generateSearchCode();
-			
-			# Fetch
-			$query = fetch_param('search.query');
-			if ( !$query ) {
-				$query = $Request->getParam('query', null);
-				if ( is_array($query) ) {
-					array_hydrate($query);
-				}
+			if ( !$code || $create ) {
+				$code = $this->generateSearchCode();
 			}
 			
 			# Secure
@@ -863,8 +866,10 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# Done
 		$search = array();
-		if ( !empty($code) ) $search['code'] = $code;
-		if ( !empty($query) ) $search['query'] = $query;
+		$search['code'] = $code;
+		$search['query'] = $query;
+		$search['create'] = $create;
+		$search['oldCode'] = $oldCode;
 		return $search;
 	}
 	
