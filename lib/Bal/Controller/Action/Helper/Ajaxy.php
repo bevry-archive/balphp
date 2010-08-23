@@ -62,20 +62,17 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 		if ( $this->_xhr === null ) {
 			$xhr = $this->getActionControllerRequest()->isXmlHttpRequest();
 			if ( !$xhr && !empty($_REQUEST['ajax']) ) $xhr = 'param';
-			if ( !$xhr ) {
-				/*
-				 * We are definitly not a AJAX request
-				 * But perhaps we have come from a redirect of a AJAX request
-				 * So check if the last request was an ajax request
-				 * And check if the last request was not sent
-				 * And that we have been accessed in an appropriate redirect timeframe
-				 */
-				if ( $this->_Session->xhr && !$this->_Session->served && strtotime('-5 seconds', time()) < $this->_Session->last_hit ) {
-					# We came from a redirect from a ajaxy request
-					$xhr = true;
-					# Save some data into data
-					$this->_data['redirected']['to'] = $this->getURL();
-				}
+			/*
+			 * Perhaps we have come from a redirect of a AJAX request
+			 * So check if the last request was an ajax request
+			 * And check if the last request was not sent
+			 * And that we have been accessed in an appropriate redirect timeframe
+			 */
+			if ( $this->_Session->xhr && !$this->_Session->served && strtotime('-5 seconds', time()) < $this->_Session->last_hit ) {
+				# We came from a redirect from a ajaxy request
+				if ( !$xhr ) $xhr = true;
+				# Save some data into data
+				$this->_data['redirected']['to'] = $this->getURL();
 			}
 			# Log the XHR into the Session
 			$this->_xhr = $xhr;
@@ -136,7 +133,8 @@ class Bal_Controller_Action_Helper_Ajaxy extends Bal_Controller_Action_Helper_Ab
 			
 			# Extract Data
 			if ( is_string($ajaxy_data) ) {
-				$ajaxy_data = explode(',', $ajaxy_data);
+				$ajaxy_data = explode(',',str_replace(' ',',',$ajaxy_data));
+				array_clean($ajaxy_data);
 				$ajaxy_data_new = array();
 				foreach ( $ajaxy_data as $item ) {
 					$ajaxy_data_new[$item] = $this->getActionControllerView()->$item;
