@@ -1493,6 +1493,9 @@ abstract class Bal_Doctrine_Core {
 		
 		# Fetch
 		$Invoker = $Event->getInvoker();
+		$Invoker->addTags($Invoker->code);
+		
+		# Fetch
 		$modified = $Invoker->getModified();
 		$modifiedLast = $Invoker->getLastModified();
 		$tagRelationNames = $tagRelation.'Names';

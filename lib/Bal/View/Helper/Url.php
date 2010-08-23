@@ -285,6 +285,9 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	
 	
 	public function content ( $Item ) {
+		if ( is_string($Item) ) {
+			$Item = Bal_Doctrine_Core::getItem('Content',$Item);
+		}
 		return $this->map($Item);
 	}
 	
@@ -293,19 +296,36 @@ class Bal_View_Helper_Url extends Zend_View_Helper_Url
 	}
 	
 	public function file ( $Item ) {
-		$url = delve($Item,'url',false);
+		if ( is_string($Item) && strstr($Item,'/') ) {
+			$url = $this->view->app()->getFileUrl($Item);
+		}
+		else {
+			if ( is_string($Item) ) {
+				$Item = Bal_Doctrine_Core::getItem('File',$Item);
+			}
+			$url = delve($Item,'url',false);
+		}
 		return $this->hard($url);
 	}
 	
 	public function user ( $Item ) {
+		if ( is_string($Item) ) {
+			$Item = Bal_Doctrine_Core::getItem('User',$Item);
+		}
 		return $this->route('default')->action('user')->item($Item);
 	}
 	
 	public function userActivate ( $Item ) {
+		if ( is_string($Item) ) {
+			$Item = Bal_Doctrine_Core::getItem('User',$Item);
+		}
 		return $this->route('default')->action('user-activate')->item($Item)->param('uid',delve($Item,'uid'));
 	}
 	
 	public function message ( $Item ) {
+		if ( is_string($Item) ) {
+			$Item = Bal_Doctrine_Core::getItem('Message',$Item);
+		}
 		return $this->route('default')->action('message')->item($Item);
 	}
 	

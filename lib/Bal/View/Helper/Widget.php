@@ -103,11 +103,12 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		return $this->view->partial($widget_view_path, $model);
 	}
 	
-	protected function renderAllReplace ( $code, $content = '', $attrs = array(), array $params = array() ) {
+	protected function renderAllReplace ( $code, $innerContent = '', $attrs = array(), array $params = array() ) {
 		# Prepare
 		
 		# Handle
-		$params['content'] = $content;
+		$params['innerContent'] = $innerContent;
+		if ( empty($params['content']) ) $params['content'] = $innerContent;
 		
 		# Attributes
 		if ( !is_array($attrs) ) {
