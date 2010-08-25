@@ -470,12 +470,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Analytics
 		if ( $analytics_code ) : ?>
 			<script type="text/javascript">
-			//<![CDATA[
+			/*<![CDATA[*/
 			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-			//]]>
+			/*]]>*/
 			</script><script type="text/javascript">
-			//<![CDATA[
+			/*<![CDATA[*/
 			var pageTracker = _gat._getTracker("<?=$analytics_code?>");
 			pageTracker._initData();
 			if ( Modernizr ) {
@@ -485,8 +485,11 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				pageTracker._setCustomVar(4, "html5.csstransitions", Modernizr.csstransitions ? "yes" : "no", 2 );
 				pageTracker._setCustomVar(5, "html5.borderradius", Modernizr.borderradius ? "yes" : "no", 2 );
 			}
-			pageTracker._trackPageview();
-			//]]>
+			if ( !(document.location.hash && jQuery && (jQuery.Ajaxy||false)) ) {
+				// We do not wish to track if we are doing a Ajaxy redirect
+				pageTracker._trackPageview();
+			}
+			/*]]>*/
 			</script>
 			<?
 		endif;
@@ -495,11 +498,11 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $reinvigorate_code ) : ?>
 			<script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
 			<script type="text/javascript">
-			//<![CDATA[
+			/*<![CDATA[*/
 			try {
 			reinvigorate.track("<?=$reinvigorate_code?>");
 			} catch(err) {}
-			//]]>
+			/*]]>*/
 			</script>
 			<?
 		endif;
