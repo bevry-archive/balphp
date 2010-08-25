@@ -378,7 +378,9 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Script
 		if ( $script ) {
 			$url = $this->getScriptUrl('script.js', 'public');
-			if ( $url )	$headScript->offsetSetFile($script, $url);
+			if ( $url )	{
+				$headScript->offsetSetFile($script, $url);
+			}
 		}
 		
 		# Theme
