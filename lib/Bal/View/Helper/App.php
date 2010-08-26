@@ -478,7 +478,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			/*<![CDATA[*/
 			var pageTracker = _gat._getTracker("<?=$analytics_code?>");
 			pageTracker._initData();
-			if ( Modernizr ) {
+			if ( Modernizr||false ) {
 				pageTracker._setCustomVar(1, "html5.boxshadow", Modernizr.boxshadow ? "yes" : "no" , 2 );
 				pageTracker._setCustomVar(2, "html5.multiplebgs", Modernizr.multiplebgs ? "yes" : "no", 2 );
 				pageTracker._setCustomVar(3, "html5.fontface", Modernizr.fontface ? "yes" : "no", 2 );
