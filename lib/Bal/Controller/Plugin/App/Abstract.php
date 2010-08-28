@@ -24,14 +24,25 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Identity
 		$this->getIdentity();
 		
-		# Done
+		# URL Paths
+		$this->updateUrlPaths();
+		
+		# Return true
 		return true;
 	}
 	
 	static public function getInstance ( ) {
-		return Bal_App::getPlugin('Bal_Controller_Plugin_App');
+		return Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
 	}
 	
+	/**
+	 * Will get a Plugin
+	 * @param {string} $plugin
+	 * @return {Router}
+	 */
+	protected function getPlugin ( $plugin ) {
+		return Zend_Controller_Front::getInstance()->getPlugin($plugin);
+	}
 	
 	# ========================
 	# Authentication
@@ -83,7 +94,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		//	$Log->log(array('log-user_login',$log_details),Bal_Log::NOTICE,array('friendly'=>true,'class'=>'success','details'=>$log_details));
 		//}
 		
-		# Done
+		# Return result
 		return $result;
 	}
 
@@ -142,7 +153,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			setcookie('debug','secret',0,'/');
 		}
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -356,7 +367,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		}
 		$this->setRole($AclUser);
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -392,7 +403,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Load the User Acl
 		$this->loadUserAcl();
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -438,19 +449,170 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			return $result;
 		}
 		
-		# Done
+		# Return false
 		return false;
 	}
 	
+	
 	# ========================
-	# SYSTEM URLS
-
+	# LAYOUT AREAS
+	
+	protected $_area = false;
+	protected $_theme = false;
+	protected $_layout = false;
+	
+	/**
+	 * Set the current area
+	 */
+	public function setArea ( $area ) {
+		# Handle
+		$this->_area = $area;
+		$theme = $this->getAreaTheme($area);
+		$this->setTheme($theme);
+		
+		# Return this
+		return $this;
+	}
+	
+	/**
+	 * Get the current area
+	 */
+	public function getArea ( $area = null ) {
+		# Handle
+		$area = $area ? $area : $this->_area;
+		if ( empty($area) ) {
+			$area = 'default';
+		}
+		
+		# Return area
+		return $area;
+	}
+	
+	
+	/**
+	 * Set the current area
+	 */
+	public function setTheme ( $theme ) {
+		# Handle
+		$this->_theme = $theme;
+		$theme_layouts_path = $this->getThemeLayoutsPath($theme);
+		$this->getMvc()->setLayoutPath($theme_layouts_path);
+		
+		# Update URL Paths
+		$this->updateUrlPaths();
+		
+		# Return this
+		return $this;
+	}
+	
+	/**
+	 * Get the current theme
+	 */
+	public function getTheme ( $theme = null ) {
+		# Prepare
+		$theme = $theme ? $theme : $this->_theme;
+		if ( empty($theme) ) {
+			$theme = $this->getAreaTheme();
+		}
+		
+		# Check
+		if ( empty($theme) ) {
+			throw new Zend_Exception('Could not find theme.');
+			return false;
+		}
+		
+		# Ensure Existance
+		$theme_path = $this->getThemePath($theme);
+		if ( empty($theme_path) ) {
+			return false;
+		}
+		
+		# Return theme
+		return $theme;
+	}
+	
+	/**
+	 * Get the theme of the current area
+	 */
+	public function getAreaTheme ( $area = null ) {
+		# Prepare
+		if ( empty($area) ) $area = $this->getArea();
+		
+		# Handle
+		$theme = $this->getConfig('bal.areaThemes.'.$area);
+		
+		# Return theme
+		return $theme;
+	}
+	
+	/**
+	 * Get the url for an area
+	 */
+	public function getAreaUrl ( $area = null, $prefix = false ) {
+		# Get the theme for the area
+		$theme = $this->getAreaTheme($area);
+		
+		# Get the url of the theme
+		$url = $this->getThemeUrl($theme, $prefix);
+		
+		# Return url
+		return $url;
+	}
+	
+	/**
+	 * Get the path for an area layouts directory
+	 */
+	public function getAreaLayoutsPath ( $area = null ) {
+		# Prepare
+		$theme = $this->getAreaTheme($area);
+		
+		# Handle
+		$path = $this->getThemeLayoutsPath($theme);
+		
+		# Return path
+		return $path;
+	}
+	
+	/**
+	 * Get the current layout
+	 */
+	public function setLayout ( $layout ) {
+		$this->_layout = $layout;
+		$this->getMvc()->setLayout($layout);
+		return $this;
+	}
+	
+	
+	public function startMvc ( ) {
+		Zend_Layout::startMvc();
+		return $this;
+	}
+	
+	public function getMvc ( ) {
+		return Zend_Layout::getMvcInstance();
+	}
+	
+	# ========================
+	# URLS + PATHS
+	
+	/**
+	 * Get the APPLICATION_ENV value
+	 * @param string $env [optional] to compare
+	 * @return boolean
+	 */
+	public function getApplicationEnvironment ( $env = null ) {
+		if ( $env ) {
+			return APPLICATION_ENV === $env;
+		}
+		return APPLICATION_ENV;
+	}
+	
 	/**
 	 * Get the root url for the site
 	 * @return string
 	 */
 	public function getRootUrl ( ) {
-		return ROOT_URL;
+		return $this->getPlugin('Bal_Controller_Plugin_Url')->getRootUrl();
 	}
 	
 	/**
@@ -459,9 +621,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return string
 	 */
 	public function getBaseUrl ( $prefix = false ) {
-		$prefix = $prefix ? $this->getRootUrl() : '';
-		$suffix = BASE_URL;
-		return $prefix.$suffix;
+		return $this->getPlugin('Bal_Controller_Plugin_Url')->getBaseUrl($prefix);
 	}
 
 	/**
@@ -471,9 +631,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return string
 	 */
 	public function getPublicUrl ( $prefix = false ) {
-		$prefix = $prefix ? $this->getRootUrl() : '';
-		$suffix = PUBLIC_URL;
-		return $prefix.$suffix;
+		return $this->getPlugin('Bal_Controller_Plugin_Url')->getPublicUrl($prefix);
 	}
 	
 	/**
@@ -513,7 +671,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			return false;
 		}
 		
-		# Done
+		# Return theme_path
 		return $theme_path;
 	}
 	
@@ -529,7 +687,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$prefix = $prefix ? $this->getRootUrl() : '';
 		$url = $prefix.$theme_url;
 		
-		# Done
+		# Return url
 		return $url;
 	}
 	
@@ -543,191 +701,87 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Handle
 		$theme_layouts_path = $this->getThemePath($theme) . DIRECTORY_SEPARATOR . 'layouts';
 		
-		# Done
+		# Return theme_layouts_path
 		return $theme_layouts_path;
 	}
 	
-	
-	# ========================
-	# LAYOUT AREAS
-	
-	protected $_area = false;
-	protected $_theme = false;
-	protected $_layout = false;
-	
-	/**
-	 * Set the current area
-	 */
-	public function setArea ( $area ) {
-		# Handle
-		$this->_area = $area;
-		$theme = $this->getAreaTheme($area);
-		$this->setTheme($theme);
-		
-		# Done
-		return $this;
-	}
-	
-	/**
-	 * Get the current area
-	 */
-	public function getArea ( $area = null ) {
-		# Handle
-		$area = $area ? $area : $this->_area;
-		if ( empty($area) ) {
-			$area = 'default';
-		}
-		
-		# Done
-		return $area;
-	}
-	
-	
-	/**
-	 * Set the current area
-	 */
-	public function setTheme ( $theme ) {
-		# Handle
-		$this->_theme = $theme;
-		$theme_layouts_path = $this->getThemeLayoutsPath($theme);
-		$this->getMvc()->setLayoutPath($theme_layouts_path);
-		
-		# Done
-		return $this;
-	}
-	
-	/**
-	 * Get the current theme
-	 */
-	public function getTheme ( $theme = null ) {
+	public function updateUrlPaths ( ) {
 		# Prepare
-		$theme = $theme ? $theme : $this->_theme;
-		if ( empty($theme) ) {
-			$theme = $this->getAreaTheme();
+		$paths = array();
+		
+		# Add Theme Path
+		if ( $this->getTheme() ) {
+			$paths[] = array(
+				'path' => $this->getThemePath(),
+				'url' => $this->getThemeUrl()
+			);
 		}
 		
-		# Check
-		if ( empty($theme) ) {
-			throw new Zend_Exception('Could not find theme.');
-			return false;
-		}
+		# Add Public Path
+		$paths[] = array(
+			'path' => $this->getPublicPath(),
+			'url' => $this->getPublicUrl()
+		);
 		
-		# Ensure Existance
-		$theme_path = $this->getThemePath($theme);
-		if ( empty($theme_path) ) {
-			return false;
-		}
+		# Apply Paths
+		$this->getPlugin('Bal_Controller_Plugin_Url')->renege('paths',$paths);
 		
-		# Done
-		return $theme;
-	}
-	
-	/**
-	 * Get the theme of the current area
-	 */
-	public function getAreaTheme ( $area = null ) {
-		# Prepare
-		if ( empty($area) ) $area = $this->getArea();
-		
-		# Handle
-		$theme = $this->getConfig('bal.areaThemes.'.$area);
-		
-		# Done
-		return $theme;
-	}
-	
-	/**
-	 * Get the url for an area
-	 */
-	public function getAreaUrl ( $area = null, $prefix = false ) {
-		# Get the theme for the area
-		$theme = $this->getAreaTheme($area);
-		
-		# Get the url of the theme
-		$url = $this->getThemeUrl($theme, $prefix);
-		
-		# Done
-		return $url;
-	}
-	
-	/**
-	 * Get the path for an area layouts directory
-	 */
-	public function getAreaLayoutsPath ( $area = null ) {
-		# Prepare
-		$theme = $this->getAreaTheme($area);
-		
-		# Handle
-		$path = $this->getThemeLayoutsPath($theme);
-		
-		# Done
-		return $path;
-	}
-	
-	/**
-	 * Get the current layout
-	 */
-	public function setLayout ( $layout ) {
-		$this->_layout = $layout;
-		$this->getMvc()->setLayout($layout);
+		# Chain
 		return $this;
 	}
-	
-	
-	public function startMvc ( ) {
-		Zend_Layout::startMvc();
-		return $this;
-	}
-	
-	public function getMvc ( ) {
-		return Zend_Layout::getMvcInstance();
-	}
-	
-	# ========================
-	# FILE URLS
 	
 	public function getPublicFileUrl ( $file ) {
 		# Prepare
-		$publicPath = $this->getPublicPath();
-		$publicUrl = $this->getPublicUrl();
-		$result = false;
+		$Url = $this->getPlugin('Bal_Controller_Plugin_Url')->paths(array(
+			'path' => $this->getPublicPath(),
+			'url' => $this->getPublicUrl()
+		));
 		
 		# Handle
-		$path = $publicPath . DIRECTORY_SEPARATOR . $file;
-		if ( file_exists($path) && filesize($path) ) {
-			$result = $publicUrl . '/' . $file;
-		}
+		$result = $Url->getFileUrl($file);
+		$Url->clear();
 		
-		# Done
+		# Return result
 		return $result;
 	}
 	
 	public function getThemeFileUrl ( $file ) {
 		# Prepare
-		$themePath = $this->getThemePath();
-		$themeUrl = $this->getThemeUrl();
-		$result = false;
+		$Url = $this->getPlugin('Bal_Controller_Plugin_Url')->paths(array(
+			'path' => $this->getThemePath(),
+			'url' => $this->getThemeUrl()
+		));
+		
+		// echo '<!-- themePath: ['.$this->getThemePath().'] -->'."\n";
+		// echo '<!-- themeUrl: ['.$this->getThemeUrl().'] -->'."\n";
+		// echo '<!-- file: ['.$file.'] -->'."\n";
 		
 		# Handle
-		$path = $themePath . DIRECTORY_SEPARATOR . $file;
-		if ( file_exists($path) && filesize($path) ) {
-			$result = $themeUrl . '/' . $file;
-		}
+		$result = $Url->getFileUrl($file);
+		$Url->clear();
 		
-		# Done
+		# Return result
 		return $result;
 	}
 	
 	public function getFileUrl ( $file, $for = null ) {
 		# Prepare
-		$result = false;
+		$result = null;
 		
 		# Handle
-		if ( $for === 'theme' || !$for )
-		$result = $this->getThemeFileUrl($file);
-		if ( $for === 'public' || (!$for && !$result) ) $result = $this->getPublicFileUrl($file);
+		if ( $for ) {
+			if ( $for === 'theme' ) {
+				$result = $this->getThemeFileUrl($file);
+			}
+			else {
+				$result = $this->getPublicFileUrl($file);
+			}
+		}
+		else {
+			$result = $this->getPlugin('Bal_Controller_Plugin_Url')->getFileUrl($file);
+		}
 		
-		# Done
+		# Return result
 		return $result;
 	}
 	

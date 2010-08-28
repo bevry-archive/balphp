@@ -14,7 +14,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Locale
 		$Locale = new Bal_Locale($this->getOption('locale'));
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -45,7 +45,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$Transport = new Zend_Mail_Transport_Smtp($smtp_host, $smtp_config);
 		Zend_Mail::setDefaultTransport($Transport);
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -102,7 +102,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$Log->addWriter($Writer_Mail);
 		}
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -135,7 +135,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$ViewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
 		$ViewRenderer->setView($View);
 		
-		# Done
+		# Return View
 		return $View;
 	}
 
@@ -159,7 +159,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# View Helpers
 		$View->addHelperPath(BALPHP_PATH . '/Bal/View/Helper', 'Bal_View_Helper');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -189,7 +189,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# $FrontController->addModuleDirectory($resources['frontController']['moduleDirectory']);
 		
 
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -206,7 +206,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Action Controllers
 		Zend_Controller_Action_HelperBroker::addPrefix('Bal_Controller_Action_Helper_');
 		
-		# Done
+		# Return Autoloader
 		return $Autoloader;
 	}
 
@@ -231,7 +231,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$Index = Zend_Search_Lucene::create($applicationConfig['data']['index_path']);
 		Zend_Registry::set('Index', $Index);
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -249,7 +249,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			Zend_Registry::set('applicationConfig', $applicationConfig);
 		}
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -280,7 +280,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Module Specific Error Controllers
 		# $FrontController->registerPlugin(new Bal_Controller_Plugin_ErrorControllerSelector());
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -296,7 +296,17 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Load
 		$FrontController = Zend_Controller_Front::getInstance();
 		
-		# Register
+		# Register URL Plugin
+		if ( !$FrontController->hasPlugin('Bal_Controller_Plugin_Url') ) {
+			
+			# Create
+			$App = new Bal_Controller_Plugin_Url();
+			
+			# Register
+			$FrontController->registerPlugin($App);
+		}
+		
+		# Register App Plugin
 		if ( !$FrontController->hasPlugin('Bal_Controller_Plugin_App') ) {
 			
 			# Create
@@ -311,7 +321,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$FrontController->registerPlugin($App);
 		}
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -338,7 +348,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Doctrine
 		$this->bootstrap('doctrine');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -497,7 +507,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$Manager->addRecordListener(new Bal_Doctrine_Record_Listener_Html(false));
 		}
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -516,7 +526,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Params
 		hydrate_request_init();
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -538,7 +548,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		if ( array_key_exists('widget', $applicationConfig['bal']) )
 		$View->getHelper('widget')->addWidgets($applicationConfig['bal']['widget']);
 		
-		# Done
+		# Return true
 		return true;
 	}
 
@@ -550,7 +560,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('balcms');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -562,7 +572,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('modules');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -574,7 +584,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('modules');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -586,7 +596,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('modules');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
@@ -598,7 +608,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('data');
 		
-		# Done
+		# Return true
 		return true;
 	}
 	
