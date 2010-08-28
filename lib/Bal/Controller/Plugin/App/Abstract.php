@@ -752,10 +752,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			'url' => $this->getThemeUrl()
 		));
 		
-		// echo '<!-- themePath: ['.$this->getThemePath().'] -->'."\n";
-		// echo '<!-- themeUrl: ['.$this->getThemeUrl().'] -->'."\n";
-		// echo '<!-- file: ['.$file.'] -->'."\n";
-		
 		# Handle
 		$result = $Url->getFileUrl($file);
 		$Url->clear();
