@@ -333,7 +333,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
-			$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/v1.5';
+			$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/'.(APPLICATION_ENV === 'production' ? '5b77c0bdeb82d63f731a5db30aa5e912093cca0e' : 'dev');
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
