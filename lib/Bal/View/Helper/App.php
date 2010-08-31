@@ -326,14 +326,47 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
-			$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/master';
+			// Prepare
+			$jquery_sparkle_url = null;
+			switch ( APPLICATION_ENV ) {
+				case 'production':
+					$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/v1.5';
+					break;
+				
+				case 'staging':
+					$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/dev';
+					break;
+					
+				case 'testing':
+				case 'development':
+				default:
+					$jquery_sparkle_url = '/repos/jquery-sparkle';
+					break;
+			}
 			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
-			$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/'.(APPLICATION_ENV === 'production' ? '5b77c0bdeb82d63f731a5db30aa5e912093cca0e' : 'dev');
+			// Prepare
+			$jquery_ajaxy_url = null;
+			switch ( APPLICATION_ENV ) {
+				case 'production':
+					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/v1.6';
+					break;
+				
+				case 'staging':
+					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/dev';
+					break;
+					
+				case 'testing':
+				case 'development':
+				default:
+					$jquery_ajaxy_url = '/repos/jquery-ajaxy';
+					break;
+			}
+			// Include
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
