@@ -556,6 +556,10 @@ class Bal_App {
 		return $this;
 	}
 	
+	static public function getDispatcher ( ) {
+		return self::getFrontController()->getDispatcher();
+	}
+	
 	static public function setDataConnection ( $Doctrine_Connection ) {
 		return Zend_Registry::set('Doctrine_Connection', $Doctrine_Connection);
 	}
