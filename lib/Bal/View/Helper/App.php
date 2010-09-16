@@ -165,6 +165,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'theme'					=> 600,
 				'locale'				=> 700,
 				'browser'				=> 800,
+				'feeds'					=> 900
 			),
 			$App->getConfig('bal.headLink', array())
 		);
@@ -251,6 +252,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $favicon ) {
 			$url = $App->getFileUrl('favicon.ico');
 			$this->view->headLink(array('rel' => 'icon', 'href' => $url, 'type' => 'image/x-icon'), 'PREPEND');
+		}
+		
+		# Feeds
+		if ( $feeds ) {
+			$url = $App->getUrl()->route('feed')->action('rss')->toString();
+			$this->view->headLink(array('rel' => 'alternate', 'title' => 'RSS Feed', 'href' => $url, 'type' => 'application/rss+xml'), 'PREPEND');
+			$url = $App->getUrl()->route('feed')->action('atom')->toString();
+			$this->view->headLink(array('rel' => 'alternate', 'title' => 'Atom Feed', 'href' => $url, 'type' => 'application/atom+xml'), 'PREPEND');
 		}
 		
 		# Return headLink
