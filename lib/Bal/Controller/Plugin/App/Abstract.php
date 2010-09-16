@@ -596,6 +596,13 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	# URLS + PATHS
 	
 	/**
+	 * Get the URL Plugin
+	 */
+	public function getUrl ( ) {
+		return $this->getPlugin('Bal_Controller_Plugin_Url');
+	}
+	
+	/**
 	 * Get the APPLICATION_ENV value
 	 * @param string $env [optional] to compare
 	 * @return boolean
@@ -612,7 +619,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return string
 	 */
 	public function getRootUrl ( ) {
-		return $this->getPlugin('Bal_Controller_Plugin_Url')->getRootUrl();
+		return $this->getUrl()->getRootUrl();
 	}
 	
 	/**
@@ -621,7 +628,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return string
 	 */
 	public function getBaseUrl ( $prefix = false ) {
-		return $this->getPlugin('Bal_Controller_Plugin_Url')->getBaseUrl($prefix);
+		return $this->getUrl()->getBaseUrl($prefix);
 	}
 
 	/**
@@ -631,7 +638,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 * @return string
 	 */
 	public function getPublicUrl ( $prefix = false ) {
-		return $this->getPlugin('Bal_Controller_Plugin_Url')->getPublicUrl($prefix);
+		return $this->getUrl()->getPublicUrl($prefix);
 	}
 	
 	/**
@@ -724,7 +731,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		);
 		
 		# Apply Paths
-		$this->getPlugin('Bal_Controller_Plugin_Url')->renege('paths',$paths);
+		$this->getUrl()->renege('paths',$paths);
 		
 		# Chain
 		return $this;
@@ -732,7 +739,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	public function getPublicFileUrl ( $file ) {
 		# Prepare
-		$Url = $this->getPlugin('Bal_Controller_Plugin_Url')->paths(array(
+		$Url = $this->getUrl()->paths(array(
 			'path' => $this->getPublicPath(),
 			'url' => $this->getPublicUrl()
 		));
@@ -747,7 +754,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	
 	public function getThemeFileUrl ( $file ) {
 		# Prepare
-		$Url = $this->getPlugin('Bal_Controller_Plugin_Url')->paths(array(
+		$Url = $this->getUrl()->paths(array(
 			'path' => $this->getThemePath(),
 			'url' => $this->getThemeUrl()
 		));
@@ -774,7 +781,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			}
 		}
 		else {
-			$result = $this->getPlugin('Bal_Controller_Plugin_Url')->getFileUrl($file);
+			$result = $this->getUrl()->getFileUrl($file);
 		}
 		
 		# Return result

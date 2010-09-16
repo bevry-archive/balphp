@@ -128,8 +128,10 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			->setSeparator($applicationConfig['bal']['site']['separator']);
 		$View->headMeta()
 			->setHttpEquiv('Content-Type', 'text/html; charset=utf-8')
-			->appendName('author', $applicationConfig['bal']['site']['author'])
-			->appendName('generator', $applicationConfig['bal']['site']['generator']);
+			->appendName('author', $applicationConfig['bal']['site']['author']['title'])
+			->appendName('generator', $applicationConfig['bal']['site']['generator'])
+			->appendName('description', $applicationConfig['bal']['site']['description'])
+			->appendName('keywords', $applicationConfig['bal']['site']['keywords']);
 		
 		# Add it to the ViewRenderer
 		$ViewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
