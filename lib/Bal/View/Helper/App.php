@@ -258,8 +258,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $feeds ) {
 			$url = $App->getUrl()->route('feed')->action('rss')->toString();
 			$this->view->headLink(array('rel' => 'alternate', 'title' => 'RSS Feed', 'href' => $url, 'type' => 'application/rss+xml'), 'PREPEND');
-			$url = $App->getUrl()->route('feed')->action('atom')->toString();
-			$this->view->headLink(array('rel' => 'alternate', 'title' => 'Atom Feed', 'href' => $url, 'type' => 'application/atom+xml'), 'PREPEND');
+			//$url = $App->getUrl()->route('feed')->action('atom')->toString();
+			//$this->view->headLink(array('rel' => 'alternate', 'title' => 'Atom Feed', 'href' => $url, 'type' => 'application/atom+xml'), 'PREPEND');
 		}
 		
 		# Return headLink
