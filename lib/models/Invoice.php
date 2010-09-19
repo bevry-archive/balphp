@@ -82,7 +82,7 @@ class Bal_Invoice extends Base_Bal_Invoice
 		}
 		
 		# Apply Config
-		$config = Bal_App::getConfig('bal.invoice', array());
+		$config = Bal_App::getConfig('invoice', array());
 		$this->config = $config;
 		
 		# Apply Currency

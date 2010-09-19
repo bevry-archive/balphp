@@ -60,7 +60,7 @@ class Bal_User extends Base_Bal_User {
 	public function preparePassword ( $value ) {
 		# Fetch Salt
 		// helps against rainbow attacks
-		$salt = Bal_App::getConfig('bal.setup.salt','');
+		$salt = Bal_App::getConfig('setup.salt','');
 		
 		# Generate hash
 		$password = md5($salt.$value);
@@ -231,7 +231,7 @@ class Bal_User extends Base_Bal_User {
 		
 		# Fetch Salt
 		// helps against rainbow attacks
-		$salt = Bal_App::getConfig('bal.setup.salt','');
+		$salt = Bal_App::getConfig('setup.salt','');
 		
 		# Is it different?
 		$uid = md5($salt.$this->username.$this->email);
