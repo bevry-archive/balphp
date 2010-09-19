@@ -25,13 +25,17 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 
 	/**
 	 * Will merge the keys of arrays together. For a normal array we replace.
-	 * @version 1, January 06, 2010
 	 * @param array $array1
 	 * @param array $array2
 	 * @return array
+	 * @version 1, January 06, 2010
+	 * @package BalPHP {@link http://www.balupton/projects/balphp}
 	 * @author Benjamin "balupton" Lupton <contact@balupton.com> {@link http://www.balupton.com/}
 	 * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
 	 * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
+	 * @copyright (c) 2010 Benjamin Arthur Lupton {@link http://www.balupton.com}
+	 * @license GNU Affero General Public License version 3 {@link http://www.gnu.org/licenses/agpl-3.0.html}
+	 * @license GNU General Public License version 2 {@link http://www.gnu.org/licenses/gpl-2.0.html}
 	 */
 	function array_merge_recursive_keys ( ) {
 		# Prepare
@@ -1541,5 +1545,33 @@ if ( function_compare('has_relation', 1, true, __FILE__, __LINE__) ) {
 		
 		# Return found
 		return $found;
+	}
+}
+
+
+if ( function_compare('adjust_yaml_inheritance', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Will merge keys together recursively when using the <<< key
+	 * @param mixed $config
+	 * @return string
+	 * @version 1.0.0
+	 * @date September 19, 2010
+	 * @since 1.0.0, September 19, 2010
+	 * @package BalPHP {@link http://www.balupton/projects/balphp}
+	 * @author Benjamin "balupton" Lupton {@link http://www.balupton.com}
+	 * @copyright (c) 2010 Benjamin Arthur Lupton {@link http://www.balupton.com}
+	 * @license GNU Affero General Public License version 3 {@link http://www.gnu.org/licenses/agpl-3.0.html}
+	 * @license GNU General Public License version 2 {@link http://www.gnu.org/licenses/gpl-2.0.html}
+	 */
+	function adjust_yaml_inheritance (array $config){
+		if ( !empty($config['<<<']) ) {
+			// We have some values we want to merge recursively with
+			# Trickle
+			$inherit = adjust_yaml_inheritance($config['<<<']);
+			# Merge
+			unset($config['<<<']);
+			$config = array_merge_recursive_keys($inherit,$config);
+		}
+		return $config;
 	}
 }

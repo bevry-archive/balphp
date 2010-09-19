@@ -124,14 +124,14 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$View->headMeta()->setHttpEquiv('Content-Type', 'text/html; charset=utf-8');
 		
 		# Customise View
-		$View->headTitle($applicationConfig['bal']['site']['title'])
-			->setSeparator($applicationConfig['bal']['site']['separator']);
+		$View->headTitle($applicationConfig['site']['title'])
+			->setSeparator($applicationConfig['site']['separator']);
 		$View->headMeta()
 			->setHttpEquiv('Content-Type', 'text/html; charset=utf-8')
-			->appendName('author', $applicationConfig['bal']['site']['author']['title'])
-			->appendName('generator', $applicationConfig['bal']['site']['generator'])
-			->appendName('description', $applicationConfig['bal']['site']['description'])
-			->appendName('keywords', $applicationConfig['bal']['site']['keywords']);
+			->appendName('author', $applicationConfig['site']['author']['title'])
+			->appendName('generator', $applicationConfig['site']['generator'])
+			->appendName('description', $applicationConfig['site']['description'])
+			->appendName('keywords', $applicationConfig['site']['keywords']);
 		
 		# Add it to the ViewRenderer
 		$ViewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
@@ -173,8 +173,11 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('autoload');
 		
+		# Config
+		$routeConfig = sfYaml::load(CONFIG_PATH.'/routes.yaml');
+		$routeConfig = new Zend_Config($routeConfig[APPLICATION_ENV]);
+		
 		# Route
-		$routeConfig = new Zend_Config_Ini(CONFIG_PATH . '/routes.ini', 'production');
 		$FrontController = Zend_Controller_Front::getInstance();
 		if ( defined('BASE_URL') ) {
 			$FrontController->setBaseUrl(BASE_URL);
@@ -184,6 +187,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$router = $FrontController->getRouter();
 		$router->removeDefaultRoutes();
 		
+		# Apply
 		$router->addConfig($routeConfig, 'routes');
 		
 		# Location
@@ -276,7 +280,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Exceptions
 		$applicationConfig = Zend_Registry::get('applicationConfig');
-		$throw_exceptions = $applicationConfig['bal']['error']['throw'];
+		$throw_exceptions = $applicationConfig['error']['throw'];
 		$FrontController->throwExceptions($throw_exceptions);
 		
 		# Module Specific Error Controllers
@@ -376,7 +380,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Load
 		if ( !$compile_use ) {
 			require_once(DOCTRINE_PATH . DIRECTORY_SEPARATOR . 'Doctrine.php');
-			require_once(implode(DIRECTORY_SEPARATOR, array(DOCTRINE_PATH, 'Doctrine', 'Parser', 'sfYaml', 'sfYaml.php')));
+			if ( !class_exists('sfYaml') ) {
+				require_once(implode(DIRECTORY_SEPARATOR, array(DOCTRINE_PATH, 'Doctrine', 'Parser', 'sfYaml', 'sfYaml.php')));
+			}
 			$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
 			//$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'sfYaml');
 		}
@@ -547,8 +553,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
 		
 		# Widgets
-		if ( array_key_exists('widget', $applicationConfig['bal']) )
-		$View->getHelper('widget')->addWidgets($applicationConfig['bal']['widget']);
+		if ( array_key_exists('widget', $applicationConfig) )
+		$View->getHelper('widget')->addWidgets($applicationConfig['widget']);
 		
 		# Return true
 		return true;

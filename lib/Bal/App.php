@@ -236,7 +236,7 @@ class Bal_App {
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
 					"$cwd/application/data/logs $cwd/application/data/logs/payment ".
-					"$cwd/application/config/application.ini ",
+					"$cwd/application/config/application.yaml ",
 				// Executable Files
 				"chmod +x ".
 					"$cwd ".

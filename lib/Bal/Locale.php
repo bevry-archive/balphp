@@ -102,7 +102,7 @@ class Bal_Locale {
 	    Zend_Registry::set('Zend_Locale', $this->Zend_Locale);
 		
 		# Apply the Zend_Translate Dependency
-	    $this->Zend_Translate = new Zend_Translate('array', $this->file, $locale);
+	    $this->Zend_Translate = new Zend_Translate('yaml', $this->file, $locale);
 	    Zend_Registry::set('Zend_Translate', $this->Zend_Translate);
 		
 		# Apply the Zend_Currency Dependency
@@ -216,7 +216,7 @@ class Bal_Locale {
 		if ( $locale === null ) $locale = $this->getLocale();
 		
 		# Determine
-		$file = $this->il8n_path . DIRECTORY_SEPARATOR . $locale . '.php';
+		$file = $this->il8n_path . DIRECTORY_SEPARATOR . $locale . '.yaml';
 		
 		# Return
 		return $file;
