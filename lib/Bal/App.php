@@ -84,7 +84,7 @@ class Bal_App {
 		
 		# Prepare Config
 		$applicationConfig = self::getConfig();
-		$siteName = delve($applicationConfig, 'bal.site.name', basename(APPLICATION_ROOT_PATH));
+		$siteName = delve($applicationConfig, 'site.name', basename(APPLICATION_ROOT_PATH));
 		
 		# Prepare Arguments
 		$cli = false;
@@ -102,7 +102,7 @@ class Bal_App {
 			header('Content-Type: text/plain');
 			
 			# Check Secret
-			if ( delve($args,'secret') !== delve($applicationConfig,'bal.setup.secret') ) {
+			if ( delve($args,'secret') !== delve($applicationConfig,'setup.secret') ) {
 				throw new Zend_Exception('Trying to setup without the secret! Did we not tell you? Maybe it is for good reason!');
 			}
 		}

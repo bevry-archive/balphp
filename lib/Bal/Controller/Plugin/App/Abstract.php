@@ -128,7 +128,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# RememberMe
 		if ( $remember ) {
-			$rememberMe = $this->getConfig('bal.auth.remember');
+			$rememberMe = $this->getConfig('auth.remember');
 			if ( $rememberMe ) {
 				$rememberMe = strtotime($rememberMe)-time();
 				Zend_Session::rememberMe($rememberMe);
@@ -539,7 +539,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		if ( empty($area) ) $area = $this->getArea();
 		
 		# Handle
-		$theme = $this->getConfig('bal.areaThemes.'.$area);
+		$theme = $this->getConfig('areaThemes.'.$area);
 		
 		# Return theme
 		return $theme;

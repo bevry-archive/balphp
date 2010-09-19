@@ -356,8 +356,8 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 				if ( $store === null ) $store = false;
 				if ( $log_request === null ) $log_request = false;
 			} else {
-				if ( $store === null ) $store = $this->getConfig('bal.log.store');
-				if ( $log_request === null ) $log_request = $this->getConfig('bal.log.request');
+				if ( $store === null ) $store = $this->getConfig('log.store');
+				if ( $log_request === null ) $log_request = $this->getConfig('log.request');
 			}
 		}
 		

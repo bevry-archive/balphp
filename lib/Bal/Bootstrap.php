@@ -64,7 +64,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Prepare Options
 		$use_mail = delve($applicationConfig, 'mail.send_email', true);
-		$friendly = delve($applicationConfig, 'bal.error.friendly', true);
+		$friendly = delve($applicationConfig, 'error.friendly', true);
 		if ( $use_mail ) $this->bootstrap('mail');
 		
 		# Create Log
@@ -316,7 +316,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			
 			# Configure
 			$applicationConfig = $App->getConfig();
-			$appConfig = delve($applicationConfig, 'bal.app', array());
+			$appConfig = delve($applicationConfig, 'app', array());
 			$App->mergeOptions($appConfig);
 			
 			# Register

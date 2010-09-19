@@ -33,7 +33,7 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 	public function setView (Zend_View_Interface $view) {
 		# Apply
 		$this->_App = Zend_Controller_Front::getInstance()->getPlugin('Bal_Controller_Plugin_App');
-		//$this->widgets_view_path = $this->_App->getConfig('bal.widgets.viewpath');
+		//$this->widgets_view_path = $this->_App->getConfig('widgets.viewpath');
 		
 		# Set
 		$this->view = $view;

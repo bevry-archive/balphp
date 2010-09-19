@@ -167,7 +167,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'browser'				=> 800,
 				'feeds'					=> 900
 			),
-			$App->getConfig('bal.headLink', array())
+			$App->getConfig('headLink', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
@@ -216,7 +216,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Editor
 		if ( $editor ) {
-			switch ( $this->getConfig('bal.editor') ) {
+			switch ( $this->getConfig('editor') ) {
 				case 'bespin':
 					$bespin_url = $script_url.'/bespin-0.9a1-custom';
 					$headLink->headLink(
@@ -290,7 +290,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'script' 				=> 500,
 				'theme' 				=> 600
 			),
-			$App->getConfig('bal.headScript', array())
+			$App->getConfig('headScript', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
@@ -400,7 +400,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Editor
 		if ( $editor ) {
-			switch ( $this->getConfig('bal.editor') ) {
+			switch ( $this->getConfig('editor') ) {
 				case 'tinymce':
 					$tiny_mce_url = $script_url.'/tiny_mce-3.2.7';
 					$headScript->offsetSetFile($editor,$tiny_mce_url.'/jquery.tinymce.js');
@@ -506,8 +506,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 	public function footer ( ) {
 		# Prepare
-		$analytics_code = $this->app()->getConfig('bal.analytics.code');
-		$reinvigorate_code = $this->app()->getConfig('bal.reinvigorate.code');
+		$analytics_code = $this->app()->getConfig('analytics.code');
+		$reinvigorate_code = $this->app()->getConfig('reinvigorate.code');
 		
 		# Analytics
 		if ( $analytics_code ) : ?>

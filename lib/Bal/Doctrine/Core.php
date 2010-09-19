@@ -567,8 +567,8 @@ abstract class Bal_Doctrine_Core {
 				# With Paging
 				$_paging = array(
 					'page' => get_param('page', 1),
-					'items' => Bal_App::getConfig('bal.paging.items'),
-					'chunk' => Bal_App::getConfig('bal.paging.chunk')
+					'items' => Bal_App::getConfig('paging.items'),
+					'chunk' => Bal_App::getConfig('paging.chunk')
 				);
 				if ( $paging === true ) {
 					$paging = $_paging;
