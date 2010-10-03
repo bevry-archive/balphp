@@ -36,7 +36,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		elseif ( !is_connected() ) return false;
 		
 		# Fetch
-		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host');
+		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host', 'localhost');
 		$smtp_config = delve($applicationConfig, 'mail.transport.smtp.config');
 		if ( empty($smtp_config) )
 			$smtp_config = array();
@@ -460,7 +460,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$Connection = $Manager->openConnection($dsn);
 		
 		# Profile Connection
-		if ( DEBUG_MODE ) {
+		if ( PROFILE_MODE ) {
 			$Profiler = new Doctrine_Connection_Profiler();
 			$Connection->setListener($Profiler);
 			Zend_Registry::set('Profiler', $Profiler);
