@@ -154,6 +154,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		
 		# Layout
+		$this->bootstrap('frontController');
 		$FrontController = Zend_Controller_Front::getInstance();
 		$App = $FrontController->getPlugin('Bal_Controller_Plugin_App');
 		$App->startMvc();
@@ -593,6 +594,11 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initScriptCron ( ) {
 		# Bootstrap
 		$this->bootstrap('modules');
+		$this->bootstrap('DoctrineListeners');
+		$this->bootstrap('presentation');
+		$this->bootstrap('frontController');
+		$FrontController = $this->getResource('frontController');
+    	$FrontController->setRequest(new Zend_Controller_Request_Http());
 		
 		# Return true
 		return true;

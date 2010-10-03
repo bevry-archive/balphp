@@ -145,9 +145,10 @@ class Bal_App {
 					'data-create',
 					'data-import',
 					'data-migrate-clean',
-					'data-migrate-create',
+					//'data-migrate-create',
 					'index-update',
-					'perm-secure'
+					'perm-secure',
+					'cron-run'
 				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
@@ -169,7 +170,8 @@ class Bal_App {
 					'data-migrate-clean',
 					'data-migrate-create',
 					'index-update',
-					'perm-secure'
+					'perm-secure',
+					'cron-run'
 				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: install ['.implode(array_keys($args),',').']'."\n";
@@ -186,7 +188,8 @@ class Bal_App {
 					'data-migrate-install',
 					'schema-create',
 					'index-update',
-					'perm-secure'
+					'perm-secure',
+					'cron-run'
 				);
 				array_keys_ensure($args, $ensure, true);
 				echo 'Setup: mode: update ['.implode(array_keys($args),',').']'."\n";
@@ -493,6 +496,13 @@ class Bal_App {
 					,
 			);
 			$result = systems($commands);
+		}
+		
+		# Cron: run
+		if ( delve($args,'cron-run') ) {
+			echo '- [cron-run] -'."\n";
+			echo 'Cron: Running cron jobs'."\n";
+			require(SCRIPTS_PATH.'/cron.php');
 		}
 		
 		# Done

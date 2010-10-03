@@ -222,7 +222,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $editor ) {
 			switch ( $this->getConfig('editor') ) {
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.9a1-custom';
+					$bespin_url = $script_url.'/bespin-0.9a2-custom';
 					$headLink->headLink(
 						array(
 							'id' => 'bespin_base',
@@ -412,7 +412,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					break;
 					
 				case 'bespin':
-					$bespin_url = $script_url.'/bespin-0.9a1-custom';
+					$bespin_url = $script_url.'/bespin-0.9a2-custom';
 					$headScript->offsetSetFile($editor,$bespin_url.'/BespinEmbedded.js');
 					break;
 				
