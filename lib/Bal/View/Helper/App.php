@@ -60,7 +60,9 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	public function getNavigation ( $code ) {
 		# Prepare
 		$NavigationMenu = delve($this->view,'Navigation.'.$code);
-		if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+		if ( !$NavigationMenu ) {
+			throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+		}
 		
 		# Return
 		return $NavigationMenu;
@@ -76,7 +78,9 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		}
 		else {
 			$NavigationMenu = $this->getNavigation($code);
-			if ( !$NavigationMenu ) throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+			if ( !$NavigationMenu ) {
+				throw new Zend_Exception('Could not find Navigation Menu: '.$code);
+			}
 		}
 		
 		# Render
@@ -349,7 +353,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				case 'testing':
 				case 'development':
 				default:
-					$jquery_sparkle_url = '/repos/jquery-sparkle';
+					$jquery_sparkle_url = '/javascript/jquery-sparkle';
 					break;
 			}
 			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
@@ -372,7 +376,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				case 'testing':
 				case 'development':
 				default:
-					$jquery_ajaxy_url = '/repos/jquery-ajaxy';
+					$jquery_ajaxy_url = '/javascript/jquery-ajaxy';
 					break;
 			}
 			// Include

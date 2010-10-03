@@ -71,12 +71,12 @@ class Bal_Controller_Router_Route_Map extends Zend_Controller_Router_Route_Regex
 	}
 
 	protected function _getOptions ( ) {
-		$options = $GLOBALS['Application']->getOption('bal');
-		$options = $options['routing'];
+		$options = $GLOBALS['Application']->getOption('routing');
 		return $options;
 	}
 
 	protected function _getDefaults ( $prefix = array(), $postfix = array() ) {
+		if ( empty($prefix) ) $prefix = array(); // if $prefix is set to NULL, it does not default to array() - how that makes sense only flying pigs know
 		$defaults = $this->_getMappedValues($this->_defaults, true, false);
 		return array_merge($prefix, $defaults, $postfix);
 	}

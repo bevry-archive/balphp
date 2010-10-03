@@ -216,7 +216,7 @@ class Bal_Locale {
 		if ( $locale === null ) $locale = $this->getLocale();
 		
 		# Determine
-		$file = $this->il8n_path . DIRECTORY_SEPARATOR . $locale . '.yaml';
+		$file = $this->il8n_path . DIRECTORY_SEPARATOR . $locale . '.yml';
 		
 		# Return
 		return $file;

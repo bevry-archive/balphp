@@ -396,10 +396,18 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function map ( $map ) {
-		$Route = delve($map,'Route');
-		if ( !$Route )
-			if ( array_key_exists('path', $map) ) {
+		$Route = delve($map,'Route',delve($map,'Map'));
+		if ( !$Route ) {
+			$pathColumn = Bal_App::getConfig('routing.defaults.pathColumn','path');
+			if ( delve($map,$pathColumn) ) {
 				$Route = $map;
+			}
+			else {
+				throw new Bal_Exception(array(
+					'Could not resolve the Map',
+					'map' => is_object($map) ? get_class($map) : $map
+				));
+			}
 		}
 		return $this->route('map')->param('Map',$Route);
 	}
@@ -469,9 +477,18 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	/**
 	 * @alias self::file
 	 */
-	public function content ( $Item ) {
-		if ( is_string($Item) ) {
-			$Item = $this->getItem('Content',$Item);
+	public function content ( $input ) {
+		if ( is_string($input) ) {
+			$Item = $this->getItem('Content',$input);
+		}
+		else {
+			$Item = $input;
+		}
+		if ( !delve($Item,'id') ) {
+			throw new Bal_Exception(array(
+				'Could not resolve the Content Item',
+				'input' => $input
+			));
 		}
 		return $this->map($Item);
 	}

@@ -174,7 +174,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('autoload');
 		
 		# Config
-		$routeConfig = sfYaml::load(CONFIG_PATH.'/routes.yaml');
+		$routeConfig = sfYaml::load(ROUTES_FILE_PATH);
 		$routeConfig = new Zend_Config($routeConfig[APPLICATION_ENV]);
 		
 		# Route
@@ -371,6 +371,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Config
 		$applicationConfig = Zend_Registry::get('applicationConfig');
+		$dsn = $applicationConfig['data']['connection_string'];
 		$extensions_path = $applicationConfig['data']['extensions_path'];
 		$models_path = $applicationConfig['data']['models_path'];
 		$autoloader = $applicationConfig['data']['autoloader'];
@@ -446,11 +447,12 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		//$manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE, $cacheDriver);
 		
 
-		# Prepare Connection
-		$dsn = $applicationConfig['data']['connection_string'];
-		$unix_socket = ini_get('mysql.default_socket');
-		if ( $unix_socket ) {
-			$dsn .= ';unix_socket=' . $unix_socket;
+		# Prepare MySQL Connection by Attaching Socket to DSN
+		if ( strstr($dsn,'mysql') && !strstr($dsn,'unix_socket=') ) {
+			$unix_socket = ini_get('mysql.default_socket');
+			if ( $unix_socket ) {
+				$dsn .= ';unix_socket=' . $unix_socket;
+			}
 		}
 		
 		# Create Connection
@@ -553,8 +555,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
 		
 		# Widgets
-		if ( array_key_exists('widget', $applicationConfig) )
-		$View->getHelper('widget')->addWidgets($applicationConfig['widget']);
+		if ( array_key_exists('widgets', $applicationConfig) )
+		$View->getHelper('widget')->addWidgets($applicationConfig['widgets']['widget']);
 		
 		# Return true
 		return true;

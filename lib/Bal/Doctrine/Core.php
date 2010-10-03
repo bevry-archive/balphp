@@ -1399,7 +1399,8 @@ abstract class Bal_Doctrine_Core {
 		
 		# Ensure
 		foreach ( $checks as $check ) {
-			$ensure[] = $Invoker->$check($Event,$Event_type);
+			$result = $Invoker->$check($Event,$Event_type);
+			$ensure[] = $result;
 		}
 		
 		# Result
@@ -1530,7 +1531,7 @@ abstract class Bal_Doctrine_Core {
 				$Invoker->$tagRelation = $tagsUser;
 				
 				# Save
-				$save = true;
+				// $save = true;
 			}
 		}
 		

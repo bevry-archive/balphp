@@ -232,7 +232,7 @@ class Bal_App {
 					"$cwd ",
 				// Writeable Files
 				"chmod -R 777 ".
-					"$cwd/application/data/dump $cwd/application/data/schema ".
+					"$cwd/application/data/dump $cwd/application/data/schema $cwd/application/data/database/*.db ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
 					"$cwd/application/data/logs $cwd/application/data/logs/payment ".
@@ -278,8 +278,8 @@ class Bal_App {
 			echo '- [media-clean] -'."\n";
 			echo 'Media: Cleaning Media'."\n";
 			# Delete the contents of media dirs; uploads and images
-			$images_path = IMAGES_PATH;
-			$upload_path = UPLOADS_PATH;
+			$images_path = MEDIA_IMAGES_PATH;
+			$upload_path = MEDIA_UPLOADS_PATH;
 	
 			# Check
 			if ( empty($images_path) ) {
@@ -614,6 +614,69 @@ class Bal_App {
 	
 	static public function getActionControllerView ( ) {
 		return self::getView();
+	}
+	
+	/**
+	 * Generates a Zend_Config object from a data file
+	 */
+	static public function parseConfigFile ( $file ) {
+		# Fetch
+		$Config = self::parseDataFile($file);
+		
+		# Check
+		if ( $Config ) {
+			$Config = new Zend_Config($Config);
+		}
+		
+		# Return Config
+		return $Config;
+	}
+	
+	/**
+	 * Takes in a file path and attempts to loads it's contents using a series of supported types.
+	 */
+	static public function parseDataFile ( $file ) {
+		# Prepare
+		$Config = null;
+		
+		# Check location exists
+		if ( is_readable($file) ) {
+			# Load Config
+			$extension = get_extension($file);
+			switch ( $extension ) {
+				# JSON
+				case 'js':
+				case 'json':
+					$Config = Zend_Json::decode(file_get_contents($file), Zend_Json::TYPE_ARRAY);
+					break;
+				
+				# YAML
+				case 'yml':
+				case 'yaml':
+					$Config = sfYaml::load($file);
+					break;
+				
+				# AUTO-DETECT
+				case '':
+					# We want to try the different extensions
+					$extensions = array('yaml','yml','json','js');
+					foreach ( $extensions as $extension ) {
+						$Config = self::parseDataFile($file.'.'.$extension);
+						if ( $Config ) {
+							break;
+						}
+					}
+					break;
+				
+				# FAILURE
+				default:
+					throw new Zend_Exception('An unsupported data file type was passed to Bal_App::parseDataFile('.$file.')');
+					break;
+			}
+		}
+		
+		# Return Config
+		return $Config;
 	}
 	
 	static public function getView ( $clone = false ) {

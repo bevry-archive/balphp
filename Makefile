@@ -26,3 +26,6 @@ tests:
 
 report:
 	open $(DIRTESTS)/log/report/index.html
+
+add:
+	git add .gitignore .htaccess * ;

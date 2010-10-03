@@ -57,16 +57,12 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		
 		# Navigation
 		$nav_path = $module_config_path . '/nav.json';
-		if ( is_readable($nav_path) ) {
-			$NavData = file_get_contents($nav_path);
-			$NavData = Zend_Json::decode($NavData, Zend_Json::TYPE_ARRAY);
-		}
+		$NavData = Bal_App::parseDataFile($nav_path);
 		
 		# Navigation Override
-		$nav_override_path = $config_path . '/nav.json';
-		if ( is_readable($nav_override_path) ) {
-			$NavDataOver = file_get_contents($nav_override_path);
-			$NavDataOver = Zend_Json::decode($NavDataOver, Zend_Json::TYPE_ARRAY);
+		$nav_override_path = NAVIGATION_FILE_PATH;
+		$NavDataOver = Bal_App::parseDataFile($nav_override_path);
+		if ( !empty($NavDataOver) ) {
 			$NavDataOver = delve($NavDataOver,$module);
 			if ( !empty($NavDataOver) ) {
 				$NavData = array_merge_recursive_keys($NavData, $NavDataOver);
