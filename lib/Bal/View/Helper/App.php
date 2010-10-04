@@ -510,8 +510,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 	
 	public function footer ( ) {
 		# Prepare
-		$analytics_code = $this->app()->getConfig('analytics.code');
-		$reinvigorate_code = $this->app()->getConfig('reinvigorate.code');
+		$analytics_code = $this->app()->getConfig('services.analytics.code');
+		$reinvigorate_code = $this->app()->getConfig('services.reinvigorate.code');
 		
 		# Analytics
 		if ( $analytics_code ) : ?>
@@ -546,7 +546,19 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			<script type="text/javascript">
 			/*<![CDATA[*/
 			try {
-			reinvigorate.track("<?=$reinvigorate_code?>");
+				reinvigorate.code = "<?=$reinvigorate_code?>";
+				reinvigorate.url_filter = function(url) {
+					if(url == reinvigorate.session.url && reinvigorate.url_override != null) {
+						reinvigorate.session.url = url = reinvigorate.url_override;
+					}
+					return url.replace(/^https?:\/\/(www\.)?/,"http://");
+				}
+				reinvigorate.ajax_track = function(url) {
+					reinvigorate.url_override = url;
+					reinvigorate.track(reinvigorate.code);
+				}
+				reinvigorate.url_override = null;
+				reinvigorate.track(reinvigorate.code);
 			} catch(err) {}
 			/*]]>*/
 			</script>
