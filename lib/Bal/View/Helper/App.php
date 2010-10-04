@@ -366,7 +366,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$jquery_ajaxy_url = null;
 			switch ( APPLICATION_ENV ) {
 				case 'production':
-					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/v1.6';
+					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/v1.7';
 					break;
 				
 				case 'staging':
