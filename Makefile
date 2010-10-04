@@ -29,3 +29,6 @@ report:
 
 add:
 	git add .gitignore .htaccess * ;
+
+deploy:
+	git checkout v1.0; git merge dev; git checkout master; git merge v1.0; git checkout dev; git push --all; git push beanstalk --all;

@@ -517,24 +517,26 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $analytics_code ) : ?>
 			<script type="text/javascript">
 			/*<![CDATA[*/
-			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+				var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+				document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 			/*]]>*/
 			</script><script type="text/javascript">
 			/*<![CDATA[*/
-			var pageTracker = _gat._getTracker("<?=$analytics_code?>");
-			pageTracker._initData();
-			if ( Modernizr||false ) {
-				pageTracker._setCustomVar(1, "html5.boxshadow", Modernizr.boxshadow ? "yes" : "no" , 2 );
-				pageTracker._setCustomVar(2, "html5.multiplebgs", Modernizr.multiplebgs ? "yes" : "no", 2 );
-				pageTracker._setCustomVar(3, "html5.fontface", Modernizr.fontface ? "yes" : "no", 2 );
-				pageTracker._setCustomVar(4, "html5.csstransitions", Modernizr.csstransitions ? "yes" : "no", 2 );
-				pageTracker._setCustomVar(5, "html5.borderradius", Modernizr.borderradius ? "yes" : "no", 2 );
-			}
-			if ( !(document.location.hash && jQuery && (jQuery.Ajaxy||false)) ) {
-				// We do not wish to track if we are doing a Ajaxy redirect
-				pageTracker._trackPageview();
-			}
+				// Setup Google Analytics
+				var pageTracker = _gat._getTracker("<?=$analytics_code?>");
+				pageTracker._initData();
+				if ( Modernizr||false ) {
+					pageTracker._setCustomVar(1, "html5.boxshadow", Modernizr.boxshadow ? "yes" : "no" , 2 );
+					pageTracker._setCustomVar(2, "html5.multiplebgs", Modernizr.multiplebgs ? "yes" : "no", 2 );
+					pageTracker._setCustomVar(3, "html5.fontface", Modernizr.fontface ? "yes" : "no", 2 );
+					pageTracker._setCustomVar(4, "html5.csstransitions", Modernizr.csstransitions ? "yes" : "no", 2 );
+					pageTracker._setCustomVar(5, "html5.borderradius", Modernizr.borderradius ? "yes" : "no", 2 );
+				}
+				// Check for Ajax Redirect
+				if ( !(document.location.hash && jQuery && (jQuery.Ajaxy||false)) ) {
+					// We do not wish to track if we are doing a Ajaxy redirect
+					pageTracker._trackPageview();
+				}
 			/*]]>*/
 			</script>
 			<?
@@ -546,6 +548,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			<script type="text/javascript">
 			/*<![CDATA[*/
 			try {
+				// Setup ReInvigorate
 				reinvigorate.code = "<?=$reinvigorate_code?>";
 				reinvigorate.url_filter = function(url) {
 					if(url == reinvigorate.session.url && reinvigorate.url_override != null) {
@@ -557,8 +560,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					reinvigorate.url_override = url;
 					reinvigorate.track(reinvigorate.code);
 				}
-				reinvigorate.url_override = null;
-				reinvigorate.track(reinvigorate.code);
+				// Check for Ajax Redirect
+				if ( !(document.location.hash && jQuery && (jQuery.Ajaxy||false)) ) {
+					// We do not wish to track if we are doing a Ajaxy redirect
+					reinvigorate.url_override = null;
+					reinvigorate.track(reinvigorate.code);
+				}
 			} catch(err) {}
 			/*]]>*/
 			</script>
