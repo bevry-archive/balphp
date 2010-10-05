@@ -252,7 +252,6 @@ class Bal_App {
 			$result = systems($commands);
 		}
 		
-		
 		# Clear: log-clean
 		if ( delve($args,'log-clean') ) {
 			echo '- [log-clean] -'."\n";
@@ -645,9 +644,29 @@ class Bal_App {
 	/**
 	 * Takes in a file path and attempts to loads it's contents using a series of supported types.
 	 */
-	static public function parseDataFile ( $file ) {
+	static public function parseDataFile ( $file, $compiled = null ) {
 		# Prepare
 		$Config = null;
+		
+		# Check for Compiled
+		if ( $compiled && is_readable($compiled) ) {
+			if ( filemtime($compiled) > filemtime($file) ) {
+				# Read Compiled
+				$Config = self::parseDataFile($compiled);
+				if ( $Config ) {
+					# Return Config
+					return $Config;
+				}
+			}
+			else {
+				# Recompile
+				$Config = self::parseDataFile($file);
+				# Write
+				file_put_contents($compiled, serialize($Config));
+				# Return Config
+				return $Config;
+			}
+		}
 		
 		# Check location exists
 		if ( is_readable($file) ) {
@@ -664,6 +683,11 @@ class Bal_App {
 				case 'yml':
 				case 'yaml':
 					$Config = sfYaml::load($file);
+					break;
+				
+				# Serialised
+				case 'data':
+					$Config = unserialize(file_get_contents($file));
 					break;
 				
 				# AUTO-DETECT

@@ -173,9 +173,18 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initRoutes ( ) {
 		# Prepare
 		$this->bootstrap('autoload');
+		$routeConfig = null;
 		
-		# Config
-		$routeConfig = sfYaml::load(ROUTES_FILE_PATH);
+		# Read Configuration
+		if ( is_readable(ROUTES_COMPILED_FILE_PATH) && filemtime(ROUTES_COMPILED_FILE_PATH) > filemtime(ROUTES_FILE_PATH) ) {
+			$routeConfig = unserialize(file_get_contents(ROUTES_COMPILED_FILE_PATH));
+		}
+		if ( !$routeConfig ) {
+			$routeConfig = sfYaml::load(ROUTES_FILE_PATH);
+			file_put_contents(ROUTES_COMPILED_FILE_PATH, serialize($routeConfig));
+		}
+		
+		# Convert to Zend Config
 		$routeConfig = new Zend_Config($routeConfig[APPLICATION_ENV]);
 		
 		# Route

@@ -48,6 +48,11 @@ if ( function_compare('array_merge_recursive_keys', 1, true, __FILE__, __LINE__)
 			$replace = true;
 		}
 		
+		# Check
+		if ( !is_array($merged) ) {
+			$merged = array();
+		}
+		
 		# Handle
 		foreach ( $args as $array ) {
 			# Prepare
