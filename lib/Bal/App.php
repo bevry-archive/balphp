@@ -229,18 +229,18 @@ class Bal_App {
 			$commands = array(
 				"mkdir -p ".
 					"$cwd/application/models/Base $cwd/application/data/dump ".
-					"$cwd/application/data/schema/compiled $cwd/application/config/compiled ".
+					"$cwd/application/config/compiled $cwd/application/data/schema/compiled ".
 					"$cwd/application/data/logs $cwd/application/data/logs/payment ",
 				// Standard Files
 				"chmod -R 755 ".
 					"$cwd ",
 				// Writeable Files
 				"chmod -R 777 ".
-					"$cwd/application/data/dump $cwd/application/data/schema/compiled $cwd/application/data/database/*.db ".
+					"$cwd/application/config/compiled $cwd/application/data/schema/compiled ".
+					"$cwd/application/data/dump $cwd/application/data/database/*.db ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
-					"$cwd/application/data/logs $cwd/application/data/logs/payment ".
-					"$cwd/application/config/compiled/*.yml ",
+					"$cwd/application/data/logs $cwd/application/data/logs/payment ",
 				// Executable Files
 				"chmod +x ".
 					"$cwd ".
@@ -650,8 +650,8 @@ class Bal_App {
 		$Config = null;
 		
 		# Check for Compiled
-		if ( $compiled && is_readable($compiled) ) {
-			if ( filemtime($compiled) > filemtime($file) ) {
+		if ( $compiled ) {
+			if ( is_readable($compiled) && filemtime($compiled) > filemtime($file) ) {
 				# Read Compiled
 				$Config = self::parseDataFile($compiled);
 				if ( $Config ) {
@@ -659,14 +659,12 @@ class Bal_App {
 					return $Config;
 				}
 			}
-			else {
-				# Recompile
-				$Config = self::parseDataFile($file);
-				# Write
-				file_put_contents($compiled, serialize($Config));
-				# Return Config
-				return $Config;
-			}
+			# Recompile
+			$Config = self::parseDataFile($file);
+			# Write
+			file_put_contents($compiled, serialize($Config));
+			# Return Config
+			return $Config;
 		}
 		
 		# Check location exists
