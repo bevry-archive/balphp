@@ -229,17 +229,18 @@ class Bal_App {
 			$commands = array(
 				"mkdir -p ".
 					"$cwd/application/models/Base $cwd/application/data/dump ".
+					"$cwd/application/data/schema/compiled $cwd/application/config/compiled ".
 					"$cwd/application/data/logs $cwd/application/data/logs/payment ",
 				// Standard Files
 				"chmod -R 755 ".
 					"$cwd ",
 				// Writeable Files
 				"chmod -R 777 ".
-					"$cwd/application/data/dump $cwd/application/data/schema $cwd/application/data/database/*.db ".
+					"$cwd/application/data/dump $cwd/application/data/schema/compiled $cwd/application/data/database/*.db ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
 					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
 					"$cwd/application/data/logs $cwd/application/data/logs/payment ".
-					"$cwd/application/config/application.yaml ",
+					"$cwd/application/config/compiled/*.yml ",
 				// Executable Files
 				"chmod +x ".
 					"$cwd ".
@@ -490,7 +491,7 @@ class Bal_App {
 			$commands = array(
 				// Writeable Files
 				"chmod -R 755 ".
-					"$cwd/application/data/dump $cwd/application/data/schema ".
+					"$cwd/application/data/dump ".
 					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php "
 					,
 			);
