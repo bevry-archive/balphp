@@ -56,8 +56,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$config_path = Bal_App::getConfig('config_path');
 		
 		# Navigation
-		$nav_path = $module_config_path . '/nav.json';
-		$NavData = Bal_App::parseDataFile($nav_path);
+		$NavData = Bal_App::parseDataFile($module_config_path.'/nav',$module_config_path.'/compiled/nav.data');
 		
 		# Navigation Override
 		$NavDataOver = Bal_App::parseDataFile(NAVIGATION_FILE_PATH,NAVIGATION_COMPILED_FILE_PATH);
@@ -290,8 +289,11 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		# Prepare
 		$result = null;
 		
+		# Fetch
+		$hasIdentity = $this->getApp()->hasIdentity();
+		
 		# Check Login Status
-		if ( $this->getApp()->hasIdentity() ) {
+		if ( $hasIdentity ) {
 			# Logged In
 			# Forward
 			if ( $logged_in_forward ) {

@@ -46,7 +46,7 @@ $balphp__sub_packages__loaded = array_merge($balphp__sub_packages, $balphp__sub_
 // Load sub packages
 foreach ( $balphp__sub_packages as $sub_package ) {
 	// Load the sub package
-	scan_dir( $dir.$sub_package.DIRECTORY_SEPARATOR, array(
+	scan_dir($dir.$sub_package.DIRECTORY_SEPARATOR, array(
 		'pattern' => 'inc_php',
 		'action' => 'inc_php'
 	));

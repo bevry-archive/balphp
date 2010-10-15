@@ -228,27 +228,26 @@ class Bal_App {
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
 				"mkdir -p ".
-					"$cwd/application/models/Base $cwd/application/data/dump ".
-					"$cwd/application/config/compiled $cwd/application/data/schema/compiled ".
-					"$cwd/application/data/logs $cwd/application/data/logs/payment ",
+					MODELS_PATH.' '.MODELS_BASE_PATH.' '.CONFIG_COMPILED_PATH.' '.
+					DATA_DUMP_PATH.' '.DATA_SCHEMA_COMPILED_PATH.' '.DATABASES_PATH.' '.
+					MEDIA_PATH.' '.MEDIA_DELETED_PATH.' '.MEDIA_UPLOADS_PATH.' '.MEDIA_IMAGES_PATH.' '.MEDIA_INVOICES_PATH.' '.
+					LOGS_PATH.' '.LOGS_PAYMENT_PATH.' '.CACHE_PATH,
 				// Standard Files
 				"chmod -R 755 ".
-					"$cwd ",
+					APPLICATION_ROOT_PATH,
 				// Writeable Files
 				"chmod -R 777 ".
-					"$cwd/application/config/compiled $cwd/application/data/schema/compiled ".
-					"$cwd/application/data/dump $cwd/application/data/database/*.db ".
-					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php ".
-					"$cwd/public/media/deleted $cwd/public/media/images  $cwd/public/media/invoices $cwd/public/media/uploads ".
-					"$cwd/application/data/logs $cwd/application/data/logs/payment ",
+					MODELS_PATH.' '.MODELS_BASE_PATH.' '.CONFIG_COMPILED_PATH.' '.
+					DATA_DUMP_PATH.' '.DATA_SCHEMA_COMPILED_PATH.' '.DATABASES_PATH.' '.
+					MEDIA_PATH.' '.MEDIA_DELETED_PATH.' '.MEDIA_UPLOADS_PATH.' '.MEDIA_IMAGES_PATH.' '.MEDIA_INVOICES_PATH.' '.
+					LOGS_PATH.' '.LOGS_PAYMENT_PATH.' '.CACHE_PATH,
 				// Executable Files
 				"chmod +x ".
-					"$cwd ".
-					"$cwd/index.php ".
-					"$cwd/application/models/*.php ".
-					"$cwd/application/models/Base/*.php ".
-					"$cwd/public/media/*.php ".
-					"$cwd/scripts/*.php $cwd/scripts/setup $cwd/scripts/doctrine ",
+					APPLICATION_ROOT_PATH.' '.
+					APPLICATION_ROOT_PATH.'/index.php '.
+					MODELS_PATH.'/*.php '.MODELS_BASE_PATH.'/*.php '.
+					MEDIA_PATH.'/*.php '.
+					SCRIPTS_PATH.'/*.php '.SCRIPTS_PATH.'/setup '.SCRIPTS_PATH.'/doctrine '.YUI_COMPILER_FILE_PATH.' '.CLOSURE_COMPILER_FILE_PATH,
 			);
 			$result = systems($commands);
 		}
@@ -491,9 +490,8 @@ class Bal_App {
 			$commands = array(
 				// Writeable Files
 				"chmod -R 755 ".
-					"$cwd/application/data/dump ".
-					"$cwd/application/models $cwd/application/models/*.php $cwd/application/models/Base $cwd/application/models/Base/*.php "
-					,
+					MODELS_PATH.' '.MODELS_BASE_PATH.' '.
+					DATA_DUMP_PATH.' '.DATA_SCHEMA_COMPILED_PATH.' ',
 			);
 			$result = systems($commands);
 		}
@@ -649,6 +647,22 @@ class Bal_App {
 		# Prepare
 		$Config = null;
 		
+		# Extract Extension
+		$extension = get_extension($file);
+		
+		# Check Extension
+		if ( !$extension ) {
+			# Try Loading Sequentially
+			$extensions = array('yml','yaml','json','js');
+			foreach ( $extensions as $extension ) {
+				$Config = self::parseDataFile($file.'.'.$extension, $compiled);
+				if ( $Config ) {
+					break;
+				}
+			}
+			return $Config;
+		}
+		
 		# Check for Compiled
 		if ( $compiled ) {
 			if ( is_readable($compiled) && filemtime($compiled) > filemtime($file) ) {
@@ -670,7 +684,6 @@ class Bal_App {
 		# Check location exists
 		if ( is_readable($file) ) {
 			# Load Config
-			$extension = get_extension($file);
 			switch ( $extension ) {
 				# JSON
 				case 'js':

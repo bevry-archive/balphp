@@ -293,6 +293,12 @@ if ( function_compare('fix_magic_quotes', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Fix magic quotes
+	 * @version 2, August 22, 2009
+	 * @since 1, Unknown
+	 * @package BalPHP {@link http://www.balupton/projects/balphp}
+	 * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
+	 * @copyright Copyright (c) 2008-2010, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
+	 * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
 	 */
 	function fix_magic_quotes ( ) {
 		if ( ini_get('magic_quotes_gpc') ) {

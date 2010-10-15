@@ -20,8 +20,11 @@
 class Bal_Framework {
 	
 	public static function import ( $libraries = array() ) {
+		global $balphp__sub_packages;
 		$balphp__sub_packages = $libraries;
 		$file = 'balphp.php';
+		
+		# Load the Packages
 		if ( file_exists($file) ) {
 			require($file);
 		} elseif ( defined('BALPHP_PATH') && file_exists(BALPHP_PATH.DIRECTORY_SEPARATOR.$file) ) {
@@ -29,9 +32,6 @@ class Bal_Framework {
 		} else {
 			throw new Zend_Exception ('Could not find balPHP: '.get_include_path());
 		}
-		
-		# Load the overrides
-		require_once BALPHP_PATH.DIRECTORY_SEPARATOR.'Zend/View/Helper/Navigation/Menu.php';
 	}
 	
 }

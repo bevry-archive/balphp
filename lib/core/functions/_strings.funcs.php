@@ -55,9 +55,14 @@ if ( function_compare('stripslashes_deep', 1.0, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Strips slashes
-	 * @version 1.0, August 22, 2009
 	 * @param	string		$str
 	 * @return	string
+	 * @version 1.0, August 22, 2009
+	 * @since 1.0, August 22, 2009
+	 * @package BalPHP {@link http://www.balupton/projects/balphp}
+	 * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
+	 * @copyright Copyright (c) 2008-2010, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
+	 * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
 	 */
 	function stripslashes_deep ( $value ) {
 		$value = is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);

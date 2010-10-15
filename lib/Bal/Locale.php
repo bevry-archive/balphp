@@ -102,7 +102,7 @@ class Bal_Locale {
 	    Zend_Registry::set('Zend_Locale', $this->Zend_Locale);
 		
 		# Apply the Zend_Translate Dependency
-	    $this->Zend_Translate = new Zend_Translate('yaml', $this->file, $locale);
+	    $this->Zend_Translate = new Zend_Translate('Bal_Translate_Adapter_Yaml', $this->file, $locale);
 	    Zend_Registry::set('Zend_Translate', $this->Zend_Translate);
 		
 		# Apply the Zend_Currency Dependency

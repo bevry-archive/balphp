@@ -4,6 +4,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	# ========================
 	# VARIABLES
 	
+	protected $_Sessions = array();
 	protected $_User = null;
 	
 	protected $_options = array(
@@ -42,6 +43,16 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 */
 	protected function getPlugin ( $plugin ) {
 		return Zend_Controller_Front::getInstance()->getPlugin($plugin);
+	}
+	
+	# ========================
+	# Sessions
+	
+	public function getSession ( $name ) {
+		if ( empty($this->_Sessions[$name]) ) {
+			$this->_Sessions[$name] = new Zend_Session_Namespace($name, true);
+		}
+		return $this->_Sessions[$name];
 	}
 	
 	# ========================
@@ -108,7 +119,6 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 */
 	public function login ( $username, $password, $locale = null, $remember = null ) {
 		# Prepare
-		$Session = new Zend_Session_Namespace('login'); // not sure why needed but it is here
 		$Auth = $this->getAuth();
 		
 		# Load
@@ -150,7 +160,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Admin cookies
 		if ( $this->hasPermission('admin') ) {
 			// Enable debug
-			setcookie('debug','secret',0,'/');
+			setcookie('debug',DEBUG_SECRET,0,'/');
 		}
 		
 		# Return true
@@ -163,6 +173,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 */
 	public function getAuth ( ) {
 		# Return the Zend_Auth Singleton
+		$this->getSession('login');
 		return Zend_Auth::getInstance();
 	}
 	

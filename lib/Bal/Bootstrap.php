@@ -377,6 +377,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Prepare
 		$this->bootstrap('autoload');
 		$this->bootstrap('config');
+		$this->bootstrap('balphp');
 		$Autoloader = Zend_Loader_Autoloader::getInstance();
 		
 		# Config
@@ -397,6 +398,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 			$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'Doctrine_');
 			//$Autoloader->pushAutoloader(array('Doctrine', 'autoload'), 'sfYaml');
 		}
+		
+		# Overides
+		Bal_Framework::import(array('Doctrine'));
 		
 		# Autoload Models
 		if ( true ) {
@@ -541,7 +545,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		global $Application;
 		
 		# balPHP
-		Bal_Framework::import();
+		Bal_Framework::import(array('core','Zend'));
 		
 		# Params
 		hydrate_request_init();
@@ -561,8 +565,9 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$applicationConfig = Zend_Registry::get('applicationConfig');
 		
 		# View Helpers
-		$View->addHelperPath(APPLICATION_PATH . '/modules/balcms/views/helpers', 'Balcms_View_Helper');
-		$View->addScriptPath(APPLICATION_PATH . '/modules/balcms/views/scripts');
+		$View->addHelperPath(APPLICATION_PATH.'/modules/balcms/views/helpers', 'Balcms_View_Helper');
+		$View->addHelperPath(LIBRARY_PATH.'/BundlePhu/View/Helper', 'BundlePhu_View_Helper');
+		$View->addScriptPath(APPLICATION_PATH.'/modules/balcms/views/scripts');
 		
 		# Widgets
 		if ( array_key_exists('widgets', $applicationConfig) )

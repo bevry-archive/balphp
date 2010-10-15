@@ -153,7 +153,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
-		$headLink = $this->view->headLink();
+		$headLink = $this->view->getHelper('HeadLink');
 		
 		# Options
 		$default = array_merge(
@@ -220,7 +220,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Editor
 		if ( $editor ) {
-			switch ( $this->getConfig('editor') ) {
+			switch ( $this->getConfig('editor.code') ) {
 				case 'bespin':
 					$bespin_url = $script_url.'/bespin-0.9a2-custom';
 					$headLink->headLink(
@@ -234,7 +234,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					$headLink->offsetSetStylesheet($editor, $bespin_url.'/BespinEmbedded.css');
 					break;
 				
+				case 'aloha':
+					break;
+					
+				case 'tinymce':
+					break;
+				
 				default:
+					throw new Exception('Unknown Editor Code');
 					break;
 			}
 		}
@@ -274,8 +281,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
-		$headScript = $this->view->headScript();
 		$browserInfo = $this->getBrowserInfo();
+		$headScript = $this->view->getHelper('HeadScriptBundler');
 		
 		# Options
 		$default = array_merge(
@@ -292,12 +299,16 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'syntax_highlighter'	=> 300,
 				'editor' 				=> 400,
 				'script' 				=> 500,
-				'theme' 				=> 600
+				'theme' 				=> 600,
+				'compiled'				=> 10
 			),
 			$App->getConfig('headScript', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
+		
+		# Compiled
+		$headScript->setCompiledOffset($compiled);
 		
 		# URLs
 		$public_url = $App->getPublicUrl();
@@ -404,11 +415,38 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Editor
 		if ( $editor ) {
-			switch ( $this->getConfig('editor') ) {
+			switch ( $this->getConfig('editor.code') ) {
 				case 'tinymce':
 					$tiny_mce_url = $script_url.'/tiny_mce-3.2.7';
 					$headScript->offsetSetFile($editor,$tiny_mce_url.'/jquery.tinymce.js');
 					$headScript->offsetSetScript($editor+1,'$.Tinymce.applyConfig("default",{script_url: "'.$tiny_mce_url.'/tiny_mce.js", content_css: "'.$front_url.'/styles/content.css"});');
+					break;
+				
+				case 'aloha':
+					# Preset Urls
+					$aloha_url = 'http://localhost/other/aloha-balupton/WebContent/';
+					$aloha_plugins_cms_url = PUBLIC_SCRIPTS_URL.'/aloha-plugins/';
+					# Include Include
+					$headScript->offsetSetFile($editor++, $aloha_url.'core/include.js', 'text/javascript');
+					$headScript->prependScript('window.GENTICS_Aloha_base = "'.$aloha_url.'";');
+					# Include Files
+					$aloha_plugins = array(
+						'plugins/com.gentics.aloha.plugins.Format/plugin.js',
+						'plugins/com.gentics.aloha.plugins.Table/plugin.js',
+						'plugins/com.gentics.aloha.plugins.List/plugin.js',
+						'plugins/com.gentics.aloha.plugins.Link/plugin.js',
+						'plugins/eu.iksproject.plugins.Loader/plugin.js',
+						'plugins/com.bal.aloha.plugins.Image/plugin.js'
+					);
+					$aloha_plugins_cms = array(
+						'com.bal.aloha.plugins.Attacher/plugin.js'
+					);
+					for ( $i=0,$n=sizeof($aloha_plugins); $i<$n; ++$i ) {
+						$headScript->offsetSetFile($editor++, $aloha_url.$aloha_plugins[$i]);
+					}
+					for ( $i=0,$n=sizeof($aloha_plugins_cms); $i<$n; ++$i ) {
+						$headScript->offsetSetFile($editor++, $aloha_plugins_cms_url.$aloha_plugins_cms[$i]);
+					}
 					break;
 					
 				case 'bespin':
@@ -417,6 +455,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					break;
 				
 				default:
+					throw new Exception('Unknown Editor Code');
 					break;
 			}
 		}

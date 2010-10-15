@@ -45,7 +45,7 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 	 *  'absolute_tree': an array tree containing all the absolute paths parented by their parent directory
 	 * </pre>
 	 *
-	 * @version 6.2-final, April 21, 2008
+	 * @version 7.0-final, October 14, 2010
 	 *
 	 * @param string $dir the directory to scan
 	 * @param string|regex|array $pattern optional a predefined regular expression to use (string), or your own (regex),
@@ -102,7 +102,7 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 					$return_dirs = false;
 					break;
 				case 'inc_php':
-					$pattern_files = '/\\'.DIRECTORY_SEPARATOR.'_.+\\.php$/';
+					$pattern_files = '/\\'.DIRECTORY_SEPARATOR.'.+\\.php$/';
 					$return_dirs = false;
 					break;
 				case 'image':
@@ -138,6 +138,11 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 			}
 		}
 		
+		# Adjust
+		if ( !$return_dirs ) {
+			$return_format = 'flat';
+		}
+		
 		# Cycle
 		$dh = opendir($dir);
 		if ( $dh ) {
@@ -159,11 +164,11 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 					if ( $skip_files || ($pattern_files && !preg_match($pattern_files, $path)) ) {
 						continue; // skip
 					}
-			
+					
 					# Trigger Action
 					if ( $action_files ) {
-						$result = $action_files($path, $filename, $dir);
-						extract($result);
+						$action_result = $action_files($path, $filename, $dir);
+						extract($action_result);
 						if ( $skip ) continue; // action set skip
 					}
 					
@@ -171,7 +176,7 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 					if ( !$return_files ) {
 						continue; // skip
 					}
-			
+					
 					# Return
 					switch ( $return_format ) {
 						case 'separate':
@@ -185,10 +190,10 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 							break;
 						
 						default:
-							throw new Exception('scan_dir: unkown $return_format:['.$return_format.']');
+							throw new Exception('scan_dir: unknown $return_format:['.$return_format.']');
 							break;
 					}
-				
+					
 				}//is_file
 				elseif ( is_dir($path) ) {
 		
@@ -199,11 +204,11 @@ if ( function_compare('scan_dir', 7, true, __FILE__, __LINE__) ) {
 			
 					# Trigger Action
 					if ( $action_dirs ) {
-						$result = $action_dirs($path, $filename, $dir);
-						extract($result);
+						$action_result = $action_dirs($path, $filename, $dir);
+						extract($action_result);
 						if ( $skip ) continue; // action set skip
 					}
-			
+					
 					# Return
 					switch ( $return_format ) {
 				
