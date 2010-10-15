@@ -566,7 +566,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# View Helpers
 		$View->addHelperPath(APPLICATION_PATH.'/modules/balcms/views/helpers', 'Balcms_View_Helper');
-		$View->addHelperPath(LIBRARY_PATH.'/BundlePhu/View/Helper', 'BundlePhu_View_Helper');
 		$View->addScriptPath(APPLICATION_PATH.'/modules/balcms/views/scripts');
 		
 		# Widgets
