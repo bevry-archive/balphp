@@ -228,10 +228,10 @@ class Bal_App {
 			$cwd = APPLICATION_ROOT_PATH;
 			$commands = array(
 				"mkdir -p ".
-					MODELS_PATH.' '.MODELS_BASE_PATH.' '.CONFIG_COMPILED_PATH.' '.
+					LIBRARY_PATH.' '.MODELS_PATH.' '.MODELS_BASE_PATH.' '.CONFIG_COMPILED_PATH.' '.
 					DATA_DUMP_PATH.' '.DATA_SCHEMA_COMPILED_PATH.' '.DATABASES_PATH.' '.
 					MEDIA_PATH.' '.MEDIA_DELETED_PATH.' '.MEDIA_UPLOADS_PATH.' '.MEDIA_IMAGES_PATH.' '.MEDIA_INVOICES_PATH.' '.
-					LOGS_PATH.' '.LOGS_PAYMENT_PATH.' '.CACHE_PATH,
+					LOGS_PATH.' '.LOGS_PAYMENT_PATH.' '.CACHE_PATH.' '.CACHE_STYLES_PATH.' '.CACHE_SCRIPTS_PATH,
 				// Standard Files
 				"chmod -R 755 ".
 					APPLICATION_ROOT_PATH,
@@ -247,7 +247,7 @@ class Bal_App {
 					APPLICATION_ROOT_PATH.'/index.php '.
 					MODELS_PATH.'/*.php '.MODELS_BASE_PATH.'/*.php '.
 					MEDIA_PATH.'/*.php '.
-					SCRIPTS_PATH.'/*.php '.SCRIPTS_PATH.'/setup '.SCRIPTS_PATH.'/doctrine '.YUI_COMPILER_FILE_PATH.' '.CLOSURE_COMPILER_FILE_PATH,
+					SCRIPTS_PATH.'/*.php '.SCRIPTS_PATH.'/setup '.SCRIPTS_PATH.'/doctrine ',
 			);
 			$result = systems($commands);
 		}
@@ -665,7 +665,7 @@ class Bal_App {
 		
 		# Check for Compiled
 		if ( $compiled ) {
-			if ( is_readable($compiled) && filemtime($compiled) > filemtime($file) ) {
+			if ( is_readable($compiled) && is_readable($file) && filemtime($compiled) > filemtime($file) ) {
 				# Read Compiled
 				$Config = self::parseDataFile($compiled);
 				if ( $Config ) {
