@@ -976,7 +976,7 @@ if ( function_compare('ensure_path_exists', 1, true, __FILE__, __LINE__) ) {
 		
 		// Check Above Worked
 		if ( !is_dir($parent) ) {
-			returnf false;
+			return false;
 		}
 		
 		// Ensure File Exists
