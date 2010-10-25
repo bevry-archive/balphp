@@ -676,6 +676,7 @@ class Bal_App {
 			# Recompile
 			$Config = self::parseDataFile($file);
 			# Write
+			ensure_path_exists($compiled);
 			file_put_contents($compiled, serialize($Config));
 			# Return Config
 			return $Config;

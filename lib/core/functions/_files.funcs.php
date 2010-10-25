@@ -897,14 +897,11 @@ if ( function_compare('rename_dir', 1, true, __FILE__, __LINE__) ) {
 
 	/**
 	 * Rename/Move a directory to another location
-	 *
-	 * @version 1
-	 *
 	 * @param string	$source
 	 * @param string	$dest
 	 * @param string	$overwrite
-	 *
 	 * @return boolean
+	 * @version 1
 	 */
 	function rename_dir ( $source, $dest, $overwrite = false ) {
 		
@@ -948,13 +945,47 @@ if ( function_compare('rename_dir', 1, true, __FILE__, __LINE__) ) {
 }
 
 if ( function_compare('move_dir', 1, true, __FILE__, __LINE__) ) {
-
 	/**
 	 * Alias for rename_dir
-	 *
 	 * @see rename_dir
 	 */
 	function move_dir ( $source, $dest, $overwrite = false ) {
 		return rename_dir($source, $dest, $overwrite);
+	}
+}
+
+if ( function_compare('ensure_path_exists', 1, true, __FILE__, __LINE__) ) {
+	/**
+	 * Rename/Move a directory to another location
+	 * @param string $path
+	 * @return true
+	 * @version v1, 25 October 2010
+	 * @since v1, 25 October 2010
+	 */
+	function ensure_path_exists ( $path ) {
+		// Check Exists
+		if ( file_exists($path) ) {
+			return true;
+		}
+		
+		// Ensure Parent Directory Exists
+		$parent = dirname($path);
+		while ( !is_dir($parent) ) {
+			`mkdir -p $parent`;
+		}
+		
+		// Check Above Worked
+		if ( !is_dir($parent) ) {
+			returnf false;
+		}
+		
+		// Ensure File Exists
+		if ( strstr($path,'.')	) {
+			$result = touch($path);
+			return $result;
+		}
+		else {
+			return true;
+		}
 	}
 }

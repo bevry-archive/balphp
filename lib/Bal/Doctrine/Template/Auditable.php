@@ -144,9 +144,11 @@ class Bal_Doctrine_Template_Auditable extends Bal_Doctrine_Template_Abstract {
 		
 		# Default
 		if ( $this->optionEnabled('Author') ) {
-			if ( isset($Record->Author) && $Record->Author->exists() ) {
-				$author = $Record->Author->displayname;
-			}
+			//if ( isset($Record->Author) && $Record->Author->exists() ) {
+			//	$author = $Record->Author->displayname;
+			//}
+			$author = delve($Record,'Author.displayname');
+			// ^ we use delve here as the above may have loaded an author without all the fields populated
 			
 			# Has changed?
 			if ( $this->optionEnabled('authorstr') ) {
