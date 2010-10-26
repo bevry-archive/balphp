@@ -192,6 +192,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 */
 	public function getIdentity ( ) {
 		# Fetch
+		if ( !empty($_SERVER['CLI']) ) return false;
 		return $this->getAuth()->getIdentity();
 	}
 	

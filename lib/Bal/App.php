@@ -91,7 +91,7 @@ class Bal_App {
 		$args = array();
 		if ( !empty($_GET) ) {
 			$args =& $_GET;
-		} elseif ( empty($_SERVER['HTTP_HOST']) ) {
+		} elseif ( empty($_SERVER['HTTP_HOST']) || !empty($_SERVER['CLI']) ) {
 			$cli = true;
 			$args =& $_SERVER['argv'];
 		}

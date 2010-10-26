@@ -65,7 +65,7 @@ class Bal_Log extends Zend_Log {
 	public function loadEvents ( ) {
 		# Check Session Status
 		$Session = $this->getSession();
-		if ( !empty($Session->events) ) {
+		if ( $Session && !empty($Session->events) ) {
 			# Load cached events
 			$events = $Session->events;
 			$this->addEvents($events);
@@ -91,7 +91,7 @@ class Bal_Log extends Zend_Log {
 		$Session = $this->getSession();
 		
 		# Store
-		$Session->events[] = $event;
+		if ( $Session ) $Session->events[] = $event;
 		
 		# Chain
 		return $this;
@@ -106,7 +106,7 @@ class Bal_Log extends Zend_Log {
 		$Session = $this->getSession();
 		
 		# Store
-		$Session->events = array();
+		if ( $Session ) $Session->events = array();
 		
 		# Chain
 		return $this;
@@ -121,14 +121,16 @@ class Bal_Log extends Zend_Log {
 		$Session = null;
 		
 		# Handle
-		if ( !$this->_Session ) {
-			$Session = new Zend_Session_Namespace('Log');
-			if ( empty($Session->events) )
-				$Session->events = array();
-			$this->_Session = $Session;
-		}
-		else {
-			$Session = $this->_Session;
+		if ( empty($_SERVER['CLI']) ) {
+			if ( !$this->_Session ) {
+				$Session = new Zend_Session_Namespace('Log');
+				if ( empty($Session->events) )
+					$Session->events = array();
+				$this->_Session = $Session;
+			}
+			else {
+				$Session = $this->_Session;
+			}
 		}
 		
 		# Return Session
@@ -218,7 +220,7 @@ class Bal_Log extends Zend_Log {
 		# Prepare
 		$render = $this->getRenderWriter()->render();
 		# Render
-		$cli = empty($_SERVER['HTTP_HOST']);
+		$cli = !empty($_SERVER['CLI']) || empty($_SERVER['HTTP_HOST']);
 		return $cli ? strip_tags($render) : $render;
 	}
 	

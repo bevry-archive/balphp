@@ -153,7 +153,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
-		$headLink = $this->view->getHelper('HeadLink');
+		$headLink = $this->view->getHelper('HeadLinkBundler');
 		
 		# Options
 		$default = array_merge(
@@ -201,21 +201,15 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
-			$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/master';
+			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
 			$headLink->offsetSetStylesheet($jquery_sparkle, $jquery_sparkle_url.'/styles/jquery.sparkle.min.css');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
-			$jquery_lightbox_url = 'http://github.com/balupton/jquery-lightbox/raw/master';
+			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
 			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.min.css');
 		}
-		
-		# Syntax Highlighter
-		/*if ( $syntax_highlighter ) {
-			$sh_url = $script_url.'/syntaxhighlighter-2.1.364/styles/sh.min.css';
-			$headLink->offsetSetStylesheet($syntax_highlighter, $sh_url);
-		}*/
 		
 		# Editor
 		if ( $editor ) {
@@ -254,7 +248,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Theme
 		if ( $theme ) {
 			$url = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css', 'theme');
-			if ( $csscaffold ) $url .= '?csscaffold';
+			if ( $csscaffold ) $url .= '?scaffold';
 			if ( $url )	$headLink->offsetSetStylesheet($theme, $url);
 		}
 		
@@ -313,21 +307,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$public_url = $App->getPublicUrl();
 		$back_url = $App->getAreaUrl('back');
 		$front_url = $App->getAreaUrl('front');
-		$script_url = $public_url.'/scripts';
+		$script_url = PUBLIC_SCRIPTS_URL;
 		
 		# Modernizr
 		if ( $modernizr ) {
-			$headScript->offsetSetFile($modernizr, $public_url.'/scripts/modernizr-1.5.js');
+			$headScript->offsetSetFile($modernizr, $script_url.'/modernizr-1.5.js');
 		}
 	
 		# jQuery
 		if ( $jquery ) {
-			$headScript->offsetSetFile($jquery, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js' : $public_url.'/scripts/jquery-1.4.3.js');
+			$headScript->offsetSetFile($jquery, $script_url.'/jquery-1.4.3.js');
 		}
 		
 		# jQuery UI
 		if ( $jquery_ui ) {
-			$headScript->offsetSetFile($jquery_ui, APPLICATION_ENV === 'production' ? 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js' : $script_url.'/jquery-ui-1.8.5.custom/js/jquery-ui-1.8.5.custom.min.js');
+			$headScript->offsetSetFile($jquery_ui, $script_url.'/jquery-ui-1.8.5.custom/js/jquery-ui-1.8.5.custom.min.js');
 	  		$headScript->offsetSetScript($jquery_ui+1,'$.datepicker.setDefaults({dateFormat: "yy-mm-dd"});');
 	    }
 		
@@ -336,35 +330,15 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$headScript->offsetSetScript($json, 'if ( typeof JSON === "undefined" ) $.appendScript("'.$script_url.'/json2.min.js");');
 	    }
 		
-		# IE9_JS
-		//if ( $ie9_js && $browserInfo['ie'] && $browserInfo['version'] < 9 ) {
-		//	$headScript->offsetSetFile($ie9_js, $script_url.'/ie7-js-2.1-beta4/'.(APPLICATION_ENV === 'production' ? '' : 'src/').'IE9.js');
-	    //}
-		
 		# jQuery Plugins
 		if ( $jquery_plugins ) {
-			$headScript->offsetSetFile($jquery_plugins, $public_url.'/scripts/jquery.autogrow.min.js');
+			$headScript->offsetSetFile($jquery_plugins, $script_url.'/jquery.autogrow.min.js');
 	    }
 		
 		# jQuery Sparkle
 		if ( $jquery_sparkle ) {
 			// Prepare
-			$jquery_sparkle_url = null;
-			switch ( APPLICATION_ENV ) {
-				case 'production':
-					$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/v1.5';
-					break;
-				
-				case 'staging':
-					$jquery_sparkle_url = 'http://github.com/balupton/jquery-sparkle/raw/dev';
-					break;
-					
-				case 'testing':
-				case 'development':
-				default:
-					$jquery_sparkle_url = '/javascript/jquery-sparkle';
-					break;
-			}
+			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
 			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
@@ -372,36 +346,20 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# jQuery Ajaxy
 		if ( $jquery_ajaxy ) {
 			// Prepare
-			$jquery_ajaxy_url = null;
-			switch ( APPLICATION_ENV ) {
-				case 'production':
-					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/v1.7';
-					break;
-				
-				case 'staging':
-					$jquery_ajaxy_url = 'http://github.com/balupton/jquery-ajaxy/raw/dev';
-					break;
-					
-				case 'testing':
-				case 'development':
-				default:
-					$jquery_ajaxy_url = '/javascript/jquery-ajaxy';
-					break;
-			}
-			// Include
+			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
 			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
-			$jquery_lightbox_url = 'http://github.com/balupton/jquery-lightbox/raw/master';
+			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
 			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 		}
 		
 		# Syntax Highlighter
 		if ( $syntax_highlighter ) {
-			$sh_url = 'http://github.com/balupton/jQuery-SyntaxHighlighter/raw/master/scripts/jquery.syntaxhighlighter'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js';
-			$headScript->offsetSetFile($syntax_highlighter, $sh_url);
+			$sh_url = $script_url.'/jquery-syntaxhighlighter';
+			$headScript->offsetSetFile($syntax_highlighter, $sh_url.'/scripts/jquery.syntaxhighlighter'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
 			$headScript->offsetSetScript($syntax_highlighter+1,
 				'$.SyntaxHighlighter.init({
 					"defaults": {
@@ -422,10 +380,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				
 				case 'aloha':
 					# Preset Urls
-					$aloha_url = 'http://localhost/other/Aloha-Editor/WebContent/';
-					$aloha_plugins_cms_url = PUBLIC_SCRIPTS_URL.'/aloha-plugins/';
+					$aloha_url = $script_url.'/aloha-editor/WebContent';
+					$aloha_plugins_cms_url = $script_url.'/aloha-plugins';
 					# Include Include
-					$headScript->offsetSetFile($editor++, $aloha_url.'core/include.js', 'text/javascript');
+					$headScript->offsetSetFile($editor++, $aloha_url.'/core/include.js', 'text/javascript');
 					$headScript->prependScript('window.GENTICS_Aloha_base = "'.$aloha_url.'";');
 					# Include Files
 					$aloha_plugins = array(
@@ -441,10 +399,10 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 						'com.bal.aloha.plugins.Attacher/plugin.js'
 					);
 					for ( $i=0,$n=sizeof($aloha_plugins); $i<$n; ++$i ) {
-						$headScript->offsetSetFile($editor++, $aloha_url.$aloha_plugins[$i]);
+						$headScript->offsetSetFile($editor++, $aloha_url.'/'.$aloha_plugins[$i]);
 					}
 					for ( $i=0,$n=sizeof($aloha_plugins_cms); $i<$n; ++$i ) {
-						$headScript->offsetSetFile($editor++, $aloha_plugins_cms_url.$aloha_plugins_cms[$i]);
+						$headScript->offsetSetFile($editor++, $aloha_plugins_cms_url.'/'.$aloha_plugins_cms[$i]);
 					}
 					break;
 					

@@ -2,17 +2,42 @@
 
 class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 	
-	protected $_compilerPath = null;
-	protected $_compiler = 'closure-webservice';
+	# =========================
+	# Custom: Variables
+	
+	protected $_extension = 'js';
 	protected $_compiledOffset = null;
 	
-	public function setCompiledOffset ( $value ) {
-		$this->_compiledOffset = $value;
-	}
+	protected $_compiler = 'closure-webservice';
+	protected $_compilerPath = null;
+	
+	# =========================
+	# Custom: Handling
 	
 	protected function isCompressable($item){
 		return isset($item->attributes['src']) && ($item->type === 'text/javascript');
 	}
+	
+	protected function addFile($url){
+		if ( $this->_compiledOffset !== null ) 
+			$this->offsetSetFile($this->_compiledOffset, $url);
+		else
+			$this->prependFile($url);
+	}
+	
+	# =========================
+	# Custom: Paths
+	
+	protected function getCachePath ( ) {
+		return CACHE_SCRIPTS_PATH;
+	}
+	
+	protected function getCacheUrl ( ) {
+		return CACHE_SCRIPTS_URL;
+	}
+	
+	# =========================
+	# Custom: Compilers
 	
 	protected function compileClosureWebservice ( $paths, $path ) {
 		$Compiler = new Bal_Service_GoogleClosure();
@@ -24,28 +49,25 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 		`$command`;
 	}
 	
+	# =========================
+	# Generic
+	
+	public function setCompiledOffset ( $value ) {
+		$this->_compiledOffset = $value;
+	}
+	
 	protected function compile($paths,$path){
-		switch ( $this->_compiler ) {
-			case 'closure-webservice':
-				$this->compileClosureWebservice($paths,$path);
-				break;
-			
-			case 'closure-compiler':
-				$this->compileClosureCompiler($paths,$path);
-				break;
-			
-			default:
-				throw new Exception('Unknown compiler');
-				break;
+		$compiler = str_replace(' ','',ucwords(str_replace('-',' ',$this->_compiler)));
+		$function = 'compile'.$compiler;
+		
+		if ( method_exists($this,$function) ) {
+			$this->$function($paths,$path);
 		}
-	}
-	
-	protected function getCachePath ( ) {
-		return CACHE_SCRIPTS_PATH;
-	}
-	
-	protected function getCacheUrl ( ) {
-		return CACHE_SCRIPTS_URL;
+		else {
+			throw new Exception('Compiler ['.$this->_compiler.']['.$function.'] not supported.');
+		}
+		
+		return true;
 	}
 	
 	public function toString ($indent = null) {
@@ -57,6 +79,7 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 		$paths = array();
 		$hash = '';
 		$refresh = false;
+		$error = false;
 		
 		# Cycle Through the Items
         foreach ($this as $key => $item) {
@@ -67,7 +90,7 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 			
 			# Determine Full URL
 			$url = $item->attributes['src'];
-			if ( strpos($url,BASE_URL) === 0 || strpos($url,'/') === 0 ) {
+			if ( (BASE_URL && strpos($url,BASE_URL) === 0) || strpos($url,'/') === 0 ) {
 				$url = ROOT_URL.$url;
 			}
 			elseif ( strpos($url,'http') === false ) {
@@ -96,15 +119,10 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 			$hash .= $url;
 		}
 		
-		# Delete the Files
-		foreach ( $files as $key => $url ) {
-			unset($this[$key]);
-		}
-		
 		# Hash
 		$hash = md5($hash);
-		$compiledFileUrl = $this->getCacheUrl().'/'.$hash.'.js';
-		$compiledFilePath = $this->getCachePath().'/'.$hash.'.js';
+		$compiledFileUrl = $this->getCacheUrl().'/'.$hash.'.'.$this->_extension;
+		$compiledFilePath = $this->getCachePath().'/'.$hash.'.'.$this->_extension;
 		
 		# Get last modified time of cache file
 		if ( is_file($compiledFilePath) ) {
@@ -152,18 +170,33 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 		
 		# Refresh the Cache File
 		if ( $refresh ) {
-			$this->compile($paths,$compiledFilePath);
+			try {
+				$error = !$this->compile($paths,$compiledFilePath);
+				if ( $error ) {
+					throw new Exception('Compilation failed.');
+				}
+			}
+			catch ( Exception $Exception ) {
+				# Log the Event and Continue
+				$Exceptor = new Bal_Exceptor($Exception);
+				$Exceptor->log();
+				$error = true;
+			}
 			$compiledFilemtime = filemtime($compiledFilePath);
 		}
 		
-		# Use the Cached File
-		if ( $this->_compiledOffset !== null ) 
-			$this->offsetSetFile($this->_compiledOffset, $compiledFileUrl.'?'.$compiledFilemtime);
-		else
-			$this->prependFile($compiledFileUrl.'?'.$compiledFilemtime);
+		# Delete the Files
+		if ( !$error ) {
+			foreach ( $files as $key => $url ) {
+				unset($this[$key]);
+			}
+			
+			# Use the Cached File
+			$this->addFile($compiledFileUrl.'?'.$compiledFilemtime);
+		}
 		
 		# Let's hand back to our parent
 		return parent::toString($indent);
 	}
-    
+
 }

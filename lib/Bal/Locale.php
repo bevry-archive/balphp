@@ -32,7 +32,7 @@ class Bal_Locale {
 	public $Zend_Currency;
 	
 	/** Session Dependency. Such that we can store which locale we should use. */
-	public $Session;
+	public $Session = null;
 	
 	/** The timezone we are localed to */
 	public $timezone = null;
@@ -74,12 +74,13 @@ class Bal_Locale {
 		}
 		
 		# Prepare Dependencies
-		$this->Session = new Zend_Session_Namespace('Application');
+		if ( !$_SERVER['CLI'] )
+			$this->Session = new Zend_Session_Namespace('Application');
 		$this->Zend_Locale = new Zend_Locale();
 		$this->il8n_path = IL8N_PATH;
 		
 		# Detect the Locale
-		if ( $this->Session->locale ) {
+		if ( $this->Session && $this->Session->locale ) {
 			Zend_Locale::setDefault($this->Session->locale);
 		} elseif ( $locale !== null ) {
 			Zend_Locale::setDefault($locale);
@@ -96,7 +97,8 @@ class Bal_Locale {
 		}
 		
 		# Apply the Locale Preference
-		$this->Session->locale = $locale = $this->getFullLocale();
+		if ( $this->Session )
+			$this->Session->locale = $locale = $this->getFullLocale();
 		
 		# Apply the Zend_Locale Dependency
 	    Zend_Registry::set('Zend_Locale', $this->Zend_Locale);
@@ -141,7 +143,8 @@ class Bal_Locale {
 	 */
 	public function clearLocale() {
 		# Clear
-		$this->Session->locale = null;
+		if ( $this->Session )
+			$this->Session->locale = null;
 		
 		# Chain
 		return $this;
@@ -159,7 +162,7 @@ class Bal_Locale {
 			$this->file = $file;
 			$this->Zend_Locale->setLocale($locale);
 			Zend_Locale::setDefault($locale);
-			$this->Session->locale = $locale;
+			if ( $this->Session ) $this->Session->locale = $locale;
 			return true;
 		}
 		# Done
