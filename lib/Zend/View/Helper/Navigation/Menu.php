@@ -64,6 +64,13 @@ class Zend_View_Helper_Navigation_Menu
      * @var string|array
      */
     protected $_partial = null;
+    
+     /**
+      * Simple template to use in the htmlify process if specified
+      *
+      * @var string
+      */
+     protected $_template = null;
 
     /**
      * View helper entry point:
@@ -195,32 +202,25 @@ class Zend_View_Helper_Navigation_Menu
         return $this->_partial;
     }
 
+     /**
+      * Set a simple template to use in the htmlify process
+      * @param string $template
+      * @return $this
+      */
+     public function setTemplate ( $template ) {
+         $this->_template = $template;
+         return $this;
+     }
+
+     /**
+      * Get the simple template to use in the htmlify process if specified
+      * @return string
+      */
+     public function getTemplate ( ) {
+         return $this->_template;
+     }
+
     // Public methods:
-
-    /**
-     * Simple template to use in the htmlify process if specified
-     *
-     * @var string
-     */
-    protected $_template = null;
-
-    /**
-     * Set a simple template to use in the htmlify process
-     * @param string $template
-     * @return $this
-     */
-    public function setTemplate ( $template ) {
-        $this->_template = $template;
-        return $this;
-    }
-
-    /**
-     * Get the simple template to use in the htmlify process if specified
-     * @return string
-     */
-    public function getTemplate ( ) {
-        return $this->_template;
-    }
 
     /**
      * Returns an HTML string containing an 'a' element for the given page if
@@ -262,22 +262,21 @@ class Zend_View_Helper_Navigation_Menu
         } else {
             $element = 'span';
         }
-
-        // put together
-        $template = $this->getTemplate();
-        if ( !$template ) {
-            $renderedTemplate = $this->view->escape($label);
-        } else {
-            $renderedTemplate = populate($template,
-                array(
-                    'label' => $this->view->escape($label),
-                    'title' => $this->view->escape($title),
-                    'Page' => $page
-                )
-            );
-        }
-
-        // return
+        
+        // generate result (with or without template)
+		$template = $this->getTemplate();
+		if ( !$template ) {
+			$renderedTemplate = $this->view->escape($label);
+		} else {
+			$renderedTemplate = populate($template,
+				array(
+					'label' => $this->view->escape($label),
+					'title' => $this->view->escape($title),
+						'Page' => $page
+				)
+			);
+		}
+		
         return '<' . $element . $this->_htmlAttribs($attribs) . '>'
              . $renderedTemplate
              . '</' . $element . '>';
@@ -685,4 +684,3 @@ class Zend_View_Helper_Navigation_Menu
         }
     }
 }
-

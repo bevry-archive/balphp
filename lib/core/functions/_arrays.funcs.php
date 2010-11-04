@@ -429,6 +429,10 @@ if ( function_compare('delve', 1, true, __FILE__, __LINE__) ) {
 	 * @param mixed $keys
 	 * @param mixed $default
 	 * @return mixed
+	 * @package balphp
+	 * @author Benjamin "balupton" Lupton <contact@balupton.com> - {@link http://www.balupton.com/}
+	 * @copyright Copyright (c) 2009-2010, Benjamin Arthur Lupton - {@link http://www.balupton.com/}
+	 * @license http://www.gnu.org/licenses/agpl.html GNU Affero General Public License
 	 */
 	function delve ( $holder, $keys, $default = null) {
 		# Prepare
