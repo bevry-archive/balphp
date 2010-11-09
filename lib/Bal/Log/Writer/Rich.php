@@ -118,8 +118,11 @@ class Bal_Log_Writer_Rich extends Zend_Log_Writer_Abstract
 			
 			# Apply Details
 			if ( !$this->isFriendly() ) {
-				$result .=
-					'<pre class="details">'.htmlspecialchars(var_export($event['details'],true)).'</pre>';
+				ob_start();
+				var_dump($event['details']);
+				$_details = ob_get_contents();
+				ob_end_clean();
+				$result .= '<pre class="details">'.htmlspecialchars($_details).'</pre>';
 			}
 			
 			# Finish event

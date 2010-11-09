@@ -704,4 +704,15 @@ class Bal_Locale {
 		$args = func_get_args();
 		return call_user_func_array(array($this,'translate'), $args);
 	}
+	
+	/**
+	 * Translate a string
+	 * @param number $number
+	 * @param array $options
+	 * @return string
+	 */
+	public function text ( ) {
+		$args = func_get_args();
+		return call_user_func_array(array($this,'translate'), $args);
+	}
 }

@@ -153,12 +153,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Prepare
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
-		$headLink = $this->view->getHelper('HeadLinkBundler');
 		
 		# Options
 		$default = array_merge(
 			array(
+				'bundle'				=> APPLICATION_ENV !== 'development',
+				'minify'				=> APPLICATION_ENV !== 'development',
 				'csscaffold'			=> false,
+				'scaffold'				=> false,
 				'favicon'				=> true,
 				'jquery_ui'				=> 210,
 				'jquery_sparkle'		=> 230,
@@ -169,12 +171,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'theme'					=> 600,
 				'locale'				=> 700,
 				'browser'				=> 800,
-				'feeds'					=> 900
+				'feeds'					=> 900,
+				'compiled'				=> 10
 			),
 			$App->getConfig('headLink', array())
 		);
 		$options = handle_options($default,$options,true);
 		extract($options);
+		
+		# Bundle
+		if ( $bundle )
+			$headLink = $this->view->getHelper('headLinkBundler')
+				->setCompiler($this->getApp('compiler.style.code'))
+				->setCompiledOffset($compiled);
+		else
+			$headLink = $this->view->getHelper('headLink');
 		
 		# URLs
 		$public_url = $App->getPublicUrl();
@@ -211,6 +222,29 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			$headLink->offsetSetStylesheet($jquery_lightbox, $jquery_lightbox_url.'/styles/jquery.lightbox.min.css');
 		}
 		
+		# Syntax Highlighter
+		if ( $syntax_highlighter ) {
+			# Preset Url
+			$syntax_highlighter_url = $script_url.'/jquery-syntaxhighlighter';
+			
+			# Define Files
+			$syntax_highlighter_scripts = array(
+				'/prettify/prettify'.($minify ? '.min' : '').'.css',
+				'/styles/style'.($minify ? '.min' : '').'.css',
+				'/styles/theme-balupton'.($minify ? '.min' : '').'.css'
+			);
+			
+			# IE
+			if ( $this->isBrowser('ie') ) {
+				$syntax_highlighter_scripts[] = '/styles/ie'.($minify ? '.min' : '').'.css';
+			}
+
+			# Include Files
+			for ( $i=0,$n=sizeof($syntax_highlighter_scripts); $i<$n; ++$i ) {
+				$headLink->offsetSetStylesheet($syntax_highlighter++, $syntax_highlighter_url.'/'.$syntax_highlighter_scripts[$i]);
+			}
+		}
+		
 		# Editor
 		if ( $editor ) {
 			switch ( $this->getConfig('editor.code') ) {
@@ -228,6 +262,21 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					break;
 				
 				case 'aloha':
+					# Preset Urls
+					$aloha_scripts_url = $script_url.'/aloha-editor/WebContent';
+					
+					# Define Files
+					$aloha_scripts = array(
+						'deps/extjs/resources/css/ext-all.css',
+						'deps/extjs/resources/css/xtheme-gray.css',
+						'deps/prettyPhoto/resources/css/prettyPhoto.css',
+						'css/aloha.css'
+					);
+
+					# Include Files
+					for ( $i=0,$n=sizeof($aloha_scripts); $i<$n; ++$i ) {
+						$headLink->offsetSetStylesheet($editor++, $aloha_scripts_url.'/'.$aloha_scripts[$i]);
+					}
 					break;
 					
 				case 'tinymce':
@@ -248,7 +297,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Theme
 		if ( $theme ) {
 			$url = $this->getStylesheetUrl($layout === 'layout' ? 'style.css' : 'style-'.$layout.'.css', 'theme');
-			if ( $csscaffold ) $url .= '?scaffold';
+			if ( $csscaffold ) $url .= '?csscaffold';
+			elseif ( $scaffold ) $url .= '?scaffold';
 			if ( $url )	$headLink->offsetSetStylesheet($theme, $url);
 		}
 		
@@ -275,11 +325,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$App = $this->getApp();
 		$layout = $App->getMvc()->getLayout();
 		$browserInfo = $this->getBrowserInfo();
-		$headScript = $this->view->getHelper('HeadScriptBundler');
 		
 		# Options
 		$default = array_merge(
 			array(
+				'bundle'				=> APPLICATION_ENV !== 'development',
+				'minify'				=> APPLICATION_ENV !== 'development',
 				'modernizr'				=> 100,
 				'json' 					=> 110,
 				'ie9_js'				=> 120,
@@ -288,7 +339,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				'jquery_plugins' 		=> 220,
 				'jquery_sparkle' 		=> 230,
 				'jquery_ajaxy' 			=> 240,
-				'jquery_lightbox' 		=> 250,
+				'jquery_lightbox' 		=> false, //250,
 				'syntax_highlighter'	=> 300,
 				'editor' 				=> 400,
 				'script' 				=> 500,
@@ -300,8 +351,14 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$options = handle_options($default,$options,true);
 		extract($options);
 		
-		# Compiled
-		$headScript->setCompiledOffset($compiled);
+		# Bundle
+		if ( $bundle )
+			$headScript = $this->view->getHelper('HeadScriptBundler')
+				->setCompiler($this->getApp('compiler.script.code'))
+				->setCompilerPath($this->getApp('compiler.style.path'))
+				->setCompiledOffset($compiled);
+		else
+			$headScript = $this->view->getHelper('HeadScript');
 		
 		# URLs
 		$public_url = $App->getPublicUrl();
@@ -339,7 +396,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $jquery_sparkle ) {
 			// Prepare
 			$jquery_sparkle_url = $script_url.'/jquery-sparkle';
-			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
+			$headScript->offsetSetFile($jquery_sparkle, $jquery_sparkle_url.'/scripts/jquery.sparkle'.($minify ? '.min' : '').'.js');
 			$headScript->offsetSetScript($jquery_sparkle+1,'$.Help.setDefaults({icon: \'<img src="'.$back_url.'/images/help.png" alt="help" class="help-icon" />\'});');
 	    }
 	
@@ -347,21 +404,35 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $jquery_ajaxy ) {
 			// Prepare
 			$jquery_ajaxy_url = $script_url.'/jquery-ajaxy';
-			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
+			$headScript->offsetSetFile($jquery_ajaxy, $jquery_ajaxy_url.'/scripts/jquery.ajaxy'.($minify ? '.min' : '').'.js');
 		}
 		
 		# jQuery Lightbox
 		if ( $jquery_lightbox ) {
 			$jquery_lightbox_url = $script_url.'/jquery-lightbox';
-			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
+			$headScript->offsetSetFile($jquery_lightbox, $jquery_lightbox_url.'/scripts/jquery.lightbox'.($minify ? '.min' : '').'.js');
 		}
 		
 		# Syntax Highlighter
 		if ( $syntax_highlighter ) {
-			$sh_url = $script_url.'/jquery-syntaxhighlighter';
-			$headScript->offsetSetFile($syntax_highlighter, $sh_url.'/scripts/jquery.syntaxhighlighter'.(APPLICATION_ENV === 'production' ? '.min' : '').'.js');
-			$headScript->offsetSetScript($syntax_highlighter+1,
+			# Preset Url
+			$syntax_highlighter_url = $script_url.'/jquery-syntaxhighlighter';
+			
+			# Define Files
+			$syntax_highlighter_scripts = array(
+				'/scripts/jquery.syntaxhighlighter'.($minify ? '.min' : '').'.js',
+				'/prettify/prettify'.($minify ? '.min' : '').'.js'
+			);
+
+			# Include Files
+			for ( $i=0,$n=sizeof($syntax_highlighter_scripts); $i<$n; ++$i ) {
+				$headScript->offsetSetFile($syntax_highlighter++, $syntax_highlighter_url.'/'.$syntax_highlighter_scripts[$i]);
+			}
+			
+			# Init
+			$headScript->offsetSetScript($syntax_highlighter++,
 				'$.SyntaxHighlighter.init({
+					"load": false,
 					"defaults": {
 						"toolbar":false
 					}
@@ -380,29 +451,80 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				
 				case 'aloha':
 					# Preset Urls
-					$aloha_url = $script_url.'/aloha-editor/WebContent';
-					$aloha_plugins_cms_url = $script_url.'/aloha-plugins';
-					# Include Include
-					$headScript->offsetSetFile($editor++, $aloha_url.'/core/include.js', 'text/javascript');
-					$headScript->prependScript('window.GENTICS_Aloha_base = "'.$aloha_url.'";');
-					# Include Files
-					$aloha_plugins = array(
+					$aloha_scripts_url = $script_url.'/aloha-editor/WebContent';
+					$aloha_plugins_url = $script_url.'/aloha-plugins';
+					
+					# Include Base Script
+					$headScript->offsetSetScript($editor++, 'window.GENTICS_Aloha_base = "'.$aloha_scripts_url.'/"; window.GENTICS_Aloha_autoloadcss = false;');
+					
+					# Define Files
+					$aloha_scripts = array(
+						'deps/jquery.json-2.2.min.js',
+						'deps/jquery.getUrlParam.js',
+						'deps/prettyPhoto/jquery.prettyPhoto.js',
+						'deps/jquery.cookie.js',
+						'deps/extjs/ext-jquery-adapter-debug.js',
+						'deps/extjs/ext-foundation-debug.js',
+						'deps/extjs/cmp-foundation-debug.js',
+						'deps/extjs/data-foundation-debug.js',
+						'deps/extjs/data-json-debug.js',
+						'deps/extjs/data-list-views-debug.js',
+						'deps/extjs/ext-dd-debug.js',
+						'deps/extjs/window-debug.js',
+						'deps/extjs/resizable-debug.js',
+						'deps/extjs/pkg-buttons-debug.js',
+						'deps/extjs/pkg-tabs-debug.js',
+						'deps/extjs/pkg-tips-debug.js',
+						'deps/extjs/pkg-tree-debug.js',
+						'deps/extjs/pkg-grid-foundation-debug.js',
+						'deps/extjs/pkg-toolbars-debug.js',
+						'deps/extjs/pkg-menu-debug.js',
+						'deps/extjs/pkg-forms-debug.js',
+						'utils/jquery.js',
+						'utils/lang.js',
+						'utils/range.js',
+						'utils/position.js',
+						'utils/dom.js',
+						'core/ext-alohaproxy.js',
+						'core/ext-alohareader.js',
+						'core/ext-alohatreeloader.js',
+						'core/core.js',
+						'core/ui.js',
+						'core/ui-attributefield.js',
+						'core/ui-browser.js',
+						'core/editable.js',
+						'core/ribbon.js',
+						'core/event.js',
+						'core/floatingmenu.js',
+						'core/ierange-m2.js',
+						'core/jquery.aloha.js',
+						'core/log.js',
+						'core/markup.js',
+						'core/message.js',
+						'core/plugin.js',
+						'core/selection.js',
+						'core/sidebar.js',
+						'core/repositorymanager.js',
+						'core/repository.js',
+						'core/repositoryobjects.js',
 						'plugins/eu.iksproject.plugins.Loader/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Format/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Table/plugin.js',
 						'plugins/com.gentics.aloha.plugins.List/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Link/plugin.js',
-						'plugins/com.gentics.aloha.plugins.GCN/plugin.js',
+						// causes annoying prompt if content has changed - 'plugins/com.gentics.aloha.plugins.GCN/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Image/plugin.js'
 					);
-					$aloha_plugins_cms = array(
+					$aloha_plugins = array(
 						'com.bal.aloha.plugins.Attacher/plugin.js'
 					);
-					for ( $i=0,$n=sizeof($aloha_plugins); $i<$n; ++$i ) {
-						$headScript->offsetSetFile($editor++, $aloha_url.'/'.$aloha_plugins[$i]);
+					
+					# Include Files
+					for ( $i=0,$n=sizeof($aloha_scripts); $i<$n; ++$i ) {
+						$headScript->offsetSetFile($editor++, $aloha_scripts_url.'/'.$aloha_scripts[$i]);
 					}
-					for ( $i=0,$n=sizeof($aloha_plugins_cms); $i<$n; ++$i ) {
-						$headScript->offsetSetFile($editor++, $aloha_plugins_cms_url.'/'.$aloha_plugins_cms[$i]);
+					for ( $i=0,$n=sizeof($aloha_plugins); $i<$n; ++$i ) {
+						$headScript->offsetSetFile($editor++, $aloha_plugins_url.'/'.$aloha_plugins[$i]);
 					}
 					break;
 					

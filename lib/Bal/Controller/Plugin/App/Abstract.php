@@ -362,16 +362,18 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		foreach ( $Roles as $Role ) {
 			$roles[] = 'role-'.$Role->code;
 		}
-		if ( !empty($roles) ) 
+		if ( !empty($roles) ) {
 			$Acl->addRole($AclUser, $roles);
+		}
 		
 		# Add User Permissions to Acl
 		$Permissions = $User->Permissions; $permissions = array();
 		foreach ( $Permissions as $Permission ) {
 			$permissions[] = 'permission-'.$Permission->code;
 		}
-		if ( !empty($permissions) ) 
+		if ( !empty($permissions) ) {
 			$Acl->allow($AclUser, $this->getDefaultResource(), $permissions);
+		}
 		
 		# Add Role to Acl / Set Role
 		if ( !$Acl->hasRole($AclUser) ) {
@@ -401,6 +403,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		
 		# Add Roles to Acl
 		$Roles = Doctrine::getTable('Role')->createQuery()->select('r.code, rp.code')->from('Role r, r.Permissions rp')->setHydrationMode(Doctrine::HYDRATE_ARRAY)->execute();
+		$Resource = $this->getDefaultResource();
 		foreach ( $Roles as $Role ) {
 			$role = 'role-'.$Role['code'];
 			$AclRole = new Zend_Acl_Role($role);
@@ -409,7 +412,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 			foreach ( $Role['Permissions'] as $Permission ) {
 				$permissions[] = 'permission-'.$Permission['code'];
 			}
-			$Acl->allow($AclRole, $this->getDefaultResource(), $permissions);
+			$Acl->allow($AclRole, $Resource, $permissions);
 		}
 		
 		# Load the User Acl
@@ -430,9 +433,14 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Prepare
 		if ( empty($Acl) ) 
 			$Acl = $this->getAcl($Acl);
+		if ( empty($resource) )
+			$resource = $this->getDefaultResource();
 		
 		# Check
 		$result = $Acl->isAllowed($role, $resource, $privilege);
+		if ( !$result && is_string($privilege) ) {
+			$result = $Acl->isAllowed($role, $resource, 'permission-'.$privilege);
+		}
 		
 		# Return result
 		return $result;
@@ -446,6 +454,7 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 	 */
 	public function hasPermission ( $resource, $privileges = null ) {
 		# Prepare
+		$result = false;
 		if ( $privileges === null ) {
 			// Shortcut simplified
 			$privileges = $resource;
@@ -457,12 +466,12 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		$Role = $this->getRole();
 		
 		# Check
-		if ( $Role && ($result = $this->hasAclEntry($Role, $resource, $privileges)) ) {
-			return $result;
+		if ( $Role ) {
+			$result = $this->hasAclEntry($Role, $resource, $privileges);
 		}
 		
-		# Return false
-		return false;
+		# Return $result
+		return $result;
 	}
 	
 	
@@ -745,6 +754,10 @@ abstract class Bal_Controller_Plugin_App_Abstract extends Bal_Controller_Plugin_
 		# Apply Paths
 		$this->getUrl()->renege('paths',$paths);
 		
+		# BaseUrl
+		$Controller = Zend_Controller_Front::getInstance();
+		$Controller->setBaseUrl($this->getBaseUrl());
+    	
 		# Chain
 		return $this;
 	}

@@ -7,13 +7,15 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 	
 	protected $_extension = 'css';
 	protected $_compiledOffset = null;
+	
 	protected $_compiler = 'scaffold';
+	protected $_compilerPath = null;
 	
 	# =========================
 	# Custom: Handling
 	
 	protected function isCompressable($item){
-		return isset($item->href) && ($item->rel === 'stylesheet') && !strstr($item->href,'http');
+		return ($item->rel === 'stylesheet') && (!empty($item->href) || !empty($item->source));
 	}
 	
 	protected function addFile($url){
@@ -40,8 +42,8 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 		if ( !defined('SCAFFOLD_PRODUCTION') ) define('SCAFFOLD_PRODUCTION',PRODUCTION_MODE);
 		
 		# Scaffold Config
-		$config = Bal_App::getConfig('compilers.csscaffold.config', array());
-		$options = Bal_App::getConfig('compilers.csscaffold.options', array());
+		$config = Bal_App::getConfig('compiler.csscaffold.config', array());
+		$options = Bal_App::getConfig('compiler.csscaffold.options', array());
 		
 		# Compile
 		$result = Scaffold::parse($paths,$config,$options,false);
@@ -59,7 +61,7 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 		Scaffold_Environment::auto_load();
 		
 		# Scaffold Config
-		$config = Bal_App::getConfig('compilers.scaffold.config', array());
+		$config = Bal_App::getConfig('compiler.scaffold.config', array());
 		
 		# The container creates Scaffold objects
 		$Container = Scaffold_Container::getInstance(SCAFFOLD_PATH,$config);
@@ -90,8 +92,19 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 	# =========================
 	# Generic
 	
+	public function setCompiler( $value ) {
+		$this->_compiler = $value;
+		return $this;
+	}
+	
+	public function setCompilerPath( $value ) {
+		$this->_compilerPath = $value;
+		return $this;
+	}
+	
 	public function setCompiledOffset ( $value ) {
 		$this->_compiledOffset = $value;
+		return $this;
 	}
 	
 	protected function compile($paths,$path){
@@ -127,24 +140,41 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 				continue;
             }
 			
-			# Determine Full URL
-			$url = $item->href;
-			if ( strpos($url,BASE_URL) === 0 || strpos($url,'/') === 0 ) {
-				$url = ROOT_URL.$url;
+			# Handle Item (Source or URL)
+			if ( !empty($item->source) ) {
+				# Generate File Name
+				$source = $item->source;
+				$filename = md5($source).'.'.$this->_extension;
+				$path = $this->getCachePath().'/'.$filename;
+				$url = ROOT_URL.$this->getCacheUrl().'/'.$filename;
+				
+				# Write to file
+				if ( !file_exists($path) ) {
+					// we can do an if here, as the filename is based on the contents, if the contents has changed the filename would be different
+					file_put_contents($path, $source);
+				}
 			}
-			elseif ( strpos($url,'http') === false ) {
-				$url = ROOT_URL.BASE_URL.$url;
-			}
-			
-			# Determine Original Path
-			if ( strpos($url,ROOT_URL) === 0 ) {
-				// We are a local file, so determine the full path from the base url
-				$path = DOCUMENT_ROOT.'/'.preg_replace('/\?.*/','',str_replace(ROOT_URL,'',$url));
-				if ( !is_file($path) ) {
-					$path = null;
+			else {
+				# Determine Full URL
+				$url = $item->href;
+				if ( strpos($url,BASE_URL) === 0 || strpos($url,'/') === 0 ) {
+					$url = ROOT_URL.$url;
+				}
+				elseif ( strpos($url,'http') === false ) {
+					$url = ROOT_URL.BASE_URL.$url;
+				}
+				
+				# Determine Original Path
+				if ( strpos($url,ROOT_URL) === 0 ) {
+					// We are a local file, so determine the full path from the base url
+					$path = DOCUMENT_ROOT.'/'.preg_replace('/\?.*/','',str_replace(ROOT_URL,'',$url));
+					if ( !is_file($path) ) {
+						$path = null;
+					}
 				}
 			}
 			
+			# Ensure Correct Path
 			$path = str_replace('//','/',$path);
 			
 			# Apply

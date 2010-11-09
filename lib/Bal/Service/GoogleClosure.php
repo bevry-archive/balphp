@@ -126,6 +126,7 @@ class Bal_Service_GoogleClosure {
 						$warnings = $node['value'];
 						break;
 					
+					case 'serverErrors':
 					case 'errors':
 						$errors = $node['value'];
 						break;
@@ -155,7 +156,16 @@ class Bal_Service_GoogleClosure {
 			}
 			
 			if ( $errors ) {
-				throw new Exception('Errors occurred when using the Google Closure Service: '.$errors);
+				$error = '';
+				if ( is_array($errors) ) {
+					foreach ( $errors as $_error ) {
+						$error .= $_error['value'];
+					}
+				}
+				else {
+					$error = $errors;
+				}
+				throw new Exception('Errors occurred when using the Google Closure Service: '.$error);
 			}
 		
 			$return .= $code.' ';
