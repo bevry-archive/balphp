@@ -478,19 +478,30 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @alias self::file
 	 */
 	public function content ( $input ) {
+		# Prepare
+		$clean = false;
 		if ( is_string($input) ) {
 			$Item = $this->getItem('Content',$input);
+			$clean = true;
 		}
 		else {
 			$Item = $input;
 		}
+		
+		# Fetch
 		if ( !delve($Item,'id') ) {
 			throw new Bal_Exception(array(
 				'Could not resolve the Content Item',
 				'input' => $input
 			));
 		}
-		return $this->map($Item);
+		$result = $this->map($Item);
+		
+		# Clean
+		if ( $clean ) $Item->free(true);
+		
+		# Return result
+		return $result;
 	}
 	
 	/**
@@ -506,16 +517,27 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function file ( $Item ) {
+		# Prepare
+		$clean = false;
 		if ( is_string($Item) && strstr($Item,'/') ) {
 			$url = $this->getFileUrl($Item);
 		}
 		else {
 			if ( is_string($Item) ) {
 				$Item = $this->getItem('File',$Item);
+				$clean = true;
 			}
 			$url = delve($Item,'url',false);
 		}
-		return $this->hard($url);
+		
+		# Fetch
+		$result = $this->hard($url);
+		
+		# Clean
+		if ( $clean ) $Item->free(true);
+		
+		# Return result
+		return $result;
 	}
 	
 	/**
@@ -524,10 +546,21 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function user ( $Item ) {
+		# Prepare
+		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('User',$Item);
+			$clean = true;
 		}
-		return $this->route('default')->action('user')->item($Item);
+		
+		# Fetch
+		$result = $this->route('default')->action('user')->item($Item);
+		
+		# Clean
+		if ( $clean ) $Item->free(true);
+		
+		# Return result
+		return $result;
 	}
 	
 	/**
@@ -536,10 +569,21 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function userActivate ( $Item ) {
+		# Prepare
+		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('User',$Item);
+			$clean = true;
 		}
-		return $this->route('default')->action('user-activate')->item($Item)->param('uid',delve($Item,'uid'));
+		
+		# Fetch
+		$result = $this->route('default')->action('user-activate')->item($Item)->param('uid',delve($Item,'uid'));
+		
+		# Clean
+		if ( $clean ) $Item->free(true);
+		
+		# Return result
+		return $result;
 	}
 	
 	/**
@@ -548,10 +592,21 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function message ( $Item ) {
+		# Prepare
+		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('Message',$Item);
+			$clean = true;
 		}
-		return $this->route('default')->action('message')->item($Item);
+		
+		# Fetch
+		$result = $this->route('default')->action('message')->item($Item);
+		
+		# Clean
+		if ( $clean ) $Item->free(true);
+		
+		# Return result
+		return $result;
 	}
 	
 	# ========================

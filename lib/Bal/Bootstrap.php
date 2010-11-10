@@ -595,7 +595,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initScriptSetup ( ) {
 		# Bootstrap
 		$this->bootstrap('modules');
-		
+				
 		# Return true
 		return true;
 	}
@@ -608,7 +608,6 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Bootstrap
 		$this->bootstrap('modules');
 		$this->bootstrap('DoctrineListeners');
-		$this->bootstrap('presentation');
 		$this->bootstrap('frontController');
 		$FrontController = $this->getResource('frontController');
     	$FrontController->setRequest(new Zend_Controller_Request_Http());
