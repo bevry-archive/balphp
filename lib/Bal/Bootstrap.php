@@ -11,6 +11,20 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('autoload');
 		$this->bootstrap('balphp');
 		
+		# Set Local Cache
+		$Cache = Zend_Cache::factory(
+			'Core',
+			'File',
+			array(
+				'lifetime' => 120,
+				'automatic_serialization' => true
+			),
+			array(
+				'cache_dir' => CACHE_LOCALE_PATH
+			)
+		);
+		Zend_Currency::setCache($Cache);
+		
 		# Locale
 		$Locale = new Bal_Locale($this->getOption('locale'));
 		
