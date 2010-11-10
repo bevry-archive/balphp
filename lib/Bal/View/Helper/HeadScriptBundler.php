@@ -198,7 +198,13 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 			# Should we refresh?
 			if ( $filemtime >= $cacheFilemtime ) {
 				$refresh = true;
-				file_put_contents($cachePath,file_get_contents($url));
+				if ( strstr($url,'?') || !$path ) {
+					$contents = file_get_contents($url);
+				}
+				else {
+					$contents = file_get_contents($path);
+				}
+				file_put_contents($cachePath,$contents);
 			}
 			elseif ( $filemtime >= $compiledFilemtime ) {
 				$refresh = true;
@@ -229,11 +235,20 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 			}
 			
 			# Use the Cached File
-			$this->addFile($compiledFileUrl.'?'.$compiledFilemtime);
+			$compiledUrl = $compiledFileUrl.'?'.$compiledFilemtime;
+			$this->addFile($compiledUrl);
 		}
 		
 		# Let's hand back to our parent
-		return parent::toString($indent);
+		$result = parent::toString($indent);
+		
+		# Add Refresh Status
+		if ( $refresh ) {
+			$result .= "\n<!--[Scripts Bundled + Refreshed]-->\n";
+		}
+		
+		# Return result
+		return $result;
 	}
 
 }

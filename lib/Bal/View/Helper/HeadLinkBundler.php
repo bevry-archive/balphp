@@ -232,11 +232,20 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 			}
 			
 			# Use the Cached File
-			$this->addFile($compiledFileUrl.'?'.$compiledFilemtime);
+			$compiledUrl = $compiledFileUrl.'?'.$compiledFilemtime;
+			$this->addFile($compiledUrl);
 		}
 		
 		# Let's hand back to our parent
-		return parent::toString($indent);
+		$result = parent::toString($indent);
+		
+		# Add Refresh Status
+		if ( $refresh ) {
+			$result .= "\n<!--[Styles Bundled + Refreshed]-->\n";
+		}
+		
+		# Return result
+		return $result;
 	}
     
 }
