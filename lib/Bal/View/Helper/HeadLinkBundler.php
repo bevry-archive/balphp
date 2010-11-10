@@ -36,6 +36,13 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 	# =========================
 	# Custom: Compilers
 	
+	protected function compileConcat ( $paths, $path ) {
+		file_put_contents($path,'');
+		foreach ( $paths as $file ) {
+			file_put_contents($path,file_get_contents($file),FILE_APPEND);
+		}
+	}
+	
 	protected function compileCsscaffold ( $paths, $path ) {
 		# Load Scaffold
 		require_once CSSCAFFOLD_PATH.'/libraries/Bootstrap.php';

@@ -39,6 +39,13 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 	# =========================
 	# Custom: Compilers
 	
+	protected function compileConcat ( $paths, $path ) {
+		file_put_contents($path,'');
+		foreach ( $paths as $file ) {
+			file_put_contents($path,file_get_contents($file),FILE_APPEND);
+		}
+	}
+	
 	protected function compileClosureWebservice ( $paths, $path ) {
 		$Compiler = new Bal_Service_GoogleClosure();
 		$Compiler->compile($paths,$path);

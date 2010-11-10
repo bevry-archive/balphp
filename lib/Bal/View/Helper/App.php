@@ -157,8 +157,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Options
 		$default = array_merge(
 			array(
-				'bundle'				=> APPLICATION_ENV !== 'development',
-				'minify'				=> APPLICATION_ENV !== 'development',
+				'bundle'				=> true,
+				'minify'				=> true,
 				'csscaffold'			=> false,
 				'scaffold'				=> false,
 				'favicon'				=> true,
@@ -182,7 +182,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Bundle
 		if ( $bundle )
 			$headLink = $this->view->getHelper('headLinkBundler')
-				->setCompiler($this->getApp('compiler.style.code'))
+				->setCompiler($this->getConfig('compiler.style.code'))
 				->setCompiledOffset($compiled);
 		else
 			$headLink = $this->view->getHelper('headLink');
@@ -329,8 +329,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Options
 		$default = array_merge(
 			array(
-				'bundle'				=> APPLICATION_ENV !== 'development',
-				'minify'				=> APPLICATION_ENV !== 'development',
+				'bundle'				=> true,
+				'minify'				=> true,
 				'modernizr'				=> 100,
 				'json' 					=> 110,
 				'ie9_js'				=> 120,
@@ -354,8 +354,8 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		# Bundle
 		if ( $bundle )
 			$headScript = $this->view->getHelper('HeadScriptBundler')
-				->setCompiler($this->getApp('compiler.script.code'))
-				->setCompilerPath($this->getApp('compiler.style.path'))
+				->setCompiler($this->getConfig('compiler.script.code'))
+				->setCompilerPath($this->getConfig('compiler.style.path'))
 				->setCompiledOffset($compiled);
 		else
 			$headScript = $this->view->getHelper('HeadScript');
