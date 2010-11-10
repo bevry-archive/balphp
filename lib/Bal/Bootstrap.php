@@ -626,7 +626,11 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('DoctrineListeners');
 		$this->bootstrap('frontController');
 		$FrontController = $this->getResource('frontController');
-    	$FrontController->setRequest(new Zend_Controller_Request_Http());
+		if ( $FrontController->getRequest() === null ) {
+			$Request = new Zend_Controller_Request_Http();
+    		$FrontController->setRequest($Request);
+    	}
+		$FrontController->setBaseUrl(BASE_URL); // must be done after the request creation
 		
 		# Return true
 		return true;
