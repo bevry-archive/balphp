@@ -48,14 +48,19 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Prepare Options
 		$use_mail = delve($applicationConfig, 'mail.send_email', true);
-		if ( !$use_mail ) return false;
-		elseif ( !is_connected() ) return false;
+		if ( !$use_mail ) {
+			return false;
+		} elseif ( DEBUG_MODE && !is_connected() ) {
+			return false;
+		}
 		
 		# Fetch
 		$smtp_host = delve($applicationConfig, 'mail.transport.smtp.host', 'localhost');
 		$smtp_config = delve($applicationConfig, 'mail.transport.smtp.config');
 		if ( empty($smtp_config) )
 			$smtp_config = array();
+			
+		var_dump($smtp_host, $smtp_config);
 			
 		# Apply
 		$Transport = new Zend_Mail_Transport_Smtp($smtp_host, $smtp_config);
@@ -231,6 +236,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 * @return
 	 */
 	protected function _initAutoload ( ) {
+	$_args = func_get_args(); Bootstrapr::log(__FILE__,__LINE__,__CLASS__,__FUNCTION__,$_args); unset($_args);
 		# Initialise Zend's Autoloader, used for plugins etc
 		$Autoloader = Zend_Loader_Autoloader::getInstance();
 		$Autoloader->registerNamespace('Bal_');
@@ -324,6 +330,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('balphp');
 		$this->bootstrap('mail'); // we require mailing in case something goes wrong
 		$this->bootstrap('log'); // we require logging in various areas
+		
 		
 		# Load
 		$FrontController = Zend_Controller_Front::getInstance();

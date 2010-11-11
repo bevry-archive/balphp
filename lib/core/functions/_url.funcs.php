@@ -128,21 +128,23 @@ if ( function_compare('regen_url', 1, true, __FILE__, __LINE__) ) {
 if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
 
 	/**
-	 * Checks internet connection
-	 * @author http://www.weberdev.com/get_example-4025.html
-	 * @copyright Unknown
-	 * @version 1, February 24, 2010
+	 * Checks internet connection. Used to detect whether or not we can send emails.
+	 * @version 1.1, November 11, 2010
+	 * @since 1, February 24, 2010
+	 * @param string $url [optional]
 	 * @return string
-	 * @todo figure out what the hell this does
 	 */
-	function is_connected ( ) {
+	function is_connected ( $url = 'www.google.com' ) {
 		$result = false;
-	    $connected = @fsockopen('www.google.com', 80); 
+	    $connected = fsockopen($url, 80, $errno, $errstr, 1); 
 	    if ( $connected ){ 
 	        $result = true; 
 	        fclose($connected); 
 	    }
-	    return $result; 
+		elseif ( $errstr ) {
+			echo "<!--[$errstr ($errno)]-->\n";
+		}
+	    return $result;
 	}
 }
 
