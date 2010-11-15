@@ -10,6 +10,7 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	protected $_encode = true;
 	protected $_url    = null;
 	protected $_mode   = null;
+	protected $_free   = array();
 	
 	/**
 	 * A set of paths to look through for the file
@@ -85,7 +86,7 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return boolean
 	 */
 	public function isCleared ( ) {
-		return !$this->_params && !$this->_route && $this->_reset && $this->_encode && !$this->_url && !$this->_mode && empty($this->_paths);
+		return !$this->_params && !$this->_route && $this->_reset && $this->_encode && !$this->_url && !$this->_mode && empty($this->_paths) && empty($this->_free);
 	}
 
 	/**
@@ -93,6 +94,7 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * @return this
 	 */
 	public function clear ( ) {
+		$this->free();
 		$this->_params = array();
 		$this->_route  = null;
 		$this->_reset  = true;
@@ -279,6 +281,16 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	}
 	
 	/**
+	 * Free anything that needs cleaning/freeling
+	 */
+	public function free ( ) {
+		foreach ( $this->_free as $Item ) {
+			$Item->free(true);
+		}
+		$this->_free = array();
+	}
+	
+	/**
 	 * Will assemble the URL
 	 * @return {string} url
 	 */
@@ -446,7 +458,7 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 		# Ensure Item
 		$code = $id = null;
 		if ( is_numeric($Item) ) {
-			$id = $itItemem;
+			$id = $Item;
 		}
 		elseif ( is_string($Item) ) {
 			$code = $Item;
@@ -479,10 +491,9 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function content ( $input ) {
 		# Prepare
-		$clean = false;
 		if ( is_string($input) ) {
 			$Item = $this->getItem('Content',$input);
-			$clean = true;
+			$this->_free[] = $Item;
 		}
 		else {
 			$Item = $input;
@@ -496,9 +507,6 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 			));
 		}
 		$result = $this->map($Item);
-		
-		# Clean
-		if ( $clean ) $Item->free(true);
 		
 		# Return result
 		return $result;
@@ -518,23 +526,19 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function file ( $Item ) {
 		# Prepare
-		$clean = false;
 		if ( is_string($Item) && strstr($Item,'/') ) {
 			$url = $this->getFileUrl($Item);
 		}
 		else {
 			if ( is_string($Item) ) {
 				$Item = $this->getItem('File',$Item);
-				$clean = true;
+				$this->_free[] = $Item;
 			}
 			$url = delve($Item,'url',false);
 		}
 		
 		# Fetch
 		$result = $this->hard($url);
-		
-		# Clean
-		if ( $clean ) $Item->free(true);
 		
 		# Return result
 		return $result;
@@ -547,17 +551,13 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function user ( $Item ) {
 		# Prepare
-		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('User',$Item);
-			$clean = true;
+			$this->_free[] = $Item;
 		}
 		
 		# Fetch
 		$result = $this->route('default')->action('user')->item($Item);
-		
-		# Clean
-		if ( $clean ) $Item->free(true);
 		
 		# Return result
 		return $result;
@@ -570,17 +570,13 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function userActivate ( $Item ) {
 		# Prepare
-		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('User',$Item);
-			$clean = true;
+			$this->_free[] = $Item;
 		}
 		
 		# Fetch
 		$result = $this->route('default')->action('user-activate')->item($Item)->param('uid',delve($Item,'uid'));
-		
-		# Clean
-		if ( $clean ) $Item->free(true);
 		
 		# Return result
 		return $result;
@@ -593,17 +589,13 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 */
 	public function message ( $Item ) {
 		# Prepare
-		$clean = false;
 		if ( is_string($Item) ) {
 			$Item = $this->getItem('Message',$Item);
-			$clean = true;
+			$this->_free[] = $Item;
 		}
 		
 		# Fetch
 		$result = $this->route('default')->action('message')->item($Item);
-		
-		# Clean
-		if ( $clean ) $Item->free(true);
 		
 		# Return result
 		return $result;

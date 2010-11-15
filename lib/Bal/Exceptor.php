@@ -209,7 +209,12 @@ class Bal_Exceptor {
 	}
 	
 	public function toString ( ) {
-		return var_export($this->toArray(), true);
+		ob_start();
+		var_dump($this->toArray(true));
+		$result = ob_get_contents();
+		ob_end_clean();
+		return $result;
+		// return var_export($this->toArray(), true);
 	}
 	
 	public function __toString ( ) {

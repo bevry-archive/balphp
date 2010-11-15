@@ -59,9 +59,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$smtp_config = delve($applicationConfig, 'mail.transport.smtp.config');
 		if ( empty($smtp_config) )
 			$smtp_config = array();
-			
-		var_dump($smtp_host, $smtp_config);
-			
+		
 		# Apply
 		$Transport = new Zend_Mail_Transport_Smtp($smtp_host, $smtp_config);
 		Zend_Mail::setDefaultTransport($Transport);
@@ -411,6 +409,8 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$autoloader = $applicationConfig['data']['autoloader'];
 		$baseClassPrefix = $applicationConfig['data']['models']['options']['baseClassPrefix'];
 		$compile_use = $applicationConfig['data']['compile']['use'];
+		$cache_dsn = $applicationConfig['data']['cache_dsn'];
+		$cache_lifespan = $applicationConfig['data']['cache_lifespan'];
 		
 		# Load
 		if ( !$compile_use ) {
@@ -467,6 +467,24 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Get Manager
 		$Manager = Doctrine_Manager::getInstance();
+		
+		# Use Cache?
+		if ( $cache_dsn ) {
+			# Open Cache Connection
+			$CacheConnection = $Manager->openConnection('sqlite:///'.CACHE_PATH.'/cache.db');
+			
+			# Apply Query Cache
+			$QueryCacheDriver = new Doctrine_Cache_Db(array('connection' => $CacheConnection, 'tableName' =>'query'));
+			try { $QueryCacheDriver->createTable(); } catch ( Exception $Exception ) { }
+			$Manager->setAttribute(Doctrine_Core::ATTR_QUERY_CACHE, $QueryCacheDriver);
+			
+			# Apply Result Cache
+			$ResultCacheDriver = new Doctrine_Cache_Db(array('connection' => $CacheConnection, 'tableName' =>'result'));
+			try { $ResultCacheDriver->createTable(); } catch ( Exception $Exception ) { }
+			$Manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE, $ResultCacheDriver);
+			$Manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE_LIFESPAN, $cache_lifespan);
+			
+		}
 		
 		# Apply Config
 		$Manager->setAttribute(Doctrine_Core::ATTR_PORTABILITY, Doctrine_Core::PORTABILITY_EMPTY_TO_NULL | Doctrine_Core::PORTABILITY_RTRIM);

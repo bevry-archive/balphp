@@ -67,6 +67,66 @@ class Bal_Service_GoogleClosure {
 		return $requests;
 	}
 	
+	protected function _sendRequestFsock ( $data ) {
+		$fp = fsockopen('closure-compiler.appspot.com', 80, $errno, $errstr, 30);
+			
+		if ( $fp ) {
+			fputs($fp, "POST /compile HTTP/1.1\r\n");
+			fputs($fp, "Host: closure-compiler.appspot.com\r\n");
+			fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
+			fputs($fp, "Content-length: ". strlen($data) ."\r\n");
+			fputs($fp, "Connection: close\r\n\r\n");
+			fputs($fp, $data); 
+
+			$result = ''; 
+			while (!feof($fp)) {
+				$result .= fgets($fp, 128);
+			}
+		
+			fclose($fp);
+		}
+		else {
+			throw new Exception('Could not connect to Google Closure Service: '.$errstr.' ('.$errno.')');
+		}
+	
+		$data = substr($result, (strpos($result, "\r\n\r\n")+4));
+			
+		if (strpos(strtolower($result), 'transfer-encoding: chunked') !== FALSE) {
+			$data = $this->_unchunk($data);
+		}
+		
+		return $data;
+	}
+	
+	protected function _sendRequestCurl ( $data ) {
+		# Prepare
+	    $defaults = array( 
+	        CURLOPT_POST => 1, 
+	        CURLOPT_HEADER => 0, 
+	        CURLOPT_URL => 'closure-compiler.appspot.com/compile', 
+	        CURLOPT_FRESH_CONNECT => 1, 
+	        CURLOPT_RETURNTRANSFER => 1, 
+	        CURLOPT_FORBID_REUSE => 1, 
+	        CURLOPT_TIMEOUT => 30, 
+	        CURLOPT_POSTFIELDS => $data
+	    ); 
+		
+		# Open
+		$ch = curl_init();
+	    curl_setopt_array($ch, $defaults);
+	     
+	    # Perform Request
+	    if ( !$result = curl_exec($ch) ) { 
+			throw new Exception('Could not connect to Google Closure Service: '.curl_error($ch));
+	    } 
+	    
+	    # Close Channel
+	    curl_close($ch);
+	    
+	    # Return result
+	    return $result;
+	}
+	
 	protected function _sendRequests ( ) {
 		$requests = array();
 		$groups = $this->_getSourceGroups();
@@ -74,33 +134,9 @@ class Bal_Service_GoogleClosure {
 		
 		foreach ( $groups as $group ) {
 			$data = $this->_getParams($group);
-			$referer = @$_SERVER['HTTP_REFERER'] or '';
-			$fp = fsockopen('closure-compiler.appspot.com', 80) or die('Unable to open socket');;
-		
-			if ( $fp ) {
-				fputs($fp, "POST /compile HTTP/1.1\r\n");
-				fputs($fp, "Host: closure-compiler.appspot.com\r\n");
-				fputs($fp, "Referer: $referer\r\n");
-				fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
-				fputs($fp, "Content-length: ". strlen($data) ."\r\n");
-				fputs($fp, "Connection: close\r\n\r\n");
-				fputs($fp, $data); 
-
-				$result = ''; 
-				while (!feof($fp)) {
-					$result .= fgets($fp, 128);
-				}
+			// $referer = @$_SERVER['HTTP_REFERER'] or '';
 			
-				fclose($fp);
-			}
-			else {
-				throw new Exception('Could not connect to Google Closure Service');
-			}
-
-			$data = substr($result, (strpos($result, "\r\n\r\n")+4));
-			if (strpos(strtolower($result), 'transfer-encoding: chunked') !== FALSE) {
-				$data = $this->_unchunk($data);
-			}
+			$data = $this->_sendRequestCurl($data);
 			
 			$requests[] = $data;
 		}

@@ -761,6 +761,20 @@ abstract class Bal_Doctrine_Core {
 	
 	/**
 	 * Get a Record determined by the series of passed arguments
+	 * @version 1.0, November 15, 2010
+	 * @since 1.0, November 15, 2010
+	 * @param string	$tableComponentName		The table/type of the record
+	 * @param mixed 	$input					Hopefully the Doctrine_Record we want to compare
+	 * @return boolean
+	 */
+	public static function isRecord ( $tableComponentName, $input ) {
+		$tableComponentName = self::getTableComponentName($tableComponentName);
+		$result = $input instanceof $tableComponentName;
+		return $result;
+	}
+	
+	/**
+	 * Get a Record determined by the series of passed arguments
 	 * @version 1.1, April 12, 2010
 	 * @param string	$tableComponentName		The table/type of the record
 	 * @param array 	$inputs					The input used to determine the record
