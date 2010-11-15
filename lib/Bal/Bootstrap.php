@@ -635,6 +635,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 */
 	protected function _initScriptSetup ( ) {
 		# Bootstrap
+		$this->bootstrap('locale');
 		$this->bootstrap('modules');
 				
 		# Return true
@@ -647,6 +648,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	 */
 	protected function _initScriptCron ( ) {
 		# Bootstrap
+		$this->bootstrap('locale');
 		$this->bootstrap('modules');
 		$this->bootstrap('DoctrineListeners');
 		$this->bootstrap('frontController');

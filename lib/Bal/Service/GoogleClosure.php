@@ -107,7 +107,7 @@ class Bal_Service_GoogleClosure {
 	        CURLOPT_FRESH_CONNECT => 1, 
 	        CURLOPT_RETURNTRANSFER => 1, 
 	        CURLOPT_FORBID_REUSE => 1, 
-	        CURLOPT_TIMEOUT => 30, 
+	        CURLOPT_TIMEOUT => 60, 
 	        CURLOPT_POSTFIELDS => $data
 	    ); 
 		

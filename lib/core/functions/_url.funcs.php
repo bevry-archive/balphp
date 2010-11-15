@@ -136,7 +136,7 @@ if ( function_compare('is_connected', 2, true, __FILE__, __LINE__) ) {
 	 */
 	function is_connected ( $url = 'www.google.com' ) {
 		$result = false;
-	    $connected = fsockopen($url, 80, $errno, $errstr, 1); 
+	    $connected = fsockopen($url, 80, $errno, $errstr, 5); 
 	    if ( $connected ){ 
 	        $result = true; 
 	        fclose($connected); 
