@@ -405,7 +405,7 @@ class Bal_Locale {
 		
 		# Check
 		if ( $matches_n === 0 ) {
-			throw new Bal_Exception('Translate advanced did not find what it was looking for..');
+			throw new Bal_Exception('Translate advanced did not find what it was looking for...');
 		}
 		
 		# Cycle
@@ -424,6 +424,11 @@ class Bal_Locale {
 				$value = $parts[2];
 			} else {
 				$value = $match_str;
+			}
+			
+			# Check
+			if ( !method_exists($this, $translator) ) {
+				throw new Bal_Exception('Translate advanced was passed invalid arguments...');
 			}
 			
 			# Apply the translator

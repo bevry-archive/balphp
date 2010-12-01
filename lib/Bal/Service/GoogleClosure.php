@@ -5,28 +5,253 @@
 
 class Bal_Service_GoogleClosure {
 	
-	protected $_srcsToBeMinified = array();
+	/** The Default Compilation Level to Use **/
 	protected $_compilationLevel = 'SIMPLE_OPTIMIZATIONS';
+	
+	/** The Default Warning Level to Use **/
 	protected $_warningLevel = 'DEFAULT';
 	
-	public function compile ( $paths, $path ) {
-		$this->_srcsToBeMinified = $paths;
-		$compiled = $this->_performRequests();
-		file_put_contents($path,$compiled);
-	}
-
-	protected function _readSources($sources) {
-		$code = '';
-		foreach ( $sources as $src ) {
-			$code .= file_get_contents($src);
-		}
-		return $code;
+	/**
+	 * Compile a series of Files to the Output Path using the Google closure Web Service
+	 **/
+	public function compile ( $files, $output_path ) {
+		$compiled = $this->getResultFromFiles($files);
+		file_put_contents($output_path,$compiled);
 	}
 	
-	protected function _getParamList ( $sources ) {
+	/**
+	 * Takes a File Group to be sent, and converts it into a series of Request Groups.
+	 * These Request Groups can then be sent to Google Closure
+	 **/	 
+	protected function generateRequestGroups ( $fileGroup ) {
+		# Prepare
+		$requestGroups = array();
+		$requestGroup = array();
+		$total_size = $file_size = 0;
+		$max_size = 800*1024;
+		
+		# Split into Size Groups
+		foreach ( $fileGroup as $file ) {
+			$file_path = $file['path'];
+			$file_size = filesize($file_path);
+			$total_size += $file_size;
+			
+			# Reached the end of a request
+			if ( $total_size > $max_size ) {
+				# Append requestGroup to requestGroups
+				$requestGroups[] = $requestGroup;
+				
+				# Reset with Current File
+				$total_size = $file_size;
+				$requestGroup = array();
+			}
+			
+			# Add file to the request
+			$requestGroup[] = $file;
+		}
+		
+		# Append requestGroup to requestGroups
+		$requestGroups[] = $requestGroup;
+		
+		# Return requestGroups
+		return $requestGroups;
+	}
+	
+	/**
+	 * Send a Request Group to Google Closure
+	 **/
+	protected function sendRequestGroup ( $request_group  ) {
+		# Perform Request
+		$params = $this->generateParamsFromRequestGroup($request_group);
+		$response = $this->sendRequestViaCurl($params);
+		$result = $this->getResultFromResponse($response);
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Send a File Group
+	 **/
+	protected function sendFileGroup ( $file_group ) {
+		$result = '';
+		
+		$request_groups = $this->generateRequestGroups($file_group);
+		foreach ( $request_groups as $request_group ) {
+			$result .= ' '.$this->sendRequestGroup($request_group);
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Gets the Result by processing and sending the group of passed files
+	 **/
+	protected function getResultFromFiles ( $files ) {
+		# Prepare
+		$result = '';
+		$group = array();
+		
+		# Combine
+		foreach ( $files as $file ) {
+			if ( $file['minified'] ) {
+				$result .= ' '.$this->sendFileGroup($group); $group = array();
+				$result .= ' '.file_get_contents($file['path']);
+			}
+			else {
+				$group[] = $file;
+			}
+		}
+		
+		# Finish Up
+		$result .= ' '.$this->sendFileGroup($group); $group = array();
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Process the Response and Return the Result
+	 */
+	protected function getResultFromResponse ( $response ) {
+		# Prepare
+		$result = '';
+	
+		# Check Response
+		if ( strpos($response, '<?xml') !== 0 ) {
+			# Error
+			throw new Bal_Exception(array(
+				'Errors occurred when using the Google Closure Service.',
+				'response' => $response
+			));
+		}
+		
+		# Process Response
+		$responseTree = $this->parseXml($response);
+		$responseValue = $responseTree[0]['value'];
+		
+		# Cycle through Responses
+		foreach ( $responseValue as $node ) {
+			# Reset Response
+	    	$code = $originalSize = $originalGzipSize = $compressedSize = $compressedGzipSize = $compileTime = $warnings = $errors = '';
+
+			# Handle Tags
+			switch ( $node['tag'] ) {
+				case 'compiledCode':
+					$code = $node['value'];
+					break;
+				
+				case 'warnings':
+					$warnings = $node['value'];
+					break;
+				
+				case 'serverErrors':
+				case 'errors':
+					$errors = $node['value'];
+					break;
+				
+				case 'statistics':
+					foreach ($node['value'] as $stat) {
+						switch ($stat['tag']) {
+							case 'originalSize':
+							case 'originalGzipSize':
+							case 'compressedSize':
+							case 'compressedGzipSize':
+							case 'compileTime':
+								$var = $stat['tag'];
+								$$var = $stat['value'];
+								break;
+						
+							default:
+								break;
+						}
+					}
+					break;
+			}
+		    
+			# Append the code
+			if ( $code ) {
+				$result .= ' '.$code;
+			}
+		}
+	
+		# No errors, but our result is empty - should be an error
+		if ( !$result && !$errors && !$warnings  ) {
+			$errors = 'Result is empty';
+		}
+		
+		# We have an error
+		if ( $errors ) {
+			$error = $this->flattenResponseDetail($errors);
+			$warning = $this->flattenResponseDetail($warnings);
+				
+			# Error
+			throw new Bal_Exception(array(
+				'Errors occurred when using the Google Closure Service.',
+				'error' => $error,
+				'warning' => $warning
+			));
+		}
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Flatten a Response Detail
+	 **/
+	protected function flattenResponseDetail ( $errors ) {
+		$error = '';
+		if ( is_array($errors) ) {
+			foreach ( $errors as $_error ) {
+				$error .= $_error['value'];
+			}
+		}
+		else {
+			$error = $errors;
+		}
+		return $error;
+	}
+	
+	/**
+	 * Convert a Series of Params to a String ready for sending
+	 **/
+	protected function generateParamsString ( $params ) {
+		# Prepare
+		$parts = array();;
+		
+		# Convert Params to Parts
+		foreach ( $params as $key => $value) {
+			$parts[] = preg_replace('/_[0-9]$/', '', $key) . '=' . urlencode($value);
+		}
+		
+		# Generate String
+		$result = implode('&', $parts);
+		
+		# Return result
+		return $result;
+	}
+	
+	/**
+	 * Generate a series of Params for Sending from the Group of Files
+	 **/
+	protected function generateParamsFromRequestGroup ( $request_group ) {
+		# Prepare
 		$params = array();
-		$params['js_code'] = $this->_readSources($sources);
-		$params['compilation_level'] = $this->_compilationLevel;
+		$compilationLevel = $this->_compilationLevel;
+		
+		# Add Code
+		$params['js_code'] = '';
+		foreach ( $request_group as $file ) {
+			$file_code = file_get_contents($file['path']);
+			$params['js_code'] .= $file_code;
+			if ( !empty($file['compilationlevel']) ) {
+				$compilationLevel = $file['compilationlevel'];
+			}
+		}
+		
+		# Add Params
+		$params['compilation_level'] = $compilationLevel;
 		$params['output_format'] = 'xml';
 		$params['warning_level'] = $this->_warningLevel;
 		$params['use_closure_library'] = 'true';
@@ -34,73 +259,20 @@ class Bal_Service_GoogleClosure {
 		$params['output_info_2'] = 'statistics';
 		$params['output_info_3'] = 'warnings';
 		$params['output_info_4'] = 'errors';
+		
+		# Return params
 		return $params;
 	}
 	
-	protected function _getParams ( $sources ) {
-		$params = array();
-		$paramList = $this->_getParamList($sources);
-		foreach ( $paramList as $key => $value) {
-			$params[] = preg_replace('/_[0-9]$/', '', $key) . '=' . urlencode($value);
-		}
-		return implode('&', $params);
-	}
-	
-	protected function _getSourceGroups ( ) {
-		$requests = array(array());
-		$currentRequest = &$requests[0];
-		$requestsCount = 1;
+	/**
+	 * Send the Request via CURL
+	 **/
+	protected function sendRequestViaCurl ( $params ) {
+		# Generate Params String
+		$paramsString = $this->generateParamsString($params);
 		
-		$currentSize = 0;
-		$sizeLimit = 500*1024;
-		$filesThisRequest = array();
-		foreach ( $this->_srcsToBeMinified as $src ) {
-			$currentSize += filesize($src);
-			if ( $currentSize > $sizeLimit ) {
-				$currentSize = 0;
-				$requests[] = array();
-				$currentRequest = &$requests[$requestsCount++];
-			}
-			$currentRequest[] = $src;
-		}
-		
-		return $requests;
-	}
-	
-	protected function _sendRequestFsock ( $data ) {
-		$fp = fsockopen('closure-compiler.appspot.com', 80, $errno, $errstr, 30);
-			
-		if ( $fp ) {
-			fputs($fp, "POST /compile HTTP/1.1\r\n");
-			fputs($fp, "Host: closure-compiler.appspot.com\r\n");
-			fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
-			fputs($fp, "Content-length: ". strlen($data) ."\r\n");
-			fputs($fp, "Connection: close\r\n\r\n");
-			fputs($fp, $data); 
-
-			$result = ''; 
-			while (!feof($fp)) {
-				$result .= fgets($fp, 128);
-			}
-		
-			fclose($fp);
-		}
-		else {
-			throw new Exception('Could not connect to Google Closure Service: '.$errstr.' ('.$errno.')');
-		}
-	
-		$data = substr($result, (strpos($result, "\r\n\r\n")+4));
-			
-		if (strpos(strtolower($result), 'transfer-encoding: chunked') !== FALSE) {
-			$data = $this->_unchunk($data);
-		}
-		
-		return $data;
-	}
-	
-	protected function _sendRequestCurl ( $data ) {
-		# Prepare
-	    $defaults = array( 
+		# Generate Options
+	    $options = array( 
 	        CURLOPT_POST => 1, 
 	        CURLOPT_HEADER => 0, 
 	        CURLOPT_URL => 'closure-compiler.appspot.com/compile', 
@@ -108,130 +280,36 @@ class Bal_Service_GoogleClosure {
 	        CURLOPT_RETURNTRANSFER => 1, 
 	        CURLOPT_FORBID_REUSE => 1, 
 	        CURLOPT_TIMEOUT => 60, 
-	        CURLOPT_POSTFIELDS => $data
+	        CURLOPT_POSTFIELDS => $paramsString
 	    ); 
 		
 		# Open
-		$ch = curl_init();
-	    curl_setopt_array($ch, $defaults);
+		$channel = curl_init();
+	    curl_setopt_array($channel, $options);
 	     
 	    # Perform Request
-	    if ( !$result = curl_exec($ch) ) { 
-			throw new Exception('Could not connect to Google Closure Service: '.curl_error($ch));
+	    if ( !$result = curl_exec($channel) ) { 
+			throw new Exception('Could not connect to Google Closure Service: '.curl_error($channel));
 	    } 
 	    
 	    # Close Channel
-	    curl_close($ch);
+	    curl_close($channel);
 	    
 	    # Return result
 	    return $result;
 	}
 	
-	protected function _sendRequests ( ) {
-		$requests = array();
-		$groups = $this->_getSourceGroups();
-		$return = '';
-		
-		foreach ( $groups as $group ) {
-			$data = $this->_getParams($group);
-			// $referer = @$_SERVER['HTTP_REFERER'] or '';
-			
-			$data = $this->_sendRequestCurl($data);
-			
-			$requests[] = $data;
-		}
-		
-		return $requests;
-	}
-
-	protected function _performRequests ( ) {
-		$return = '';
-		$requests = $this->_sendRequests();
-		
-		foreach ( $requests as $request ) {
-	    	$code = $originalSize = $originalGzipSize = $compressedSize = $compressedGzipSize = $compileTime = $warnings = $errors = '';
-			$tree = $this->_parseXml($request);
-			$result = $tree[0]['value'];
-		    foreach ( $result as $node ) {
-				switch ( $node['tag'] ) {
-					case 'compiledCode':
-						$code = $node['value'];
-						break;
-					
-					case 'warnings':
-						$warnings = $node['value'];
-						break;
-					
-					case 'serverErrors':
-					case 'errors':
-						$errors = $node['value'];
-						break;
-					
-					case 'statistics':
-						foreach ($node['value'] as $stat) {
-							switch ($stat['tag']) {
-								case 'originalSize':
-								case 'originalGzipSize':
-								case 'compressedSize':
-								case 'compressedGzipSize':
-								case 'compileTime':
-									$var = $stat['tag'];
-									$$var = $stat['value'];
-									break;
-							
-								default:
-									break;
-							}
-						}
-						break;
-				}
-		    }
-			
-			if ( !$code && !$errors ) {
-				$errors = 'Result is empty';
-			}
-			
-			if ( $errors ) {
-				$error = '';
-				if ( is_array($errors) ) {
-					foreach ( $errors as $_error ) {
-						$error .= $_error['value'];
-					}
-				}
-				else {
-					$error = $errors;
-				}
-				throw new Exception('Errors occurred when using the Google Closure Service: '.$error);
-			}
-		
-			$return .= $code.' ';
-		}
-		
-		return $return;
-	}
-	
-	protected function _unchunk($data) {
-		$fp = 0;
-		$outData = '';
-		while ($fp < strlen($data)) {
-			$rawnum = substr($data, $fp, strpos(substr($data, $fp), "\r\n") + 2);
-			$num = hexdec(trim($rawnum));
-			$fp += strlen($rawnum);
-			$chunk = substr($data, $fp, $num);
-			$outData .= $chunk;
-			$fp += strlen($chunk);
-		}
-		return $outData;
-	}
-
-	protected function _parseXml($data) {
+	/**
+	 * Parse a XML Response
+	 **/
+	protected function parseXml($data) {
 		$data = str_replace('&lt;', '---LTLTLTLT---', $data);
 		$xml = new XMLReader();
 		$xml->xml($data);
-		return $this->_parseXmlHelper($xml);
+		return $this->parseXmlHelper($xml);
 	}
 
-	protected function _parseXmlHelper($xml) {
+	protected function parseXmlHelper($xml) {
 		$tree = null; 
 		while( $xml->read() ) {
 			switch ( $xml->nodeType ) { 
@@ -241,7 +319,7 @@ class Bal_Service_GoogleClosure {
 				case XMLReader::ELEMENT: 
 					$node = array(
 						'tag' => $xml->name,
-						'value' => $xml->isEmptyElement ? '' : $this->_parseXmlHelper($xml)
+						'value' => $xml->isEmptyElement ? '' : $this->parseXmlHelper($xml)
 					); 
 					if ( $xml->hasAttributes ) {
 						while ( $xml->moveToNextAttribute() ) {

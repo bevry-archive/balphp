@@ -680,7 +680,8 @@ if ( function_compare('get_extension', 1, true, __FILE__, __LINE__) ) {
 	 */
 	function get_extension ( $file ) {
 		$end = strrpos($file, '.');
-		if ( $end !== false )
+		$brace = strrpos($file, '/');
+		if ( $end !== false && $end > $brace )
 			return strtolower(substr($file, $end + 1));
 		else
 			return '';

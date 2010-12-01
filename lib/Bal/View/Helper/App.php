@@ -263,7 +263,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				
 				case 'aloha':
 					# Preset Urls
-					$aloha_scripts_url = $script_url.'/aloha-editor/WebContent';
+					$aloha_scripts_url = $script_url.'/aloha-nightly/compressed';
 					
 					# Define Files
 					$aloha_scripts = array(
@@ -355,7 +355,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		if ( $bundle )
 			$headScript = $this->view->getHelper('HeadScriptBundler')
 				->setCompiler($this->getConfig('compiler.script.code'))
-				->setCompilerPath($this->getConfig('compiler.style.path'))
+				->setCompilerPath($this->getConfig('compiler.script.path'))
 				->setCompiledOffset($compiled);
 		else
 			$headScript = $this->view->getHelper('HeadScript');
@@ -368,12 +368,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		
 		# Modernizr
 		if ( $modernizr ) {
-			$headScript->offsetSetFile($modernizr, $script_url.'/modernizr-1.5.js');
+			$headScript->offsetSetFile($modernizr, $script_url.'/modernizr-1.6.min.js');
 		}
 	
 		# jQuery
 		if ( $jquery ) {
-			$headScript->offsetSetFile($jquery, $script_url.'/jquery-1.4.3.js');
+			$headScript->offsetSetFile($jquery, $script_url.'/jquery-1.4.4.min.js');
 		}
 		
 		# jQuery UI
@@ -451,7 +451,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 				
 				case 'aloha':
 					# Preset Urls
-					$aloha_scripts_url = $script_url.'/aloha-editor/WebContent';
+					$aloha_scripts_url = $script_url.'/aloha-nightly/compressed';
 					$aloha_plugins_url = $script_url.'/aloha-plugins';
 					
 					# Include Base Script
@@ -459,60 +459,13 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 					
 					# Define Files
 					$aloha_scripts = array(
-						'deps/jquery.json-2.2.min.js',
-						'deps/jquery.getUrlParam.js',
-						'deps/prettyPhoto/jquery.prettyPhoto.js',
-						'deps/jquery.cookie.js',
-						'deps/extjs/ext-jquery-adapter-debug.js',
-						'deps/extjs/ext-foundation-debug.js',
-						'deps/extjs/cmp-foundation-debug.js',
-						'deps/extjs/data-foundation-debug.js',
-						'deps/extjs/data-json-debug.js',
-						'deps/extjs/data-list-views-debug.js',
-						'deps/extjs/ext-dd-debug.js',
-						'deps/extjs/window-debug.js',
-						'deps/extjs/resizable-debug.js',
-						'deps/extjs/pkg-buttons-debug.js',
-						'deps/extjs/pkg-tabs-debug.js',
-						'deps/extjs/pkg-tips-debug.js',
-						'deps/extjs/pkg-tree-debug.js',
-						'deps/extjs/pkg-grid-foundation-debug.js',
-						'deps/extjs/pkg-toolbars-debug.js',
-						'deps/extjs/pkg-menu-debug.js',
-						'deps/extjs/pkg-forms-debug.js',
-						'utils/jquery.js',
-						'utils/lang.js',
-						'utils/range.js',
-						'utils/position.js',
-						'utils/dom.js',
-						'core/ext-alohaproxy.js',
-						'core/ext-alohareader.js',
-						'core/ext-alohatreeloader.js',
-						'core/core.js',
-						'core/ui.js',
-						'core/ui-attributefield.js',
-						'core/ui-browser.js',
-						'core/editable.js',
-						'core/ribbon.js',
-						'core/event.js',
-						'core/floatingmenu.js',
-						'core/ierange-m2.js',
-						'core/jquery.aloha.js',
-						'core/log.js',
-						'core/markup.js',
-						'core/message.js',
-						'core/plugin.js',
-						'core/selection.js',
-						'core/sidebar.js',
-						'core/repositorymanager.js',
-						'core/repository.js',
-						'core/repositoryobjects.js',
-						'plugins/eu.iksproject.plugins.Loader/plugin.js',
+						'aloha-ext.js',
+						'aloha-deps.js',
+						'aloha-core.js',
 						'plugins/com.gentics.aloha.plugins.Format/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Table/plugin.js',
 						'plugins/com.gentics.aloha.plugins.List/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Link/plugin.js',
-						// causes annoying prompt if content has changed - 'plugins/com.gentics.aloha.plugins.GCN/plugin.js',
 						'plugins/com.gentics.aloha.plugins.Image/plugin.js'
 					);
 					$aloha_plugins = array(

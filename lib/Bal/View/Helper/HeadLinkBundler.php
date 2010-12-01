@@ -151,7 +151,7 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 			if ( !empty($item->source) ) {
 				# Generate File Name
 				$source = $item->source;
-				$filename = md5($source).'.'.$this->_extension;
+				$filename = 'source-'.md5($source).'.'.$this->_extension;
 				$path = $this->getCachePath().'/'.$filename;
 				$url = ROOT_URL.$this->getCacheUrl().'/'.$filename;
 				
@@ -195,8 +195,9 @@ class Bal_View_Helper_HeadLinkBundler extends Zend_View_Helper_HeadLink {
 		
 		# Hash
 		$hash = md5($hash);
-		$compiledFileUrl = $this->getCacheUrl().'/'.$hash.'.'.$this->_extension;
-		$compiledFilePath = $this->getCachePath().'/'.$hash.'.'.$this->_extension;
+		$compiledFileName = 'compiled-'.$hash.'.'.$this->_extension;
+		$compiledFileUrl = $this->getCacheUrl().'/'.$compiledFileName;
+		$compiledFilePath = $this->getCachePath().'/'.$compiledFileName;
 		
 		# Get last modified time of cache file
 		if ( is_file($compiledFilePath) ) {
