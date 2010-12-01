@@ -83,7 +83,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		
 		# Prepare Options
 		$use_mail = delve($applicationConfig, 'mail.send_email', true);
-		$friendly = delve($applicationConfig, 'error.friendly', true);
+		$friendly = delve($applicationConfig, 'error.friendly', true) || DEBUG_MODE;
 		if ( $use_mail ) $this->bootstrap('mail');
 		
 		# Create Log
