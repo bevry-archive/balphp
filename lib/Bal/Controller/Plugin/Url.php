@@ -284,8 +284,10 @@ class Bal_Controller_Plugin_Url extends Zend_Controller_Plugin_Abstract {
 	 * Free anything that needs cleaning/freeling
 	 */
 	public function free ( ) {
-		foreach ( $this->_free as $Item ) {
-			$Item->free(true);
+		if ( FREE_RESOURCES ) {
+			foreach ( $this->_free as $Item ) {
+				$Item->free(true);
+			}
 		}
 		$this->_free = array();
 	}

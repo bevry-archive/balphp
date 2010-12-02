@@ -1505,24 +1505,28 @@ abstract class Bal_Doctrine_Core {
 	public static function ensureTags ( Doctrine_Event $Event, $tagRelation, $tagField ) {
 		# Prepare
 		$save = false;
+		$tagRelationNames = $tagRelation.'Names';
 		
 		# Fetch
 		$Invoker = $Event->getInvoker();
-		$Invoker->addTags($Invoker->code);
 		
 		# Fetch
 		$modified = $Invoker->getModified();
 		$modifiedLast = $Invoker->getLastModified();
-		$tagRelationNames = $tagRelation.'Names';
 		
 		# Fetch
-		$tagsSystemOrig = $Invoker->$tagRelationNames;
-		$tagsUserOrig = $Invoker->$tagField;
+		$tagsSystemOrig = delve($Invoker,$tagRelationNames);
+		$tagsUserOrig = delve($Invoker,$tagField);
 		$tagsSystem = prepare_csv_str($tagsSystemOrig);
 		$tagsUser = prepare_csv_str($tagsUserOrig);
 		$tagsUserNewer = array_key_exists($tagField, $modified);
 		$tagsSystemNewer = !array_key_exists($tagField, $modified) && !array_key_exists($tagField, $modifiedLast);
 		$tagsDiffer = $tagsUser != $tagsSystem;
+		
+		# Workaround to fix Doctrine bug which causes lost tags
+		if ( !$tagsSystemOrig ) {
+			$tagsSystemNewer = false;
+		}
 		
 		# TagField > TagField
 		if ( ($tagsDiffer || $tagsUserOrig != $tagsUser) && $tagsUserNewer ) {
@@ -1559,6 +1563,13 @@ abstract class Bal_Doctrine_Core {
 			# Save
 			$save = true;
 		}
+		
+		# Ensure our Code is a Tag
+		$tagsSystemOrig = delve($Invoker,$tagRelationNames);
+		if ( !in_array($Invoker->code, $tagsSystemOrig) ) {
+			$Invoker->addTags($Invoker->code);
+		}
+		
 		
 		# Return
 		return $save;
