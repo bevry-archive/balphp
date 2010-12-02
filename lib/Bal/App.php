@@ -108,7 +108,7 @@ class Bal_App {
 		}
 			
 		# Intro
-		echo 'Welcome to ['.$siteName.']'."\n";
+		echo 'Welcome to ['.$siteName.'] on the ['.APPLICATION_ENV.'] environment.'."\n";
 		
 		# Prepare Cli
 		if ( $cli ) {
