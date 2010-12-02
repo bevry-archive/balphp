@@ -138,13 +138,13 @@ class Bal_View_Helper_Widget extends Zend_View_Helper_Abstract {
 		$search =
 		'/' .
 			'\['.
-				'(?<code>'.
+				'(?P<code>'.
 					'('.implode(array_keys($this->widgets),'|').')'.
 				')'.
-				'\s*(?<attrs>[^\]]*)'.
+				'\s*(?P<attrs>[^\]]*)'.
 			'\]'.
 			'('.
-				'(?<content>[^\]]*)'.
+				'(?P<content>[^\]]*)'.
 				'\[\/' . '\1' . '\]' .
 			')?'.
 		'/e';

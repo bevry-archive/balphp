@@ -602,7 +602,7 @@ if ( function_compare('array_from_attributes', 1, true, __FILE__, __LINE__) ) {
 		$array = array();
 	
 		# Search
-		$search = '/(?<name>\w+)\="(?<value>.*?[^\\\\])"/';
+		$search = '/(?P<name>\w+)\="(?P<value>.*?[^\\\\])"/';
 		$matches = array();
 		preg_match_all($search, $attrs, $matches);
 		
