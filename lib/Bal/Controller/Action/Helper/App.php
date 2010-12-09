@@ -59,7 +59,7 @@ class Bal_Controller_Action_Helper_App extends Bal_Controller_Action_Helper_Abst
 		$NavData = Bal_App::parseDataFile($module_config_path.'/nav',$module_config_path.'/compiled/nav.data');
 		
 		# Navigation Override
-		$NavDataOver = Bal_App::parseDataFile(NAVIGATION_FILE_PATH,NAVIGATION_COMPILED_FILE_PATH);
+		$NavDataOver = Bal_App::parseAdvancedYamlFile(NAVIGATION_FILE_PATH,NAVIGATION_COMPILED_FILE_PATH);
 		if ( !empty($NavDataOver) ) {
 			$NavDataOver = delve($NavDataOver,$module);
 			if ( !empty($NavDataOver) ) {

@@ -624,6 +624,18 @@ class Bal_App {
 		return self::getView();
 	}
 	
+	static public function parseAdvancedYamlFile ( ) {
+		$args = func_get_args();
+		$Bootstrapr = Bootstrapr::getInstance();
+		return call_user_func_array(array($Bootstrapr,'parseAdvancedYamlFile'), $args);
+	}
+	
+	static public function loadAdvancedYamlFile ( ) {
+		$args = func_get_args();
+		$Bootstrapr = Bootstrapr::getInstance();
+		return call_user_func_array(array($Bootstrapr,'loadAdvancedYamlFile'), $args);
+	}
+	
 	/**
 	 * Generates a Zend_Config object from a data file
 	 */
