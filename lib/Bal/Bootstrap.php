@@ -192,19 +192,14 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 	protected function _initRoutes ( ) {
 		# Prepare
 		$this->bootstrap('autoload');
+		$Bootstrapr = Bootstrapr::getInstance();
 		$routeConfig = null;
 		
 		# Read Configuration
-		if ( is_readable(ROUTES_COMPILED_FILE_PATH) && filemtime(ROUTES_COMPILED_FILE_PATH) > filemtime(ROUTES_FILE_PATH) ) {
-			$routeConfig = unserialize(file_get_contents(ROUTES_COMPILED_FILE_PATH));
-		}
-		if ( !$routeConfig ) {
-			$routeConfig = sfYaml::load(ROUTES_FILE_PATH);
-			file_put_contents(ROUTES_COMPILED_FILE_PATH, serialize($routeConfig));
-		}
+		$routeConfig = $Bootstrapr->loadAdvancedYamlFile(ROUTES_FILE_PATH,ROUTES_COMPILED_FILE_PATH);
 		
 		# Convert to Zend Config
-		$routeConfig = new Zend_Config($routeConfig[APPLICATION_ENV]);
+		$routeConfig = new Zend_Config($routeConfig);
 		
 		# Route
 		$FrontController = Zend_Controller_Front::getInstance();
@@ -399,6 +394,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$this->bootstrap('autoload');
 		$this->bootstrap('config');
 		$this->bootstrap('balphp');
+		$Bootstrapr = Bootstrapr::getInstance();
 		$Autoloader = Zend_Loader_Autoloader::getInstance();
 		
 		# Config
@@ -471,19 +467,18 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Use Cache?
 		if ( $cache_dsn ) {
 			# Open Cache Connection
-			$CacheConnection = $Manager->openConnection('sqlite:///'.CACHE_PATH.'/cache.db');
+			$CacheConnection = $Manager->openConnection($cache_dsn);
 			
 			# Apply Query Cache
-			$QueryCacheDriver = new Doctrine_Cache_Db(array('connection' => $CacheConnection, 'tableName' =>'query'));
-			try { $QueryCacheDriver->createTable(); } catch ( Exception $Exception ) { }
-			$Manager->setAttribute(Doctrine_Core::ATTR_QUERY_CACHE, $QueryCacheDriver);
+			// $QueryCacheDriver = new Doctrine_Cache_Db(array('connection' => $CacheConnection, 'tableName' =>'query'));
+			// try { $QueryCacheDriver->createTable(); } catch ( Exception $Exception ) { }
+			// $Manager->setAttribute(Doctrine_Core::ATTR_QUERY_CACHE, $QueryCacheDriver);
 			
 			# Apply Result Cache
 			$ResultCacheDriver = new Doctrine_Cache_Db(array('connection' => $CacheConnection, 'tableName' =>'result'));
 			try { $ResultCacheDriver->createTable(); } catch ( Exception $Exception ) { }
 			$Manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE, $ResultCacheDriver);
 			$Manager->setAttribute(Doctrine_Core::ATTR_RESULT_CACHE_LIFESPAN, $cache_lifespan);
-			
 		}
 		
 		# Apply Config
@@ -511,6 +506,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		}
 		
 		# Create Connection
+		$Bootstrapr->ensureDsnPath($dsn);
 		$Connection = $Manager->openConnection($dsn);
 		
 		# Profile Connection
