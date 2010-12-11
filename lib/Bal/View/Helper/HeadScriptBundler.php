@@ -196,7 +196,7 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 		$compiledFilePath = $this->getCachePath().'/'.$compiledFileName;
 		
 		# Get last modified time of cache file
-		if ( is_file($compiledFilePath) ) {
+		if ( is_file($compiledFilePath) && filesize($compiledFilePath) ) {
 			$compiledFilemtime = filemtime($compiledFilePath);
 		}
 		else {
