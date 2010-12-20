@@ -72,7 +72,7 @@ class Bal_View_Helper_HeadScriptBundler extends Zend_View_Helper_HeadScript {
 		# Compile Each File and Append to Output File
 		foreach ( $files as $file ) {
 			$out_path = $file_path = $file['path'];
-			if ( $file['compressed'] ) {
+			if ( $file['compress'] ) {
 				$compressed_path = $file['path'].'.compressed';
 				$command = 'java -jar '.$this->_compilerPath.' --js_output_file '.$compressed_path.' --js '.$file_path;
 				$out_path = $compressed_path;
