@@ -467,6 +467,7 @@ class Bal_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		# Use Cache?
 		if ( $cache_dsn ) {
 			# Open Cache Connection
+			$Bootstrapr->ensureDsnPath($cache_dsn);
 			$CacheConnection = $Manager->openConnection($cache_dsn);
 			
 			# Apply Query Cache
