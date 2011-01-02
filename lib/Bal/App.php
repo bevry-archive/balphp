@@ -80,6 +80,7 @@ class Bal_App {
 	public function setup ( ) {
 		# Prepare
 		$Application = $this->getApplication();
+		$Bootstrapr = Bootstrapr::getInstance();
 		$this->bootstrap();
 		
 		# Prepare Config
@@ -317,6 +318,7 @@ class Bal_App {
 		
 		
 		# Doctrine
+		$data_dsn = delve($applicationConfig,'data.connection_string',false);
 		$data_compile_generate = delve($applicationConfig,'data.compile.generate',false);
 		$data_fixtures_path = delve($applicationConfig,'data.fixtures_path');
 		$data_dump_path = delve($applicationConfig,'data.dump_path');
@@ -430,7 +432,9 @@ class Bal_App {
 			echo '- [data-create] -'."\n";
 			# Reset Database
 			echo 'Doctrine: Create Database...'."\n";
+			$Bootstrapr->ensureDsnPath($data_dsn);
 			Doctrine_Core::dropDatabases();
+			$Bootstrapr->ensureDsnPath($data_dsn);
 			Doctrine_Core::createDatabases();
 		}
 		
