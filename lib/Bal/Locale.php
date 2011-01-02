@@ -74,8 +74,9 @@ class Bal_Locale {
 		}
 		
 		# Prepare Dependencies
-		if ( !$_SERVER['CLI'] )
+		if ( !$_SERVER['CLI'] ) {
 			$this->Session = new Zend_Session_Namespace('Application');
+		}
 		$this->Zend_Locale = new Zend_Locale();
 		$this->il8n_path = IL8N_PATH;
 		
