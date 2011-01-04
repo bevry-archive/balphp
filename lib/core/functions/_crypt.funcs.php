@@ -24,11 +24,11 @@ require_once (dirname(__FILE__).DIRECTORY_SEPARATOR.'_general.funcs.php');
 if ( !defined('CRYPT_LOADED') ) {
 	// Cryptography
 	define('CRIPT_ENABLED', function_exists('mcrypt_module_open'));
-	define('CRYPT_CIPHER',	MCRYPT_RIJNDAEL_256);
+	define('CRYPT_CIPHER',	defined('MCRYPT_RIJNDAEL_256') ? MCRYPT_RIJNDAEL_256 : false);
+	define('CRYPT_MODE',	defined('MCRYPT_MODE_CBC') ? MCRYPT_MODE_CBC : false);
+	define('CRYPT_SOURCE',	defined('MCRYPT_DEV_RANDOM') ? MCRYPT_DEV_RANDOM : false);
 	define('CRYPT_KEY',		'F5Z3aDe4cQGeixEmS5XvhmG0cd');
 	define('CRYPT_IV',		'QDFCMmMzRDRlNUY2ZzdIOAasd');
-	define('CRYPT_MODE',	MCRYPT_MODE_CBC);
-	define('CRYPT_SOURCE',	MCRYPT_DEV_RANDOM);
 	define('CRYPT_SIZE',	'256');
 	
 	// Encoding
@@ -36,8 +36,7 @@ if ( !defined('CRYPT_LOADED') ) {
 	define('CRYPT_DECODER',	'base64_decode');
 	
 	// Loaded
-	define('CRYPT_LOADED',	true)
-	;
+	define('CRYPT_LOADED',	true);
 }
 
 if ( function_compare('encode', 1.1, true, __FILE__, __LINE__) ) {
