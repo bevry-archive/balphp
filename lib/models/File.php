@@ -29,8 +29,8 @@ class Bal_File extends Base_Bal_File {
 	 */
 	public function setUpload ( $file ) {
 		# Fetech Config
-		$uploads_path = Bal_App::getConfig('uploads_path');
-		$uploads_url = Bal_App::getConfig('uploads_url');
+		$uploads_path = Bal_App::getConfig('media_uploads_path');
+		$uploads_url = Bal_App::getConfig('media_uploads_url');
 		
 		# Check the file
 		$error = delve($file,'error');
