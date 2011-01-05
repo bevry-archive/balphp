@@ -1,0 +1,79 @@
+From e407c2f65225dd2269be156481c5820166bc7666 Mon Sep 17 00:00:00 2001
+From: Benjamin "balupton" Lupton <contact@balupton.com>
+Date: Wed, 5 Jan 2011 08:42:18 +0800
+Subject: [PATCH] Added templating to View/Helper/Navigation/Menu.php
+
+---
+ library/Zend/View/Helper/Navigation/Menu.php |   41 +++++++++++++++++++++++++-
+ 1 files changed, 40 insertions(+), 1 deletions(-)
+
+diff --git a/library/Zend/View/Helper/Navigation/Menu.php b/library/Zend/View/Helper/Navigation/Menu.php
+index 9b58c12..63dd9ef 100644
+--- a/library/Zend/View/Helper/Navigation/Menu.php
++++ b/library/Zend/View/Helper/Navigation/Menu.php
+@@ -65,6 +65,13 @@ class Zend_View_Helper_Navigation_Menu
+      */
+     protected $_partial = null;
+ 
++     /**
++      * Simple template to use in the htmlify process if specified
++      *
++      * @var string
++      */
++     protected $_template = null;
++
+     /**
+      * View helper entry point:
+      * Retrieves helper and optionally sets container to operate on
+@@ -195,6 +202,24 @@ class Zend_View_Helper_Navigation_Menu
+         return $this->_partial;
+     }
+ 
++     /**
++      * Set a simple template to use in the htmlify process
++      * @param string $template
++      * @return $this
++      */
++     public function setTemplate ( $template ) {
++         $this->_template = $template;
++         return $this;
++     }
++
++     /**
++      * Get the simple template to use in the htmlify process if specified
++      * @return string
++      */
++     public function getTemplate ( ) {
++         return $this->_template;
++     }
++
+     // Public methods:
+ 
+     /**
+@@ -238,8 +263,22 @@ class Zend_View_Helper_Navigation_Menu
+             $element = 'span';
+         }
+ 
++        // generate result (with or without template)
++		$template = $this->getTemplate();
++		if ( !$template ) {
++			$renderedTemplate = $this->view->escape($label);
++		} else {
++			$renderedTemplate = populate($template,
++				array(
++					'label' => $this->view->escape($label),
++					'title' => $this->view->escape($title),
++						'Page' => $page
++				)
++			);
++		}
++		
+         return '<' . $element . $this->_htmlAttribs($attribs) . '>'
+-             . $this->view->escape($label)
++             . $renderedTemplate
+              . '</' . $element . '>';
+     }
+ 
+-- 
+1.7.3.1
+
