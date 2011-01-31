@@ -365,6 +365,7 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 		$public_url = $App->getPublicUrl();
 		$back_url = $App->getAreaUrl('back');
 		$front_url = $App->getAreaUrl('front');
+		$theme_url = $App->getThemeUrl();
 		$script_url = PUBLIC_SCRIPTS_URL;
 
 		# Modernizr
@@ -505,7 +506,12 @@ class Bal_View_Helper_App extends Zend_View_Helper_Abstract {
 			// Configure
 			$root_url = $this->app()->getRootUrl();
 			$base_url = $this->app()->getBaseUrl();
-			$headScript->offsetSetScript($script+1,'$.BalCMS.options.root_url = "'.$root_url.'"; $.BalCMS.options.base_url = "'.$base_url.'"; $.BalCMS.options.debug = '.(DEBUG_MODE ? 'true' : 'false').';');
+			$headScript->offsetSetScript($script+1,
+				'$.BalCMS.options.root_url = "'.$root_url.'";'.
+				'$.BalCMS.options.base_url = "'.$base_url.'";'.
+				'$.BalCMS.options.theme_url = "'.$theme_url.'";'.
+				'$.BalCMS.options.debug = '.(DEBUG_MODE ? 'true' : 'false').';'
+			);
 		}
 
 		# Theme
